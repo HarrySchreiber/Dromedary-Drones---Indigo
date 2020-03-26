@@ -1,12 +1,15 @@
 package application;
 	
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 
 
@@ -17,7 +20,16 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
+			//Simulation Screen Layout
 			GridPane simulationScreenLayout = buildSimulationScreen();
+			
+			//Edit Simulation Button on Simulation Screen
+			Button runSimulationBtn = new Button("Run Simulation");
+			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
+			runSimulationBtn.setOnAction(e -> {
+				System.out.println("TODO: Run Simulation");
+			}); //TODO: Add some logic to run the simulation
+			simulationScreenLayout.add(runSimulationBtn, 0, 1);	//Add the button to the screen
 			
 			//Edit Simulation Button on Simulation Screen
 			Button editSimulationBtn = new Button("Edit Simulation");
@@ -25,6 +37,38 @@ public class Main extends Application {
 			editSimulationBtn.setOnAction(e -> primaryStage.setScene(settingsScreen));	//Adds function to the button TODO: Expand function to grab which simulation we need to edit from the radio buttons
 			simulationScreenLayout.add(editSimulationBtn, 0, 2);	//Add the button to the screen
 			
+			//Create Simulation Button on Simulation Screen
+			Button createSimulationBtn = new Button("Create New Simulation");
+			createSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
+			createSimulationBtn.setOnAction(e -> primaryStage.setScene(settingsScreen));	//Adds function to the button TODO: Expand function to grab which simulation we need to edit from the radio buttons
+			simulationScreenLayout.add(createSimulationBtn, 0, 3);	//Add the button to the screen
+			
+			//A Horizontal Stack Box to put buttons for save data and open data
+			HBox dataButtonsBox = new HBox();
+			dataButtonsBox.setAlignment(Pos.CENTER);	//Center the elements
+			dataButtonsBox.setSpacing(100);	//Set the spacing of the buttons
+			
+			//Button for loading a data file
+			Button loadDataFileBtn = new Button("Load a Results File");
+			loadDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+			loadDataFileBtn.setOnAction(e ->{
+				System.out.println("TODO: Load a Results File");	//TODO: Add the logic here
+			});
+			dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
+			
+			//Button for saving a data file
+			Button saveDataFileBtn = new Button("Save Data File");
+			saveDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+			saveDataFileBtn.setOnAction(e ->{
+				System.out.println("TODO: Save a Results File");	//TODO: Add the logic here
+			});
+			dataButtonsBox.getChildren().add(saveDataFileBtn);	//Add button to screen
+			
+			//Add the box to the grid layout
+			simulationScreenLayout.add(dataButtonsBox, 1, 3);
+			
+			
+			//Settings Screen Layout
 			GridPane settingsScreenLayout = buildSettingsScreen();
 			
 			//Save Simulation button on Simulation settings screen
