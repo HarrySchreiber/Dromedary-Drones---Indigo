@@ -1,0 +1,3 @@
+INFO  started: Metals version 0.8.3 in workspace 'C:\Users\grubend17\Desktop\SWE\Dromedary-Drones---Indigo'
+INFO  time: initialize in 4.66s
+WARN  no build tool detected in workspace 'C:\Users\grubend17\Desktop\SWE\Dromedary-Drones---Indigo'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
