@@ -27,21 +27,61 @@ public class Main extends Application {
 			//TODO: Add Scroll panel and radio buttons
 			
 			//Section that holds results
-			VBox resultsBox = new VBox();
-			resultsBox.setAlignment(Pos.TOP_CENTER);	//Center at the top of the screen
-			resultsBox.setSpacing(10);	//Sets a 10 pixel space TODO: Check this and make decisions about it
+			GridPane resultsBox = new GridPane();
+			//Column Constraints for the results pane
+			ColumnConstraints c1 = new ColumnConstraints();
+			c1.setPercentWidth(50);
+			ColumnConstraints c2 = new ColumnConstraints();
+			c2.setPercentWidth(50);
+			resultsBox.getColumnConstraints().addAll(c1,c2);
+			//Row Constraints for the results pane
+			RowConstraints r1 = new RowConstraints();
+			r1.setPercentHeight(10);
+			RowConstraints r2 = new RowConstraints();
+			r2.setPercentHeight(90);
+			resultsBox.getRowConstraints().addAll(r1,r2);
 			
-			//Lebels for result data TODO: Add formatting and needed values
-			Label resultsLabel = new Label("Results");
-			Label avgDeliveryTimeLabel = new Label("Average Delivery Time: ");	//TODO: Add the variable here
-			Label wrstDeliveryTimeLabel = new Label("Worst Delivery Time: ");	//TODO: Add the variable here
+			//Box for the results title heading TODO: figure out how we want to place the box and how we want to format the text
+			HBox resultsTextBox = new HBox();
+			resultsTextBox.setAlignment(Pos.CENTER);	//Centers box elements
 			
-			//TODO: Add the chart and data here
+			Label resultsText = new Label("Results");
+			resultsTextBox.getChildren().add(resultsText);
 			
-			//Add elements to the box
-			resultsBox.getChildren().addAll(resultsLabel,avgDeliveryTimeLabel, wrstDeliveryTimeLabel);
-			//Add box to the grid in the second column stretching three rows if need be
+			//Add the box to the results grid and span 2 columns
+			resultsBox.add(resultsTextBox, 0, 0, 2, 1);
+			
+			//FIFO results section
+			VBox fifoResultsBox = new VBox();
+			fifoResultsBox.setAlignment(Pos.TOP_LEFT);	//Left Align
+			
+			Label fifoLabel = new Label("FIFO");
+			Label fifoAvgLabel = new Label("Average Delivery Time: ");	//TODO: Add variable Here
+			Label fifoWrstLabel = new Label("Worst Deivery Time: ");	//TODO: Add variable Here
+			
+			//TODO: Add FIFO results graph here
+			
+			fifoResultsBox.getChildren().addAll(fifoLabel, fifoAvgLabel,fifoWrstLabel);
+			
+			//Knapsack results section
+			VBox knapsackResultsBox = new VBox();
+			knapsackResultsBox.setAlignment(Pos.TOP_LEFT);	//Left Align
+			
+			Label knapsackLabel = new Label("Knapsack");
+			Label knapsackAvgLabel = new Label("Average Delivery Time: ");	//TODO: Add variable here
+			Label knapsackWrstLabel = new Label("Worst Delivery Time: ");	//TODO: Add variable here
+			
+			//TODO: Add Knapsack results graph here
+			
+			knapsackResultsBox.getChildren().addAll(knapsackLabel,knapsackAvgLabel,knapsackWrstLabel);
+			
+			//Add results boxes to results grid
+			resultsBox.add(fifoResultsBox, 0, 1);
+			resultsBox.add(knapsackResultsBox, 1, 1);
+
+			//Add box to the main grid in the second column stretching three rows if need be			
 			simulationScreenLayout.add(resultsBox, 1, 0, 1, 3);
+			
 			
 			//Edit Simulation Button on Simulation Screen
 			Button runSimulationBtn = new Button("Run Simulation");
