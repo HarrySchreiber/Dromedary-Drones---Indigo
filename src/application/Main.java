@@ -11,6 +11,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.VBox;
 
 
 public class Main extends Application {
@@ -22,6 +23,25 @@ public class Main extends Application {
 		try {
 			//Simulation Screen Layout
 			GridPane simulationScreenLayout = buildSimulationScreen();
+			
+			//TODO: Add Scroll panel and radio buttons
+			
+			//Section that holds results
+			VBox resultsBox = new VBox();
+			resultsBox.setAlignment(Pos.TOP_CENTER);	//Center at the top of the screen
+			resultsBox.setSpacing(10);	//Sets a 10 pixel space TODO: Check this and make decisions about it
+			
+			//Lebels for result data TODO: Add formatting and needed values
+			Label resultsLabel = new Label("Results");
+			Label avgDeliveryTimeLabel = new Label("Average Delivery Time: ");	//TODO: Add the variable here
+			Label wrstDeliveryTimeLabel = new Label("Worst Delivery Time: ");	//TODO: Add the variable here
+			
+			//TODO: Add the chart and data here
+			
+			//Add elements to the box
+			resultsBox.getChildren().addAll(resultsLabel,avgDeliveryTimeLabel, wrstDeliveryTimeLabel);
+			//Add box to the grid in the second column stretching three rows if need be
+			simulationScreenLayout.add(resultsBox, 1, 0, 1, 3);
 			
 			//Edit Simulation Button on Simulation Screen
 			Button runSimulationBtn = new Button("Run Simulation");
