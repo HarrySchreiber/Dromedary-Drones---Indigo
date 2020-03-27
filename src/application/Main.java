@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -96,6 +97,49 @@ public class Main extends Application {
 			//Settings Screen Layout
 			GridPane settingsScreenLayout = buildSettingsScreen();
 			
+			//HBox for the naming components of the simulation settings
+			HBox simNameBox = new HBox();
+			simNameBox.setAlignment(Pos.CENTER);	//Center the box
+			simNameBox.setSpacing(5);	//Space between elements is 5
+			
+			//Label and TextField for the simulation TODO: Formatting
+			Label simNameLabel = new Label("Simulation Name:");
+			TextField simNameField = new TextField();
+			
+			//Add Items to the HBox
+			simNameBox.getChildren().addAll(simNameLabel,simNameField);
+			//Add HBox to the grid and stretch it over 3 columns
+			settingsScreenLayout.add(simNameBox, 0, 0, 3, 1);
+			
+			
+			//VBox for things in column 1
+			VBox columnOne = new VBox();
+			columnOne.setAlignment(Pos.TOP_LEFT);
+			
+			//TODO: Use this to add things in column one
+			//columnOne.getChildren().addAll();
+			
+			settingsScreenLayout.add(columnOne,0,1);
+			
+			//VBox for things in column 2
+			VBox columnTwo = new VBox();
+			columnTwo.setAlignment(Pos.TOP_LEFT);
+			
+			//TODO: Use this to add things in column two
+			//columnTwo.getChildren().addAll();
+			
+			settingsScreenLayout.add(columnTwo,1,1);
+			
+			//VBox for things in column 3
+			VBox columnThree = new VBox();
+			columnThree.setAlignment(Pos.TOP_LEFT);
+			
+			//TODO: Use this to add things in column three
+			//columnThree.getChildren().addAll();
+			
+			settingsScreenLayout.add(columnThree,2,1);
+			
+			//HBox for the save and Cancel Buttons
 			HBox saveAndCancelButtonsBox = new HBox();
 			saveAndCancelButtonsBox.setAlignment(Pos.CENTER);
 			saveAndCancelButtonsBox.setSpacing(100);
