@@ -68,13 +68,37 @@ public class Main extends Application {
 			simulationScreenLayout.add(dataButtonsBox, 1, 3);
 			
 			
+			
+			//-----------------------------------------------------------------------------------
+			
+			
+			
 			//Settings Screen Layout
 			GridPane settingsScreenLayout = buildSettingsScreen();
 			
-			//Save Simulation button on Simulation settings screen
-			Button saveSimulationBtn = new Button("Save");
-			saveSimulationBtn.setOnAction(e -> primaryStage.setScene(simulationScreen));	//Adds function to the button TODO: Expand function to not save if the user has not inputed correct values, possibly able to be done with throwing exceptions in a constructor
-			settingsScreenLayout.add(saveSimulationBtn, 0, 0);	//Add the button to the screen
+			HBox saveAndCancelButtonsBox = new HBox();
+			saveAndCancelButtonsBox.setAlignment(Pos.CENTER);
+			saveAndCancelButtonsBox.setSpacing(100);
+			
+			//Save Simulation Settings button on Simulation settings screen
+			Button saveSimulationSetngsBtn = new Button("Save Settings");
+			saveSimulationSetngsBtn.setOnAction(e -> primaryStage.setScene(simulationScreen));	//Adds function to the button TODO: Expand function to not save if the user has not inputed correct values, possibly able to be done with throwing exceptions in a constructor
+			saveSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+			saveAndCancelButtonsBox.getChildren().add(saveSimulationSetngsBtn);
+			
+			//Cancel Simulation Settings button on Simulation settings screen
+			Button cancelSimulationSetngsBtn = new Button("Cancel");
+			cancelSimulationSetngsBtn.setOnAction(e -> primaryStage.setScene(simulationScreen));	//Adds function to the button TODO: Idk if there's anything else were gonna have to do here cause as long as we dont save anything we should be good
+			cancelSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+			saveAndCancelButtonsBox.getChildren().add(cancelSimulationSetngsBtn);
+			
+			settingsScreenLayout.add(saveAndCancelButtonsBox,0,2,3,1);
+			
+			
+			
+			//------------------------------------------------------------------------------------------------
+			
+			
 			
 			//TODO: Decide on default
 			simulationScreen = new Scene(simulationScreenLayout,800,500);
@@ -139,11 +163,11 @@ public class Main extends Application {
 		
 		//Column Constraints for Settings screen
 		ColumnConstraints c1 = new ColumnConstraints();
-		c1.setPercentWidth(1/3);	//Screen is divided in thirds for different sections
+		c1.setPercentWidth(34);	//Screen is divided in thirds for different sections
 		ColumnConstraints c2 = new ColumnConstraints();
-		c2.setPercentWidth(1/3);	//Screen is divided in thirds for different sections
+		c2.setPercentWidth(33);	//Screen is divided in thirds for different sections
 		ColumnConstraints c3 = new ColumnConstraints();
-		c3.setPercentWidth(1/3);	//Screen is divided in thirds for different sections
+		c3.setPercentWidth(33);	//Screen is divided in thirds for different sections
 		settingsScreenLayout.getColumnConstraints().addAll(c1,c2,c3);
 		//Row Constraints for Settings screen
 		RowConstraints r1 = new RowConstraints();
