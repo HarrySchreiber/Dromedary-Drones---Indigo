@@ -23,7 +23,7 @@ public class SimulationSettings {
 	//TODO: IMPORTANT Lets discus this class again to figure out what we have to actually have here and how we need to populate this stuff
 	//Like what are we going to pass it? An XML of all of the settings already filled out? Or are we giving it all of the variables?
 	public SimulationSettings() {
-		
+		Drone standardDrone = new Drone();
 	}
 	
 	public boolean checkPercentage() {
