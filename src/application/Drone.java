@@ -15,6 +15,20 @@ public class Drone {
 	private double unloadTime;
 	
 	/**
+	 * No argument constructor for all default values as specified in the instructions
+	 * will be option to select from the drones list as "Default Drone"
+	 * So we can call this argument easier when its seleted from drone list..
+	 */
+	public Drone() {
+		this.name = "Default Grove City Drone";
+		this.maxCargo = 12;
+		this.avgCruisingSpeed = 20;
+		this.maxFlightTime = 20;
+		this.turnAroundTime = 3;
+		this.unloadTime = 0.5;
+	}
+	
+	/**
 	 * @param name Name of the Drone
 	 * @param maxCargo The Max Cargo the drone can lift in pounds
 	 * @param avgCruisingSpeed the cruising speed of the drone in miles per hour
