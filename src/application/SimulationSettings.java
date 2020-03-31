@@ -1,6 +1,9 @@
 package application;
 
 import java.util.ArrayList;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 /**
  * The settings for a simulation
@@ -29,5 +32,28 @@ public class SimulationSettings {
 	public boolean checkPercentage() {
 		//TODO: Add real logic here
 		return true;
+	}
+
+	//This method takes in a string (name of txt file) and 
+	//parses the JSON found within to return an arraylist
+	//of delivery points
+	public ArrayList<Location> populateLocations(String deliveryPoints) throws FileNotFoundException {
+		ArrayList<Location> deliveryLocations = new ArrayList<Location>();
+		
+		try{
+			File deliveryMap = new File(deliveryPoints);
+			Scanner scan = new Scanner(deliveryMap);
+
+			while (scan.hasNextLine()) {
+				
+			}
+
+			scan.close();
+		}
+		catch (Exception e) {
+			System.out.println("FAILURE TO OPEN FILE.");
+		}
+		
+		return deliveryLocations;
 	}
 }
