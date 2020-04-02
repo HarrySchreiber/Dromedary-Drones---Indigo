@@ -32,8 +32,9 @@ import javafx.beans.property.DoubleProperty;
 public class Main extends Application{
 
 	private Scene simulationScreen, settingsScreen;
-	private int weightPerOrder[] = new int[50];
-	private double sumPercent= 100;
+	private int weightPerOrder[] = new int[50]; //global variable for sum of the order weight for each array  
+	private double sumPercent= 100; //global variable for the sum of the all percentage sliders
+	private boolean orderIsTooHeavy = false;  //boolean to check if any order have weights that > 100
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -244,6 +245,10 @@ public class Main extends Application{
 			VBox columnTwo = new VBox();
 			columnTwo.setAlignment(Pos.TOP_LEFT);
 			
+			/*
+			 * Column 2 Variable Dictionary
+			 */
+			
         	//Slider sliderO1 = new Slider();
 			Label perUsedL = new Label("Percentage Used: "  + String.valueOf(sumPercent));		
 		    columnTwo.getChildren().add(perUsedL);
@@ -284,26 +289,26 @@ public class Main extends Application{
 	        	
 	        	//final int initialVal = 0;
 
-	        	//Spinner val that doesn't go up to 16 burgers (to not go over 96 oz)
+	        	//Spinner val that doesn't go up to 32 burgers (to not go over 192 oz)
 	        	
 	        	SpinnerValueFactory<Integer> valueFactoryB = //
-	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 16, 0);
+	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 32, 0);
 	        	spinnerB.setValueFactory(valueFactoryB);
 	        	spinnerB.setMaxWidth(50);
 	        	spinnerB.setEditable(true);
 
-	        	//Spinner val that doesn't go up to 24 fries (to not go over 96 oz)
+	        	//Spinner val that doesn't go up to 48 fries (to not go over 192 oz)
 	        	
 	        	SpinnerValueFactory<Integer> valueFactoryF = //
-	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24, 0);
+	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 48, 0);
 	        	spinnerF.setValueFactory(valueFactoryF);
 	        	spinnerF.setMaxWidth(50);
 	        	spinnerF.setEditable(true);
 
-	        	//Spinner val that doesn't go up to 6 fries (to not go over 96 oz)
+	        	//Spinner val that doesn't go up to 14 cokes (to not go over 192 oz)
 	        	
 	        	SpinnerValueFactory<Integer> valueFactoryC = //
-	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 6, 0);
+	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 14, 0);
 	        	spinnerC.setValueFactory(valueFactoryC);
 	        	spinnerC.setMaxWidth(50);
 	        	spinnerC.setEditable(true);
@@ -339,10 +344,18 @@ public class Main extends Application{
 	        	
 	        	spinnerB.valueProperty().addListener((obs, oldVal, newVal) 
 	        			->{
-	        				if(oldVal > newVal)
+	        				if(oldVal > newVal) {
 	        					saveNewWValue(curLoopVal, -6);
-	        				else
+	        					//TDOO: remove burger from meal
+	        				}
+	        				else {
 	        					saveNewWValue(curLoopVal, 6);
+	        					//TDOO: add burger object to meal
+	        				}
+	        				
+	        				if(weightPerOrder[curLoopVal] > 192)
+	        					orderIsTooHeavy = true;
+	        				
 	        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
 	        				burgerWeight.textProperty().bind(Bindings.format("%d %s", newVal * 6, "oz"));
 	        				
@@ -350,21 +363,36 @@ public class Main extends Application{
 	        	
 	        	spinnerF.valueProperty().addListener((obs, oldVal, newVal) 
 	        			->{
-	        				if(oldVal > newVal)
+	        				if(oldVal > newVal) {
 	        					saveNewWValue(curLoopVal, -4);
-	        				else
+	        					//TDOO: remove fries object from meal
+	        				}
+	        				else {
 	        					saveNewWValue(curLoopVal, 4);
+	        					//TDOO: add fries object to meal
+	        				}
+	        				
+	        				if(weightPerOrder[curLoopVal] > 192)
+	        					orderIsTooHeavy = true;
+	        				
 	        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
 	        				friesWeight.textProperty().bind(Bindings.format("%d %s", newVal * 4, "oz"));
 	        			});
 	        	
 	        	spinnerC.valueProperty().addListener((obs, oldVal, newVal) 
 	        			-> {
-	        				if(oldVal > newVal)
+	        				if(oldVal > newVal) {
 	        					saveNewWValue(curLoopVal, -14);
-	        				else
+	        					//TDOO: remove coke object from meal
+	        				}
+	        				else {
 	        					saveNewWValue(curLoopVal, 14);
-	        				saveNewWValue(curLoopVal, 14);
+	        					//TDOO: add coke object to meal
+	        				}
+	        				
+	        				if(weightPerOrder[curLoopVal] > 192)
+	        					orderIsTooHeavy = true;
+	        					
 	        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
 	        				cokeWeight.textProperty().bind(Bindings.format("%d %s", newVal * 14, "oz"));
 	        			});
@@ -421,7 +449,7 @@ public class Main extends Application{
 			gridC3.setAlignment(Pos.CENTER_LEFT);
 			
 			/*
-			 * Variable dictionary
+			 * Column 3 Variable dictionary
 			 */
 			Label hoursLabel = new Label("Hours Per Shift:");
 			final Spinner<Integer> spinnerHours = new Spinner<Integer>();
@@ -440,13 +468,14 @@ public class Main extends Application{
         	spinnerHours.setMaxWidth(70);
         	spinnerHours.setEditable(true);
         	
-        	
+        	//adds labels to grid
         	GridPane.setConstraints(hoursLabel, 0, 1);
         	gridC3.getChildren().add(hoursLabel);
         	GridPane.setConstraints(spinnerHours, 1, 1);
         	gridC3.getChildren().add(spinnerHours);
         	
         	
+        	//Adds label to grid
         	orderPerHourL.setAlignment(Pos.BASELINE_RIGHT);
         	GridPane.setConstraints(orderPerHourL, 0, 5);
         	gridC3.getChildren().add(orderPerHourL);
@@ -493,8 +522,13 @@ public class Main extends Application{
 			saveAndCancelButtonsBox.setSpacing(100);
 			
 			//Save Simulation Settings button on Simulation settings screen
+			//BUTTON does not save if one of the order weights is > 192oz...
 			Button saveSimulationSetngsBtn = new Button("Save Settings");
-			saveSimulationSetngsBtn.setOnAction(e -> primaryStage.setScene(simulationScreen));	//Adds function to the button TODO: Expand function to not save if the user has not inputed correct values, possibly able to be done with throwing exceptions in a constructor
+			saveSimulationSetngsBtn.setOnAction(e ->
+			{
+				if(orderIsTooHeavy == false)
+					primaryStage.setScene(simulationScreen);
+			});	//Adds function to the button TODO: Expand function to not save if the user has not inputed correct values, possibly able to be done with throwing exceptions in a constructor
 			saveSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			saveAndCancelButtonsBox.getChildren().add(saveSimulationSetngsBtn);
 			
@@ -593,18 +627,29 @@ public class Main extends Application{
 		return settingsScreenLayout;
 	}
 	
+	/*
+	 * Simple helper method to change the element of the weightPerOrder array
+	 * @param int elem, the number of the array that we want to add onto
+	 * @param int plus the number that we will add onto
+	 * 
+	 */
 	public void saveNewWValue(int elem, int plus) {
+		//Checker to make sure the element exists
 		if(weightPerOrder.length - 1 < elem) 
 			throw new IndexOutOfBoundsException("Index " + elem + " is out of bounds!");
-		else {
+		
+		else {//adds the parameter onto the int value 
 			int temp = weightPerOrder[elem];
 			weightPerOrder[elem] =  temp + plus;
 		}
 	}
 	
+	/*
+	 * Simple helper that alters the sum of the percetanges of the sliders with the paramter
+	 * @param a double that we want to want add onto sumPercent
+	 */
 	public void saveNewPValue(double plus) {
-			sumPercent =  sumPercent + plus;
-		
+			sumPercent =  sumPercent + plus;	
 	}
 	
 	
