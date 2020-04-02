@@ -17,6 +17,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.GridPane;
 import javafx.geometry.Insets;
@@ -30,10 +32,14 @@ import javafx.beans.property.DoubleProperty;
 public class Main extends Application{
 
 	private Scene simulationScreen, settingsScreen;
+	private int weightPerOrder[] = new int[50];
+	private double sumPercent= 100;
 	
 	@Override
 	public void start(Stage primaryStage) {
 		try {
+			
+		
 			//Simulation Screen Layout
 			GridPane simulationScreenLayout = buildSimulationScreen();
 			
@@ -238,44 +244,48 @@ public class Main extends Application{
 			VBox columnTwo = new VBox();
 			columnTwo.setAlignment(Pos.TOP_LEFT);
 			
-			String perUsed1 = "Percentage Used";
         	//Slider sliderO1 = new Slider();
-			double perSum = 100;
-			double perLeft = 0;
-			String perUsedStr = "Percentage Used: " + String.valueOf(perSum);
-			//Label perUsedL = new Label("Percentage Used: "  + String.valueOf(perSum));
-			Label perUsedL = new Label("");
+			Label perUsedL = new Label("Percentage Used: "  + String.valueOf(sumPercent));		
 		    columnTwo.getChildren().add(perUsedL);
-		    Label perLeftL = new Label("Percentage Left: " + String.valueOf(perLeft));
+		    Label perLeftL = new Label("Percentage Left: " + String.valueOf(0));
 		    columnTwo.getChildren().add(perLeftL);
 			
 			GridPane grid = new GridPane();
-	        //grid.setPadding(new Insets(50, 10, 10, 10));
 	        grid.setVgap(1);
 	        grid.setHgap(1);
 	        
 	        
 	        String [] orderNames = {"Order 1: ", "Order 2: ", "Order 3: ", "Order 4: "};
+	       
 	        
 	        for(int i = 0; i < 4; i++){
-			
+	        	
+	        	int curLoopVal = i;
 	        	Label order1L = new Label(orderNames[i]);
+	        	Slider sliderO1 = new Slider();
 	        	//Label order1L = new Label("Order 1");
 	        	//Label order2L = new Label("Order 2");
 	        	//Label order3L = new Label("Order 3");
 	        	//Label order4L = new Label("Order 4");
 	        	Label currentSliderVal = new Label("");
 	        	Label burgerL = new Label("Burger");
-	        	Label burgerWeight = new Label("");
+	        	final Spinner<Integer> spinnerB = new Spinner<Integer>();
+	        	Label burgerWeight = new Label("0 oz");
 	        	Label friesL = new Label("Fries");
-	        	Label friesWeight = new Label("");
+	        	final Spinner<Integer> spinnerF = new Spinner<Integer>();
+	        	Label friesWeight = new Label("0 oz");
 	        	Label cokeL = new Label("Coke");
-	        	Label cokeWeight = new Label("");
+	        	final Spinner<Integer> spinnerC = new Spinner<Integer>();
+	        	Label cokeWeight = new Label("0 oz");
+	        	Label totalWeightL = new Label("Total:");
+	        	Label weightPerOrderL = new Label("0 oz");
+	        	
+	      
 	        	
 	        	//final int initialVal = 0;
 
 	        	//Spinner val that doesn't go up to 16 burgers (to not go over 96 oz)
-	        	final Spinner<Integer> spinnerB = new Spinner<Integer>();
+	        	
 	        	SpinnerValueFactory<Integer> valueFactoryB = //
 	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 16, 0);
 	        	spinnerB.setValueFactory(valueFactoryB);
@@ -283,7 +293,7 @@ public class Main extends Application{
 	        	spinnerB.setEditable(true);
 
 	        	//Spinner val that doesn't go up to 24 fries (to not go over 96 oz)
-	        	final Spinner<Integer> spinnerF = new Spinner<Integer>();
+	        	
 	        	SpinnerValueFactory<Integer> valueFactoryF = //
 	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24, 0);
 	        	spinnerF.setValueFactory(valueFactoryF);
@@ -291,7 +301,7 @@ public class Main extends Application{
 	        	spinnerF.setEditable(true);
 
 	        	//Spinner val that doesn't go up to 6 fries (to not go over 96 oz)
-	        	final Spinner<Integer> spinnerC = new Spinner<Integer>();
+	        	
 	        	SpinnerValueFactory<Integer> valueFactoryC = //
 	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 6, 0);
 	        	spinnerC.setValueFactory(valueFactoryC);
@@ -299,61 +309,102 @@ public class Main extends Application{
 	        	spinnerC.setEditable(true);
 
 	        		
-	        	Slider sliderO1 = new Slider();
+	        	
 	        	sliderO1.setMin(0);
 	        	sliderO1.setMax(100);
 	        	sliderO1.setValue(25);
 	        	//sliderO1.setShowTickLabels(true);
 	        	sliderO1.setShowTickMarks(true);
 	        	sliderO1.setMajorTickUnit(50);
-	        	
 	        	sliderO1.setMaxWidth(300);
+	        	
+	        	sliderO1.valueProperty().addListener((obs, oldVal, newVal)
+	        			->{
+	        				double difference = Double.valueOf(newVal.toString()) - Double.valueOf(oldVal.toString()) ;
+	        				double  perLeftNum;
+	        				if(sumPercent >= 100 || (100-sumPercent) < 0)
+	        					perLeftNum = 0;
+	        				else
+	        					perLeftNum = 100 - sumPercent;
+	        				saveNewPValue(difference);
+	        				perUsedL.textProperty().bind(Bindings.format("%s %.0f %s", "Percentage Used: ", sumPercent, "%"));
+	        				perLeftL.textProperty().bind(Bindings.format("%s %.0f %s", "Percentage Used: ", perLeftNum , "%"));
+	        			});
+	        	
+	        	totalWeightL.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
+	        	
 	        	
 	        	currentSliderVal.textProperty().bind(Bindings.format("%.0f %s ", sliderO1.valueProperty(), "%"));
 	        	
-	        	burgerWeight.textProperty().bind(Bindings.format("%d", spinnerB.valueProperty()));
 	        	
-	        	friesWeight.textProperty().bind(Bindings.format("%d", spinnerF.valueProperty()));
+	        	spinnerB.valueProperty().addListener((obs, oldVal, newVal) 
+	        			->{
+	        				if(oldVal > newVal)
+	        					saveNewWValue(curLoopVal, -6);
+	        				else
+	        					saveNewWValue(curLoopVal, 6);
+	        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
+	        				burgerWeight.textProperty().bind(Bindings.format("%d %s", newVal * 6, "oz"));
+	        				
+	        			});
 	        	
-	        	cokeWeight.textProperty().bind(Bindings.format("%d", spinnerC.valueProperty()));
+	        	spinnerF.valueProperty().addListener((obs, oldVal, newVal) 
+	        			->{
+	        				if(oldVal > newVal)
+	        					saveNewWValue(curLoopVal, -4);
+	        				else
+	        					saveNewWValue(curLoopVal, 4);
+	        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
+	        				friesWeight.textProperty().bind(Bindings.format("%d %s", newVal * 4, "oz"));
+	        			});
 	        	
+	        	spinnerC.valueProperty().addListener((obs, oldVal, newVal) 
+	        			-> {
+	        				if(oldVal > newVal)
+	        					saveNewWValue(curLoopVal, -14);
+	        				else
+	        					saveNewWValue(curLoopVal, 14);
+	        				saveNewWValue(curLoopVal, 14);
+	        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
+	        				cokeWeight.textProperty().bind(Bindings.format("%d %s", newVal * 14, "oz"));
+	        			});
 	        	
 	        	
 
 
-	        	GridPane.setConstraints(order1L, 0, 1 + (4*i));
+	        	GridPane.setConstraints(order1L, 0, 1 + (5*i));
 	        	grid.getChildren().add(order1L);
-	        	GridPane.setConstraints(currentSliderVal, 2, 1 + (4*i));
+	        	GridPane.setConstraints(currentSliderVal, 2, 1 + (5*i));
 	        	grid.getChildren().add(currentSliderVal);
-	        	GridPane.setConstraints(sliderO1, 1, 1 + (4*i));
+	        	GridPane.setConstraints(sliderO1, 1, 1 + (5*i));
 	        	grid.getChildren().add(sliderO1);
-	        	GridPane.setConstraints(burgerL, 0, 2 + (4*i));
+	        	GridPane.setConstraints(burgerL, 0, 2 + (5*i));
 	        	grid.getChildren().add(burgerL);
-	        	GridPane.setConstraints(spinnerB, 1, 2 + (4*i));
+	        	GridPane.setConstraints(spinnerB, 1, 2 + (5*i));
 	        	grid.getChildren().add(spinnerB);
-	        	GridPane.setConstraints(burgerWeight, 2, 2 + (4*i));
+	        	GridPane.setConstraints(burgerWeight, 2, 2 + (5*i));
 	        	grid.getChildren().add(burgerWeight);
-	        	GridPane.setConstraints(friesL, 0, 3 + (4*i));
+	        	GridPane.setConstraints(friesL, 0, 3 + (5*i));
 	        	grid.getChildren().add(friesL);
-	        	GridPane.setConstraints(spinnerF, 1, 3 + (4*i));
+	        	GridPane.setConstraints(spinnerF, 1, 3 + (5*i));
 	        	grid.getChildren().add(spinnerF);
-	        	GridPane.setConstraints(friesWeight, 2, 3 + (4*i));
+	        	GridPane.setConstraints(friesWeight, 2, 3 + (5*i));
 	        	grid.getChildren().add(friesWeight);
-	        	GridPane.setConstraints(cokeL, 0, 4 + (4*i));
+	        	GridPane.setConstraints(cokeL, 0, 4 + (5*i));
 	        	grid.getChildren().add(cokeL);
-	        	GridPane.setConstraints(spinnerC, 1, 4 + (4*i));
+	        	GridPane.setConstraints(spinnerC, 1, 4 + (5*i));
 	        	grid.getChildren().add(spinnerC);
-	        	GridPane.setConstraints(cokeWeight, 2, 4 + (4*i));
+	        	GridPane.setConstraints(cokeWeight, 2, 4 + (5*i));
 	        	grid.getChildren().add(cokeWeight);
+	        	GridPane.setConstraints(totalWeightL, 0, 5 + (5*i));
+	        	grid.getChildren().add(totalWeightL);
+	        	GridPane.setConstraints(weightPerOrderL, 1, 5 + (5*i));
+	        	grid.getChildren().add(weightPerOrderL);
 	        	
-	        	//perSum += Double.valueOf(sliderO1.valueProperty().toString());
-	        	//perSum += sliderO1.valueProperty().get();
 	        	
 	        	
-	        
 		}
-	        	        
-	        
+	        	        	        
 			
 			//TODO: Use this to add things in column two
 			columnTwo.getChildren().addAll(grid);
@@ -409,7 +460,7 @@ public class Main extends Application{
         	spinnerUpperHours.setValueFactory(valueFactoryUH);
         	spinnerUpperHours.setMaxWidth(70);
         	spinnerUpperHours.setEditable(true);
-        	
+        
         	
         	//NOTE: spinner can't go higher than 30 orders but can change this         	
         	SpinnerValueFactory<Integer> valueFactoryLH = //
@@ -427,6 +478,8 @@ public class Main extends Application{
         	gridC3.getChildren().add(lowerHoursL);
         	GridPane.setConstraints(spinnerLowerHours, 1, 10);
         	gridC3.getChildren().add(spinnerLowerHours);
+        	
+        
         	
 			
 			//TODO: Use this to add things in column three
@@ -539,4 +592,20 @@ public class Main extends Application{
 		
 		return settingsScreenLayout;
 	}
+	
+	public void saveNewWValue(int elem, int plus) {
+		if(weightPerOrder.length - 1 < elem) 
+			throw new IndexOutOfBoundsException("Index " + elem + " is out of bounds!");
+		else {
+			int temp = weightPerOrder[elem];
+			weightPerOrder[elem] =  temp + plus;
+		}
+	}
+	
+	public void saveNewPValue(double plus) {
+			sumPercent =  sumPercent + plus;
+		
+	}
+	
+	
 }
