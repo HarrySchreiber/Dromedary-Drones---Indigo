@@ -10,7 +10,6 @@ import java.util.ArrayList;
  */
 public class SimulationSettings {
 	private String name;
-	private ArrayList<Drone> drones;
 	private Drone currentDrone;
 	private ArrayList<Location> locations;
 	private int percentageUsed;
@@ -20,14 +19,30 @@ public class SimulationSettings {
 	private int orderUpper;
 	private int orderLower;
 	
-	//TODO: IMPORTANT Lets discus this class again to figure out what we have to actually have here and how we need to populate this stuff
+	//TODO: IMPORTANT Lets discuss this class again to figure out what we have to actually have here and how we need to populate this stuff
 	//Like what are we going to pass it? An XML of all of the settings already filled out? Or are we giving it all of the variables?
-	public SimulationSettings() {
-		
+	public SimulationSettings(String name, String locationFileName, ArrayList<Meal> meals, int hoursPerShift, int orderUpper, int orderLower) {
+		this.name = name;
+		this.currentDrone = new Drone();	//TODO: This will have to be updated with whatever drone the user wants
+		this.locations = buildLocationsFromFile(locationFileName);
+		this.percentageUsed = 0;	//TODO: If were going to handle this in main then we may not even need this
+		this.percentageLeft = 100;	//TODO: If were going to handle this in main then we may not even need this
+		this.meals = meals;	//TODO: Question 1: I feel like we need to pull this in from it being built in the main frontend side Question 2: Do we need a deep copy constructor here?
+		this.hoursPerShift = hoursPerShift;
+		this.orderUpper = orderUpper;
+		this.orderLower = orderLower;
 	}
 	
 	public boolean checkPercentage() {
 		//TODO: Add real logic here
 		return true;
+	}
+	
+	public ArrayList<Location> buildLocationsFromFile(String fileName){
+		//TODO: This will probably involve throwing exceptions for files
+		
+		ArrayList<Location> ret = new ArrayList<Location>();
+		//TODO: Add Logic Once I know what the file looks like
+		return ret;
 	}
 }
