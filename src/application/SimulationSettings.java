@@ -33,6 +33,7 @@ public class SimulationSettings {
 		this.orderLower = orderLower;
 	}
 	
+	//TODO: Are we going to do this here or in main?
 	public boolean checkPercentage() {
 		//TODO: Add real logic here
 		return true;
