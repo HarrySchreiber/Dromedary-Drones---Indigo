@@ -1,4 +1,8 @@
 package application;
+
+import java.util.ArrayList;
+import java.util.Random;
+
 /**
  * An order contains what meal a customer ordered, when they ordered it, and where its going
  * 
@@ -9,8 +13,11 @@ public class Order {
 	private Meal meal;
 	private int timeStamp;
 	private Location deliveryPoint;
-	public int orders = 0;
-	public int[] numbers = new int[orders];
+	//public int orders = 0;
+	ArrayList<Integer> times = new ArrayList<Integer>();
+	ArrayList<Order> orders = new ArrayList<Order>();
+	int max = 60;
+	int min = 1;
 	
 	/**
 	 * Order Constructor
@@ -45,7 +52,7 @@ public class Order {
 	 * @return The minute the order came in
 	 */
 	public int getTimeStamp() {
-
+		//get the ith element of times
 		return timeStamp;
 	}
 
@@ -55,6 +62,16 @@ public class Order {
 	public void setTimeStamp(int timeStamp) {
 		//TODO: Do we even need setters and if so do we need to do deep copys?
 		this.timeStamp = timeStamp;
+	}
+	public static int rand(int min, int max) {
+		return new Random().nextInt(max - min +1)+min;
+	}
+	public void orderTime() {
+		for(int i = 0; i<4; i++) {
+			for(int j = 0; j<15; j++) {
+				times.add(rand(min, max) + (60 * i));
+			}
+		}
 	}
 
 	/**

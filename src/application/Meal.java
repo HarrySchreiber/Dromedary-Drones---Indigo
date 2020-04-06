@@ -13,8 +13,11 @@ public class Meal {
 	FoodItem fries = new FoodItem("Fries", 4);
 	FoodItem coke = new FoodItem("coke", 14);
 	ArrayList<FoodItem> foodItems;
-	int totalWeight;
+	public int totalWeight;
 	
+	/**
+	 * Meal Constructor
+	 */
 	public Meal() {
 		this.foodItems = new ArrayList<FoodItem>();
 	}
@@ -22,17 +25,21 @@ public class Meal {
 	/**
 	 * TODO: Decide if we want to calculate this everytime we need it or just keep a member variable that updates every time we add a food
 	 * @return The total weight of the meal
+	 * can be changed 
 	 */
 	public double calculateWeight() {
 		//TODO: Actually Populate the method
-		return 0;
+		return totalWeight;
 	}
 	
 	/**
 	 * TODO: If we decide to update the weight member variable just remember to do that here and add the member variable
 	 * @param item The food item to be passed to the list
+	 * can be changed 
+	 * Should be run everything we increment a food in the simulation setting page
 	 */
 	public void addFoodItem(FoodItem item) {
-		
+		foodItems.add(item);
+		totalWeight += item.getWeight();
 	}
 }
