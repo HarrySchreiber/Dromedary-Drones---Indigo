@@ -9,11 +9,12 @@ import java.util.ArrayList;
  *
  */
 public class Meal {
+	FoodItem burgers = new FoodItem("Burger", 6);
+	FoodItem fries = new FoodItem("Fries", 4);
+	FoodItem coke = new FoodItem("coke", 14);
 	ArrayList<FoodItem> foodItems;
+	int totalWeight;
 	
-	/**
-	 * Meal Constructor
-	 */
 	public Meal() {
 		this.foodItems = new ArrayList<FoodItem>();
 	}

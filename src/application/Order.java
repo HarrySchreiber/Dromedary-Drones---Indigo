@@ -9,6 +9,8 @@ public class Order {
 	private Meal meal;
 	private int timeStamp;
 	private Location deliveryPoint;
+	public int orders = 0;
+	public int[] numbers = new int[orders];
 	
 	/**
 	 * Order Constructor
@@ -43,6 +45,7 @@ public class Order {
 	 * @return The minute the order came in
 	 */
 	public int getTimeStamp() {
+
 		return timeStamp;
 	}
 
