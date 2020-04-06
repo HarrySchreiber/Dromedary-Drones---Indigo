@@ -1,6 +1,12 @@
 package application;
 
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -30,17 +36,33 @@ import javafx.beans.property.DoubleProperty;
 
 
 public class Main extends Application{
-
-	private Scene simulationScreen, settingsScreen;
-	private int weightPerOrder[] = new int[50]; //global variable for sum of the order weight for each array  
-	private double sumPercent= 100; //global variable for the sum of the all percentage sliders
-	private boolean orderIsTooHeavy = false;  //boolean to check if any order have weights that > 100
+	
+	//global variables
+	private Scene simulationScreen, settingsScreen; //scenes 
+	private int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
+	private double sumPercent= 100; //a total 
+	private String realFileContents = ""; //what we want to print to the file
 	
 	@Override
 	public void start(Stage primaryStage) {
 		try {
 			
-		
+			//opens the file with the default values
+			Scanner sc = new Scanner(new File("DefSimData.txt")); 
+			StringBuffer buffer = new StringBuffer();
+			
+			//reads all the lines of the file to buffer
+			while (sc.hasNextLine()) {
+		         buffer.append(sc.nextLine()+System.lineSeparator());
+		      }
+		     
+			 //saves all the old file into the global variables
+		     realFileContents = buffer.toString();
+
+		     sc.close();
+		     //FileWriter writer = new FileWriter("NewSimData.txt" ,false);
+		     //writer.write("We writing this..");
+			
 			//Simulation Screen Layout
 			GridPane simulationScreenLayout = buildSimulationScreen();
 			
@@ -169,7 +191,19 @@ public class Main extends Application{
 			simNameBox.getChildren().addAll(simNameLabel,simNameField);
 			//Add HBox to the grid and stretch it over 3 columns
 			settingsScreenLayout.add(simNameBox, 0, 0, 3, 1);
+			String temp = simNameField.getText();
 			
+			//Event for changing the values to the new Settings Name
+			EventHandler<ActionEvent> event = new EventHandler<ActionEvent>()  { 
+	            public void handle(ActionEvent e)   { 
+	            	String oldSimName = "Simulation Name: " + temp;
+	            	String newSimName = "Simulation Name: " + simNameField.getText();
+	            	realFileContents = realFileContents.replaceFirst(oldSimName, newSimName);
+	            		      	      
+	      
+			}}; 
+	        simNameField.setOnAction(event); //sets up the Event
+	                		
 			
 			//VBox for things in column 1
 			VBox columnOne = new VBox(20);
@@ -182,13 +216,18 @@ public class Main extends Application{
 			CheckBox schemeFCB = new CheckBox("FIFO - First in First out");
 			Boolean oneSchemeSelected = false;
 			
-			//Event handler for Knapsack Check Box
+			//Event handler for Knapsack Check Box and replaces the new status of Knapsack
 			EventHandler<ActionEvent> knapEvent = new EventHandler<ActionEvent>() { 
                 public void handle(ActionEvent e) { 
                 	//TODO: Knap method
                 	//So we know that only one method is selected.
                     if (schemeKCB.isSelected() && !(schemeFCB.isSelected())) {
-                    	System.out.println("knap" + " was selected");
+                    	//System.out.println("knap" + " was selected");
+                    	String oldKnap = "Knapsack Packing: false";
+                    	String newKnap = "Knapsack Packing: true";
+                    	
+                    	//makes the replace here
+                    	realFileContents = realFileContents.replaceFirst(oldKnap, newKnap);
                     	//KNAP method
                     }
                         
@@ -197,15 +236,20 @@ public class Main extends Application{
                     }
                 }
 			};
-            schemeKCB.setOnAction(knapEvent);
+            schemeKCB.setOnAction(knapEvent);//sets up the event here
             
-          //Event handler for FIFO Check Box
+          //Event handler for FIFO Check Box and replaces the new status of Fifo 
 			EventHandler<ActionEvent> fifoEvent = new EventHandler<ActionEvent>() { 
                 public void handle(ActionEvent e) { 
                 	//TODO: FIFO method
                 	//So we know that only one method is selected.
                     if (schemeFCB.isSelected() && !(schemeKCB.isSelected())) {
-                    	System.out.println("fifo" + " was selected");
+                    	//System.out.println("fifo" + " was selected");
+                    	String oldFifo = "Fifo: false";
+                    	String newFifo = "Fifo: true";
+                    
+                    	//makes the replace here
+                    	realFileContents = realFileContents.replaceFirst(oldFifo, newFifo);
                     	// FIFO method here
                     }
                         
@@ -214,9 +258,10 @@ public class Main extends Application{
                     }
                 }
 			};
-			schemeFCB.setOnAction(fifoEvent);
+			schemeFCB.setOnAction(fifoEvent);//sets up the event here
 			
 
+			
 			Label dronesL = new Label ("Drones: ");
 			CheckBox defaultDroneCB = new CheckBox("Default Grove City Drone");
 			EventHandler<ActionEvent> defaultDroneEvent = new EventHandler<ActionEvent>() { 
@@ -232,7 +277,7 @@ public class Main extends Application{
 			};
 			defaultDroneCB.setOnAction(defaultDroneEvent);
 			
-			
+			//add everything to column one
 			columnOne.getChildren().addAll(schemeL, schemeKCB, schemeFCB, dronesL, defaultDroneCB);
 			
 			settingsScreenLayout.add(columnOne,0,1);
@@ -245,12 +290,8 @@ public class Main extends Application{
 			VBox columnTwo = new VBox();
 			columnTwo.setAlignment(Pos.TOP_LEFT);
 			
-			/*
-			 * Column 2 Variable Dictionary
-			 */
-			
         	//Slider sliderO1 = new Slider();
-			Label perUsedL = new Label("Percentage Used: "  + String.valueOf(sumPercent));		
+			Label perUsedL = new Label("Percentage Used: "  + String.valueOf(100));		
 		    columnTwo.getChildren().add(perUsedL);
 		    Label perLeftL = new Label("Percentage Left: " + String.valueOf(0));
 		    columnTwo.getChildren().add(perLeftL);
@@ -259,12 +300,13 @@ public class Main extends Application{
 	        grid.setVgap(1);
 	        grid.setHgap(1);
 	        
-	        
+	        //Names of the 4 orders that we are using
 	        String [] orderNames = {"Order 1: ", "Order 2: ", "Order 3: ", "Order 4: "};
 	       
 	        
 	        for(int i = 0; i < 4; i++){
 	        	
+	        	//variable dictionary for the for loop 
 	        	int curLoopVal = i;
 	        	Label order1L = new Label(orderNames[i]);
 	        	Slider sliderO1 = new Slider();
@@ -286,35 +328,30 @@ public class Main extends Application{
 	        	Label weightPerOrderL = new Label("0 oz");
 	        	
 	      
-	        	
-	        	//final int initialVal = 0;
 
-	        	//Spinner val that doesn't go up to 32 burgers (to not go over 192 oz)
-	        	
+	        	//Spinner val that doesn't go up to 16 burgers (to not go over 96 oz)	        	
 	        	SpinnerValueFactory<Integer> valueFactoryB = //
-	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 32, 0);
+	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 16, 0);
 	        	spinnerB.setValueFactory(valueFactoryB);
 	        	spinnerB.setMaxWidth(50);
 	        	spinnerB.setEditable(true);
 
-	        	//Spinner val that doesn't go up to 48 fries (to not go over 192 oz)
-	        	
+	        	//Spinner val that doesn't go up to 24 fries (to not go over 96 oz)
 	        	SpinnerValueFactory<Integer> valueFactoryF = //
-	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 48, 0);
+	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24, 0);
 	        	spinnerF.setValueFactory(valueFactoryF);
 	        	spinnerF.setMaxWidth(50);
 	        	spinnerF.setEditable(true);
 
-	        	//Spinner val that doesn't go up to 14 cokes (to not go over 192 oz)
-	        	
+	        	//Spinner val that doesn't go up to 6 fries (to not go over 96 oz)
 	        	SpinnerValueFactory<Integer> valueFactoryC = //
-	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 14, 0);
+	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 6, 0);
 	        	spinnerC.setValueFactory(valueFactoryC);
 	        	spinnerC.setMaxWidth(50);
 	        	spinnerC.setEditable(true);
 
 	        		
-	        	
+	        	//slider for percentages
 	        	sliderO1.setMin(0);
 	        	sliderO1.setMax(100);
 	        	sliderO1.setValue(25);
@@ -323,83 +360,102 @@ public class Main extends Application{
 	        	sliderO1.setMajorTickUnit(50);
 	        	sliderO1.setMaxWidth(300);
 	        	
+	        	//order probability percentages
 	        	sliderO1.valueProperty().addListener((obs, oldVal, newVal)
 	        			->{
-	        				double difference = Double.valueOf(newVal.toString()) - Double.valueOf(oldVal.toString()) ;
+	        				//difference we can add to the percentage label
+	        				double difference = newVal.intValue() - oldVal.intValue() ;
 	        				double  perLeftNum;
 	        				if(sumPercent >= 100 || (100-sumPercent) < 0)
 	        					perLeftNum = 0;
 	        				else
 	        					perLeftNum = 100 - sumPercent;
+	        				
+	        				//prints lables here
 	        				saveNewPValue(difference);
 	        				perUsedL.textProperty().bind(Bindings.format("%s %.0f %s", "Percentage Used: ", sumPercent, "%"));
 	        				perLeftL.textProperty().bind(Bindings.format("%s %.0f %s", "Percentage Used: ", perLeftNum , "%"));
+	        				
+	        				//makes new and old strings so we can write to the txt file.
+	        				String oldPerc = "Order " + String.valueOf(curLoopVal+1) + " Percentage: " + String.valueOf(oldVal.intValue());
+	        				String newPerc = "Order " + String.valueOf(curLoopVal+1) + " Percentage: " + String.valueOf(newVal.intValue());
+	        				
+	        				//does the replacement here	
+	        				realFileContents = realFileContents.replaceFirst(oldPerc, newPerc);
 	        			});
 	        	
+	        	//sends label here
 	        	totalWeightL.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
 	        	
-	        	
+	        	//curent val of slider percentage
 	        	currentSliderVal.textProperty().bind(Bindings.format("%.0f %s ", sliderO1.valueProperty(), "%"));
 	        	
 	        	
+	        	//burger spinner per each order with a listener
 	        	spinnerB.valueProperty().addListener((obs, oldVal, newVal) 
 	        			->{
-	        				if(oldVal > newVal) {
+	        				if(oldVal > newVal) // so we can remove weight
 	        					saveNewWValue(curLoopVal, -6);
-	        					//TDOO: remove burger from meal
-	        				}
-	        				else {
+	        				else //standard add
 	        					saveNewWValue(curLoopVal, 6);
-	        					//TDOO: add burger object to meal
-	        				}
 	        				
-	        				if(weightPerOrder[curLoopVal] > 192)
-	        					orderIsTooHeavy = true;
-	        				
+	        				//updates the burger label
 	        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
 	        				burgerWeight.textProperty().bind(Bindings.format("%d %s", newVal * 6, "oz"));
 	        				
+	        				//makes new and old strings so we can write to the txt file
+	        				String oldBurger = "Order " + String.valueOf(curLoopVal+1) + " Burgers: " + String.valueOf(oldVal);
+	        				String newBurger = "Order " + String.valueOf(curLoopVal+1) + " Burgers: " + String.valueOf(newVal);
+
+	        				//does the replacement here
+	        				realFileContents = realFileContents.replaceFirst(oldBurger, newBurger);
+	        				
 	        			});
 	        	
+	        	//fries spinner per each order with a listener
 	        	spinnerF.valueProperty().addListener((obs, oldVal, newVal) 
 	        			->{
-	        				if(oldVal > newVal) {
+	        				if(oldVal > newVal)//so we remove weight
 	        					saveNewWValue(curLoopVal, -4);
-	        					//TDOO: remove fries object from meal
-	        				}
-	        				else {
+	        				else //standard add
 	        					saveNewWValue(curLoopVal, 4);
-	        					//TDOO: add fries object to meal
-	        				}
 	        				
-	        				if(weightPerOrder[curLoopVal] > 192)
-	        					orderIsTooHeavy = true;
-	        				
+	        				//updates fries labels
 	        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
 	        				friesWeight.textProperty().bind(Bindings.format("%d %s", newVal * 4, "oz"));
+	        				
+	        				//makes new/old strings to write to the txt file
+	        				String oldFries = "Order " + String.valueOf(curLoopVal+1) + " Fries: " + String.valueOf(oldVal);
+	        				String newFries = "Order " + String.valueOf(curLoopVal+1) + " Fries: " + String.valueOf(newVal);
+
+	        				//does the replacement here
+	        				realFileContents = realFileContents.replaceFirst(oldFries, newFries);
 	        			});
 	        	
+	        	//coke spinner per each order with a listener
 	        	spinnerC.valueProperty().addListener((obs, oldVal, newVal) 
 	        			-> {
-	        				if(oldVal > newVal) {
+	        				if(oldVal > newVal) //so we remove weight 
 	        					saveNewWValue(curLoopVal, -14);
-	        					//TDOO: remove coke object from meal
-	        				}
-	        				else {
+	        				else //standard add
 	        					saveNewWValue(curLoopVal, 14);
-	        					//TDOO: add coke object to meal
-	        				}
 	        				
-	        				if(weightPerOrder[curLoopVal] > 192)
-	        					orderIsTooHeavy = true;
-	        					
+	        				
+	        				//updates the coke labels
 	        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
 	        				cokeWeight.textProperty().bind(Bindings.format("%d %s", newVal * 14, "oz"));
+	        				
+	        				//makes new/old strings to write to the txt file
+	        				String oldCoke = "Order " + String.valueOf(curLoopVal+1) + " Cokes: " + String.valueOf(oldVal);
+	        				String newCoke = "Order " + String.valueOf(curLoopVal+1) + " Cokes: " + String.valueOf(newVal);
+
+	        				//does the replacement here
+	        				realFileContents = realFileContents.replaceFirst(oldCoke, newCoke);
 	        			});
-	        	
-	        	
+	        		        	
 
 
+	        	//adds all labels and spinners to the grid pane here
 	        	GridPane.setConstraints(order1L, 0, 1 + (5*i));
 	        	grid.getChildren().add(order1L);
 	        	GridPane.setConstraints(currentSliderVal, 2, 1 + (5*i));
@@ -433,7 +489,6 @@ public class Main extends Application{
 	        	
 		}
 	        	        	        
-			
 			//TODO: Use this to add things in column two
 			columnTwo.getChildren().addAll(grid);
 			
@@ -449,11 +504,11 @@ public class Main extends Application{
 			gridC3.setAlignment(Pos.CENTER_LEFT);
 			
 			/*
-			 * Column 3 Variable dictionary
+			 * Variable dictionary
 			 */
 			Label hoursLabel = new Label("Hours Per Shift:");
 			final Spinner<Integer> spinnerHours = new Spinner<Integer>();
-			Label orderPerHourL = new Label("Order Per House");
+			Label orderPerHourL = new Label("Orders Per Hour");
 			
 			Label upperHoursL = new Label("Upper Bound:");
 			final Spinner<Integer> spinnerUpperHours = new Spinner<Integer>();
@@ -468,14 +523,26 @@ public class Main extends Application{
         	spinnerHours.setMaxWidth(70);
         	spinnerHours.setEditable(true);
         	
-        	//adds labels to grid
+        	//spinner for the hours per shift
+    		spinnerHours.valueProperty().addListener((obs, oldVal, newVal)
+    				-> {
+				
+    					//makes new/old string we can write to the txt
+    					String oldHours = "Hours Per Shift: "  + String.valueOf(oldVal);
+    					String newHours = "Hours Per Shift: "  + String.valueOf(newVal);
+
+    					//does the replacement here
+    					realFileContents = realFileContents.replaceFirst(oldHours, newHours);
+			});
+        	
+        	
+    		//adds everything to grid pane 3
         	GridPane.setConstraints(hoursLabel, 0, 1);
         	gridC3.getChildren().add(hoursLabel);
         	GridPane.setConstraints(spinnerHours, 1, 1);
         	gridC3.getChildren().add(spinnerHours);
         	
         	
-        	//Adds label to grid
         	orderPerHourL.setAlignment(Pos.BASELINE_RIGHT);
         	GridPane.setConstraints(orderPerHourL, 0, 5);
         	gridC3.getChildren().add(orderPerHourL);
@@ -489,8 +556,20 @@ public class Main extends Application{
         	spinnerUpperHours.setValueFactory(valueFactoryUH);
         	spinnerUpperHours.setMaxWidth(70);
         	spinnerUpperHours.setEditable(true);
-        
         	
+        	//spinner for the upper limit of the orders per hour
+        	spinnerUpperHours.valueProperty().addListener((obs, oldVal, newVal)
+    				-> {
+				
+    					//makes new and old strings to write to the txt
+    					String oldHours = "Upper Bound of Orders per Hour: "  + String.valueOf(oldVal);
+    					String newHours = "Upper Bound of Orders per Hour: "  + String.valueOf(newVal);
+
+    					//does the replacement
+    					realFileContents = realFileContents.replaceFirst(oldHours, newHours);
+			});
+        
+        	//spinner for the lower limits of thr orders per hour
         	//NOTE: spinner can't go higher than 30 orders but can change this         	
         	SpinnerValueFactory<Integer> valueFactoryLH = //
         			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 30, 15);
@@ -498,6 +577,18 @@ public class Main extends Application{
         	spinnerLowerHours.setMaxWidth(70);
         	spinnerLowerHours.setEditable(true);
         	
+        	spinnerLowerHours.valueProperty().addListener((obs, oldVal, newVal)
+    				-> {
+				
+    					//makes new and old strings to write to the txt
+    					String oldHours = "Lower Bound of Orders per Hour: "  + String.valueOf(oldVal);
+    					String newHours = "Lower Bound of Orders per Hour: "  + String.valueOf(newVal);
+
+    					//does the replacement
+    					realFileContents = realFileContents.replaceFirst(oldHours, newHours);
+			});	
+        	
+        	//adds all this stuff to grid pane 3 
         	GridPane.setConstraints(upperHoursL, 0, 8);
         	gridC3.getChildren().add(upperHoursL);
         	GridPane.setConstraints(spinnerUpperHours, 1, 8);
@@ -522,13 +613,25 @@ public class Main extends Application{
 			saveAndCancelButtonsBox.setSpacing(100);
 			
 			//Save Simulation Settings button on Simulation settings screen
-			//BUTTON does not save if one of the order weights is > 192oz...
 			Button saveSimulationSetngsBtn = new Button("Save Settings");
-			saveSimulationSetngsBtn.setOnAction(e ->
-			{
-				if(orderIsTooHeavy == false)
-					primaryStage.setScene(simulationScreen);
-			});	//Adds function to the button TODO: Expand function to not save if the user has not inputed correct values, possibly able to be done with throwing exceptions in a constructor
+
+			//listener so we can go back to the simulation screen and write to the file
+			saveSimulationSetngsBtn.setOnAction(e  ->  {
+
+						//try catch to the write to the file
+						try(FileWriter writer = new FileWriter("NewSimData.txt" ,false)) {
+							writer.write(realFileContents);
+							writer.flush();
+							writer.close();
+							
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						
+					primaryStage.setScene(simulationScreen); //saves the stage
+				});	//Adds function to the button TODO: Expand function to not save if the user has not inputed correct values, possibly able to be done with throwing exceptions in a constructor
+			
 			saveSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			saveAndCancelButtonsBox.getChildren().add(saveSimulationSetngsBtn);
 			
@@ -545,7 +648,6 @@ public class Main extends Application{
 			//------------------------------------------------------------------------------------------------
 			
 			
-			
 			//TODO: Decide on default
 			simulationScreen = new Scene(simulationScreenLayout,800,600);
 			//TODO: Are we going to use this ever?
@@ -560,6 +662,7 @@ public class Main extends Application{
 			primaryStage.setResizable(false);
 			primaryStage.setTitle("Dromedary Drones Simulation");
 			primaryStage.show();
+			
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -626,6 +729,7 @@ public class Main extends Application{
 		
 		return settingsScreenLayout;
 	}
+	
 	
 	/*
 	 * Simple helper method to change the element of the weightPerOrder array
