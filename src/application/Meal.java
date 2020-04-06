@@ -9,17 +9,23 @@ import java.util.ArrayList;
  *
  */
 public class Meal {
-	FoodItem burgers = new FoodItem("Burger", 6);
-	FoodItem fries = new FoodItem("Fries", 4);
-	FoodItem coke = new FoodItem("coke", 14);
+	FoodItem burgers = new FoodItem("Burger", 0.375);
+	FoodItem fries = new FoodItem("Fries", 0.25);
+	FoodItem coke = new FoodItem("Coke", 0.875);
 	ArrayList<FoodItem> foodItems;
-	int totalWeight;
+	double totalWeight;
 	
 	/**
 	 * Meal Constructor
 	 */
 	public Meal() {
 		this.foodItems = new ArrayList<FoodItem>();
+		this.totalWeight = 0;
+	}
+	
+	public Meal(Meal other) {
+		this.foodItems = other.foodItems;
+		this.totalWeight = other.totalWeight;
 	}
 	
 	/**
