@@ -24,6 +24,11 @@ public class Main extends Application {
 	}
 	
 	public static void main(String[] args) {
-		launch(args);
+		//TODO: Take out testing
+		Simulation s = new Simulation();
+		s.runSimulation();
+		
+		
+		//launch(args);
 	}
 }
