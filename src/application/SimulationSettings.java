@@ -43,9 +43,18 @@ public class SimulationSettings {
 		try{
 			File deliveryMap = new File(deliveryPoints);
 			Scanner scan = new Scanner(deliveryMap);
+			String line;
+			Scanner lineScan;
+			Location current;
+
 
 			while (scan.hasNextLine()) {
-				
+				line = scan.nextLine();
+				lineScan = new Scanner(line);
+				lineScan.useDelimiter(",");
+				current = new Location(lineScan.next(), lineScan.nextInt(), lineScan.nextInt());
+				deliveryLocations.add(current);
+
 			}
 
 			scan.close();
