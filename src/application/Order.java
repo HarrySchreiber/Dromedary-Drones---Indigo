@@ -106,6 +106,7 @@ public class Order implements Comparable<Order> {
 		return Integer.valueOf(this.getTimeStamp()).compareTo(o.getTimeStamp());
 	}
 	
+	//TODO: Remove after testing
 	@Override
 	public String toString() {
 		return String.valueOf(this.getTimeStamp());
