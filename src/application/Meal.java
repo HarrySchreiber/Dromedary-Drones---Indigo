@@ -9,11 +9,11 @@ import java.util.ArrayList;
  *
  */
 public class Meal {
-	FoodItem burgers = new FoodItem("Burger", 6);
-	FoodItem fries = new FoodItem("Fries", 4);
-	FoodItem coke = new FoodItem("coke", 14);
+	FoodItem burgers = new FoodItem("Burger", 0.375);
+	FoodItem fries = new FoodItem("Fries", 0.25);
+	FoodItem coke = new FoodItem("coke", 0.875);
 	ArrayList<FoodItem> foodItems;
-	private int totalWeight;
+	private double totalWeight;
 	private double probability;
 	
 	/**

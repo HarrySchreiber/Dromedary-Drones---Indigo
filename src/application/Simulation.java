@@ -93,6 +93,13 @@ public class Simulation {
 				orders.add(o);
 			}
 		}
+		
+		
+		Collections.sort(orders);
+				
+		knapsackSimulation(orders);
+		fifoSimulation(orders);
+		
 	}
 	
 	public void knapsackSimulation(ArrayList<Order> foodList) {
@@ -111,6 +118,7 @@ public class Simulation {
 			boolean full = false;
 			//If the drone isn't full and there is still food yet to be delivered
 			while(!full && !foodListDeepCopy.isEmpty()) {
+				
 				//Figure out if anything has been skipped
 				ArrayList<Order> skipped = new ArrayList<Order>();
 				for(int i = 0; i < foodListDeepCopy.size(); i++) {
@@ -305,7 +313,7 @@ public class Simulation {
 		double curMaxProb = 0;
 		for(int i = 0; i < meals.size(); i++) {
 			if(rndNum >= curMaxProb && rndNum <= (meals.get(i).getProbability() + curMaxProb)) {
-				retMeal = meals.get(i);
+				retMeal = new Meal(meals.get(i));
 			}
 			curMaxProb += meals.get(i).getProbability();
 		}
