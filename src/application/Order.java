@@ -52,7 +52,8 @@ public class Order {
 	 * @return The minute the order came in
 	 */
 	public int getTimeStamp() {
-		//get the ith element of times
+		timeStamp = times.get(0);
+		times.remove(0);
 		return timeStamp;
 	}
 
@@ -66,12 +67,24 @@ public class Order {
 	public static int rand(int min, int max) {
 		return new Random().nextInt(max - min +1)+min;
 	}
+	
 	public void orderTime() {
 		for(int i = 0; i<4; i++) {
 			for(int j = 0; j<15; j++) {
 				times.add(rand(min, max) + (60 * i));
 			}
 		}
+	}
+	/*
+	 * Adds a new order to the arrayList of Orders
+	 * @param meal The meal the customer ordered
+	 * @param timeStamp The minute they ordered the meal
+	 * @param deliveryPoint Where the meal order is going
+	 */
+	public ArrayList<Order> addOrder(Meal meal, int timeStamp, Location deliveryPoint){
+		orders.add(new Order(meal, timeStamp, deliveryPoint));
+		return orders;
+		
 	}
 
 	/**
