@@ -13,13 +13,15 @@ public class Meal {
 	FoodItem fries = new FoodItem("Fries", 4);
 	FoodItem coke = new FoodItem("coke", 14);
 	ArrayList<FoodItem> foodItems;
-	public int totalWeight;
+	private int totalWeight;
+	private double probability;
 	
 	/**
 	 * Meal Constructor
 	 */
-	public Meal() {
+	public Meal(double probability) {
 		this.foodItems = new ArrayList<FoodItem>();
+		this.probability = probability;
 	}
 	
 	/**
@@ -41,5 +43,13 @@ public class Meal {
 	public void addFoodItem(FoodItem item) {
 		foodItems.add(item);
 		totalWeight += item.getWeight();
+	}
+
+	public double getProbability() {
+		return probability;
+	}
+
+	public void setProbability(double probability) {
+		this.probability = probability;
 	}
 }
