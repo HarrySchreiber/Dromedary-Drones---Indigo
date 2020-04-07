@@ -13,6 +13,9 @@ import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -58,10 +61,67 @@ public class Main extends Application{
 		     
 			 //saves all the old file into the global variables
 		     realFileContents = buffer.toString();
+		     String defaultFileContents = buffer.toString();
+		     
+		     //Not quite done yet
+		    /* String[] defaultFileLines = defaultFileContents.split(System.getProperty("line.separator"));
+		     double perUsedB, perLeftB;
+		     int perCountsB [] = new int [50];
+		     int burgerCountsB [] = new int [50];
+		     int fryCountsB [] = new int [50];
+		     int cokeCountsB [] = new int [50];
+		     int hoursPerShiftB, upperOrdersB, lowerOrdersB;
+		     
+		    for(int i = 0; i < defaultFileLines.length; i++) {
+		    	String curLine = defaultFileLines[i];
+		    	String [] splitVal = curLine.split(": ");
+		    	for(int j = 1; j <= 4; j++) {
+		    		
+		    		if(curLine.contains("Order " + String.valueOf(j) + " Percentage:" )){
+		    			perCountsB[j-1] = Integer.valueOf(splitVal[1]);
+		    			//System.out.println(splitVal[1]);
+		    		}
+		    		else if (curLine.contains("Order " + String.valueOf(j) + " Burgers:" )){
+		    			burgerCountsB[j-1] = Integer.valueOf(splitVal[1]);
+		    			//System.out.println(splitVal[1]);
+		    			
+		    		}
+		    		else if (curLine.contains("Order " + String.valueOf(j) + " Fries:") ){
+		    			fryCountsB[j-1] = Integer.valueOf(splitVal[1]);
+		    			//System.out.println(splitVal[1]);
+		    		}
+		    		else if (curLine.contains("Order " + String.valueOf(j) + " Cokes:")){
+		    			cokeCountsB[j-1] = Integer.valueOf(splitVal[1]);
+		    			//System.out.println(splitVal[1]);
+		    		}
+		    		
+		    	}
+		    	
+		    	if(curLine.contains("Percentage Used:")) {
+		    		perUsedB = Double.valueOf(splitVal[1]);
+		    		System.out.println(splitVal[1]);
+		    	}
+		    	else if (curLine.contains("Percentage Left:")) {
+		    		perLeftB = Double.valueOf(splitVal[1]);
+		    		System.out.println(splitVal[1]);
+		    	}
+		    	else if (curLine.contains("Hours Per Shift:")) {
+		    		hoursPerShiftB = Integer.valueOf(splitVal[1]);
+		    	}
+		    	else if (curLine.contains("Hours Per Shift:")) {
+		    		upperOrdersB = Integer.valueOf(splitVal[1]);
+		    	}
+		    	else if (curLine.contains("Hours Per Shift:")) {
+		    		lowerOrdersB = Integer.valueOf(splitVal[1]);
+		    	}
+		    	
+		    }
+		     */
 
 		     sc.close();
 		     //FileWriter writer = new FileWriter("NewSimData.txt" ,false);
 		     //writer.write("We writing this..");
+		     
 			
 			//Simulation Screen Layout
 			GridPane simulationScreenLayout = buildSimulationScreen();
@@ -103,7 +163,19 @@ public class Main extends Application{
 			
 			//TODO: Add FIFO results graph here
 			
-			fifoResultsBox.getChildren().addAll(fifoLabel, fifoAvgLabel,fifoWrstLabel);
+		     final CategoryAxis xAxis = new CategoryAxis(); // we are gonna plot against time
+		     final NumberAxis yAxis = new NumberAxis();
+		     xAxis.setLabel("Orders");
+		     xAxis.setAnimated(false); // axis animations are removed
+	         yAxis.setLabel("Delivery Times");
+		     yAxis.setAnimated(false); // axis animations are removed
+
+		     //creating the line chart with two axis created above
+		     final LineChart<String, Number> fifoLineChart = new LineChart<>(xAxis, yAxis);
+		     fifoLineChart.setTitle("FIFO Results");
+		     fifoLineChart.setAnimated(false); // disable animations
+			
+			fifoResultsBox.getChildren().addAll(fifoLabel, fifoAvgLabel,fifoWrstLabel, fifoLineChart);
 			
 			//Knapsack results section
 			VBox knapsackResultsBox = new VBox();
@@ -114,12 +186,16 @@ public class Main extends Application{
 			Label knapsackWrstLabel = new Label("Worst Delivery Time: ");	//TODO: Add variable here
 			
 			//TODO: Add Knapsack results graph here
+			final LineChart<String, Number> knapLineChart = new LineChart<>(xAxis, yAxis);
+		     knapLineChart.setTitle("FIFO Results");
+		     knapLineChart.setAnimated(false); // disable animations
 			
-			knapsackResultsBox.getChildren().addAll(knapsackLabel,knapsackAvgLabel,knapsackWrstLabel);
+			knapsackResultsBox.getChildren().addAll(knapsackLabel,knapsackAvgLabel,knapsackWrstLabel, knapLineChart);
 			
 			//Add results boxes to results grid
 			resultsBox.add(fifoResultsBox, 0, 1);
 			resultsBox.add(knapsackResultsBox, 1, 1);
+			
 
 			//Add box to the main grid in the second column stretching three rows if need be			
 			simulationScreenLayout.add(resultsBox, 1, 0, 1, 3);
