@@ -1,12 +1,10 @@
 package application;
 
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
-
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -25,17 +23,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.control.Slider;
-import javafx.scene.layout.GridPane;
-import javafx.geometry.Insets;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.layout.FlowPane;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
 
 
 public class Main extends Application{
@@ -64,13 +57,15 @@ public class Main extends Application{
 		     String defaultFileContents = buffer.toString();
 		     
 		     //Not quite done yet
-		    /* String[] defaultFileLines = defaultFileContents.split(System.getProperty("line.separator"));
-		     double perUsedB, perLeftB;
+		     String[] defaultFileLines = defaultFileContents.split(System.getProperty("line.separator"));
+		     
+		     boolean knapB = false, fifoB = false, defDroneB = false;
+		     double perUsedB = 0, perLeftB = 0;
 		     int perCountsB [] = new int [50];
 		     int burgerCountsB [] = new int [50];
 		     int fryCountsB [] = new int [50];
 		     int cokeCountsB [] = new int [50];
-		     int hoursPerShiftB, upperOrdersB, lowerOrdersB;
+		     int hoursPerShiftB = 0, upperOrdersB = 0, lowerOrdersB = 0;
 		     
 		    for(int i = 0; i < defaultFileLines.length; i++) {
 		    	String curLine = defaultFileLines[i];
@@ -79,44 +74,59 @@ public class Main extends Application{
 		    		
 		    		if(curLine.contains("Order " + String.valueOf(j) + " Percentage:" )){
 		    			perCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(splitVal[1]);
+		    			//System.out.println(perCountsB[j-1]);
 		    		}
 		    		else if (curLine.contains("Order " + String.valueOf(j) + " Burgers:" )){
 		    			burgerCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(splitVal[1]);
+		    			//System.out.println(burgerCountsB[j-1]);
 		    			
 		    		}
 		    		else if (curLine.contains("Order " + String.valueOf(j) + " Fries:") ){
 		    			fryCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(splitVal[1]);
+		    			//System.out.println(fryCountsB[j-1]);
 		    		}
 		    		else if (curLine.contains("Order " + String.valueOf(j) + " Cokes:")){
 		    			cokeCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(splitVal[1]);
+		    			//System.out.println(cokeCountsB[j-1]);
 		    		}
 		    		
 		    	}
 		    	
 		    	if(curLine.contains("Percentage Used:")) {
 		    		perUsedB = Double.valueOf(splitVal[1]);
-		    		System.out.println(splitVal[1]);
+		    		//System.out.println(perUsedB);
 		    	}
 		    	else if (curLine.contains("Percentage Left:")) {
 		    		perLeftB = Double.valueOf(splitVal[1]);
-		    		System.out.println(splitVal[1]);
+		    		//System.out.println(perLeftB);
 		    	}
 		    	else if (curLine.contains("Hours Per Shift:")) {
 		    		hoursPerShiftB = Integer.valueOf(splitVal[1]);
+		    		//System.out.println(hoursPerShiftB);
 		    	}
-		    	else if (curLine.contains("Hours Per Shift:")) {
+		    	else if (curLine.contains("Upper Bound")) {
 		    		upperOrdersB = Integer.valueOf(splitVal[1]);
+		    		//System.out.println(upperOrdersB);
 		    	}
-		    	else if (curLine.contains("Hours Per Shift:")) {
+		    	else if (curLine.contains("Lower Bound")) {
 		    		lowerOrdersB = Integer.valueOf(splitVal[1]);
+		    		//System.out.println(lowerOrdersB);
+		    	}
+		    	else if(curLine.contains("Knapsack Packing")){
+		    		knapB = Boolean.valueOf(splitVal[1]);
+		    		//System.out.println(knapB);
+		    	}
+		    	else if(curLine.contains("Fifo")) {
+		    		fifoB = Boolean.valueOf(splitVal[1]);
+		    		//System.out.println(fifoB);
+		    	}
+		    	else if(curLine.contains("Default Grove City Drone")){
+		    		defDroneB = Boolean.valueOf(splitVal[1]);
+		    		//System.out.println(defDroneB);
 		    	}
 		    	
 		    }
-		     */
+		     
 
 		     sc.close();
 		     //FileWriter writer = new FileWriter("NewSimData.txt" ,false);
@@ -289,7 +299,11 @@ public class Main extends Application{
 			
 			Label schemeL = new Label ("Delivery Scheme: ");
 			CheckBox schemeKCB = new CheckBox("Knapsack Packing");
+			schemeKCB.setSelected(knapB);
+			
 			CheckBox schemeFCB = new CheckBox("FIFO - First in First out");
+			schemeFCB.setSelected(fifoB);
+			
 			Boolean oneSchemeSelected = false;
 			
 			//Event handler for Knapsack Check Box and replaces the new status of Knapsack
@@ -340,6 +354,8 @@ public class Main extends Application{
 			
 			Label dronesL = new Label ("Drones: ");
 			CheckBox defaultDroneCB = new CheckBox("Default Grove City Drone");
+			defaultDroneCB.setSelected(defDroneB);
+			
 			EventHandler<ActionEvent> defaultDroneEvent = new EventHandler<ActionEvent>() { 
                 public void handle(ActionEvent e) { 
                 	//TODO: FIFO method
@@ -367,9 +383,9 @@ public class Main extends Application{
 			columnTwo.setAlignment(Pos.TOP_LEFT);
 			
         	//Slider sliderO1 = new Slider();
-			Label perUsedL = new Label("Percentage Used: "  + String.valueOf(100));		
+			Label perUsedL = new Label("Percentage Used: "  + String.valueOf(perUsedB));		
 		    columnTwo.getChildren().add(perUsedL);
-		    Label perLeftL = new Label("Percentage Left: " + String.valueOf(0));
+		    Label perLeftL = new Label("Percentage Left: " + String.valueOf(perLeftB));
 		    columnTwo.getChildren().add(perLeftL);
 			
 			GridPane grid = new GridPane();
@@ -407,21 +423,21 @@ public class Main extends Application{
 
 	        	//Spinner val that doesn't go up to 16 burgers (to not go over 96 oz)	        	
 	        	SpinnerValueFactory<Integer> valueFactoryB = //
-	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 16, 0);
+	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 16, burgerCountsB[i]);
 	        	spinnerB.setValueFactory(valueFactoryB);
 	        	spinnerB.setMaxWidth(50);
 	        	spinnerB.setEditable(true);
 
 	        	//Spinner val that doesn't go up to 24 fries (to not go over 96 oz)
 	        	SpinnerValueFactory<Integer> valueFactoryF = //
-	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24, 0);
+	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24, fryCountsB[i]);
 	        	spinnerF.setValueFactory(valueFactoryF);
 	        	spinnerF.setMaxWidth(50);
 	        	spinnerF.setEditable(true);
 
 	        	//Spinner val that doesn't go up to 6 fries (to not go over 96 oz)
 	        	SpinnerValueFactory<Integer> valueFactoryC = //
-	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 6, 0);
+	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 6, cokeCountsB[i]);
 	        	spinnerC.setValueFactory(valueFactoryC);
 	        	spinnerC.setMaxWidth(50);
 	        	spinnerC.setEditable(true);
@@ -430,7 +446,7 @@ public class Main extends Application{
 	        	//slider for percentages
 	        	sliderO1.setMin(0);
 	        	sliderO1.setMax(100);
-	        	sliderO1.setValue(25);
+	        	sliderO1.setValue(perCountsB[i]);
 	        	//sliderO1.setShowTickLabels(true);
 	        	sliderO1.setShowTickMarks(true);
 	        	sliderO1.setMajorTickUnit(50);
@@ -594,7 +610,7 @@ public class Main extends Application{
         	
 			//Hours Per Shift can't got lower than 1 or higher than 8
         	SpinnerValueFactory<Integer> valueFactoryH = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 8, 4);
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 8, hoursPerShiftB);
         	spinnerHours.setValueFactory(valueFactoryH);
         	spinnerHours.setMaxWidth(70);
         	spinnerHours.setEditable(true);
@@ -628,7 +644,7 @@ public class Main extends Application{
         	
         	//NOTE: spinner can't go higher than 30 orders but can change this 
         	SpinnerValueFactory<Integer> valueFactoryUH = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 30, 22);
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 30, upperOrdersB);
         	spinnerUpperHours.setValueFactory(valueFactoryUH);
         	spinnerUpperHours.setMaxWidth(70);
         	spinnerUpperHours.setEditable(true);
@@ -648,7 +664,7 @@ public class Main extends Application{
         	//spinner for the lower limits of thr orders per hour
         	//NOTE: spinner can't go higher than 30 orders but can change this         	
         	SpinnerValueFactory<Integer> valueFactoryLH = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 30, 15);
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 30, lowerOrdersB);
         	spinnerLowerHours.setValueFactory(valueFactoryLH);
         	spinnerLowerHours.setMaxWidth(70);
         	spinnerLowerHours.setEditable(true);
