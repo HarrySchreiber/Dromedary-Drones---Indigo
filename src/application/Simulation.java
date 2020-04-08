@@ -167,7 +167,13 @@ public class Simulation {
 				}
 			}
 			
+			
 			//TODO: Traveling Salesman Problem goes here probably
+			TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
+			onDrone = tsp.GreedyTSP();
+
+			
+
 			
 			//Run calculations on the time of the simulation
 			Location homeBase = new Location("Sac",0,0);	//TODO: Refactor to work with true home base of file Set the drones initial location
@@ -237,6 +243,8 @@ public class Simulation {
 			}
 			
 			//TODO: Traveling Salesman Problem goes here probably
+			TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
+			onDrone = tsp.GreedyTSP();
 			
 			//Run calculations on the time of the simulation
 			Location homeBase = new Location("Sac",0,0);	//Set the drones initial location

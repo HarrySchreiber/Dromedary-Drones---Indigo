@@ -1,0 +1,12 @@
+INFO  started: Metals version 0.8.3 in workspace 'C:\Users\grubend17\Desktop\DromedaryDrones\Dromedary-Drones---Indigo'
+INFO  time: initialize in 3.22s
+WARN  no build tool detected in workspace 'C:\Users\grubend17\Desktop\DromedaryDrones\Dromedary-Drones---Indigo'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+WARN  no build target for: C:\Users\grubend17\Downloads\Telegram Desktop\applyMethod.scala
+INFO  no build target: using presentation compiler with only scala-library
+WARN  no build target for: C:\Users\grubend17\Downloads\VoterGroup.scala
+Mar 31, 2020 7:01:12 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTraceNotification
+INFO  shutting down Metals
+INFO  started: Metals version 0.8.3 in workspace 'C:\Users\grubend17\Desktop\DromedaryDrones\Dromedary-Drones---Indigo'
+INFO  time: initialize in 3.11s
+WARN  no build tool detected in workspace 'C:\Users\grubend17\Desktop\DromedaryDrones\Dromedary-Drones---Indigo'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
