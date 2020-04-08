@@ -4,14 +4,17 @@ import java.util.ArrayList;
 
 public class TravelingSalesmanProblem {
 
-    private ArrayList<Location> locations;
-    private int locSize = locations.size();
+    private ArrayList<Location> locations = new ArrayList<Location>();
+    private int locSize;
 
     /**
      * Constructor
      */
-    public TravelingSalesmanProblem(ArrayList<Location> inputLocations) {
-        locations = inputLocations;
+    public TravelingSalesmanProblem(ArrayList<Order> orders) {
+        for (int i = 0; i < orders.size(); i++) {
+            locations.add(orders.get(i).getDeliveryPoint());
+        }
+        locSize = locations.size();
     }
 
     /**
