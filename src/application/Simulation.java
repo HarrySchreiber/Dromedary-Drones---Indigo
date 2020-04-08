@@ -32,6 +32,8 @@ public class Simulation {
 	 * Contains the logic required to run the full simulation
 	 */
 	public void runSimulation() {
+		
+		//TODO: Remove this crap once we set up the real values to pull from
 		Location l1 = new Location("SAC",0,0);
 		Location l2 = new Location("HAL",46,-121);
 		Location l3 = new Location("PLC",-106,115);
@@ -84,24 +86,29 @@ public class Simulation {
 		meals.add(m4);
 		
 		Random rnd = new Random();
-		
-		ArrayList<Order> orders = new ArrayList<Order>();
-		//TODO: Set these up to dynamically populate: ie take out 4 and 15 and populate from settings
-		for(int i = 0; i<4; i++) {
-			for(int j = 0; j<15; j++) {
-				Order o = new Order(mealPicker(meals), rnd.nextInt(60)+1 + (i*60), locations.get(rnd.nextInt(locations.size())));
-				orders.add(o);
+		for(int simulationNum = 0; simulationNum < 50; simulationNum++) {
+			ArrayList<Order> orders = new ArrayList<Order>();
+			//TODO: Set these up to dynamically populate: ie take out 4 and 15 and populate from settings
+			for(int i = 0; i<4; i++) {
+				for(int j = 0; j<15; j++) {
+					Order o = new Order(mealPicker(meals), rnd.nextInt(60)+1 + (i*60), locations.get(rnd.nextInt(locations.size())));
+					orders.add(o);
+				}
 			}
+			
+			
+			Collections.sort(orders);
+					
+			knapsackSimulation(orders);
+			fifoSimulation(orders);
 		}
-		
-		
-		Collections.sort(orders);
-				
-		knapsackSimulation(orders);
-		fifoSimulation(orders);
 		
 	}
 	
+	/**
+	 * Contains logic to run a simulation for the knapsack implementation
+	 * @param foodList The list of orders that need to be processed
+	 */
 	public void knapsackSimulation(ArrayList<Order> foodList) {
 		ArrayList<Order> foodListDeepCopy = new ArrayList<Order>();
 		for(Order ordr : foodList) {
@@ -163,7 +170,7 @@ public class Simulation {
 			//TODO: Traveling Salesman Problem goes here probably
 			
 			//Run calculations on the time of the simulation
-			Location homeBase = new Location("Sac",0,0);	//Set the drones initial location
+			Location homeBase = new Location("Sac",0,0);	//TODO: Refactor to work with true home base of file Set the drones initial location
 			for(int i = 0; i < onDrone.size(); i++) {
 				double distance;
 				//First destination needs to leave from the initial location
@@ -202,7 +209,12 @@ public class Simulation {
 		}
 	}
 	
+	/**
+	 * Contains logic to run a simulation for the fifo implementation
+	 * @param foodList The list of orders that need to be processed
+	 */
 	public void fifoSimulation(ArrayList<Order> foodList) {
+		//Make a deep copy of the ArrayList
 		ArrayList<Order> foodListDeepCopy = new ArrayList<Order>();
 		for(Order ordr : foodList) {
 			foodListDeepCopy.add(new Order(ordr));
@@ -296,25 +308,39 @@ public class Simulation {
 		return ret;
 	}
 	
+	/**
+	 * @return the data from the fifo implementation
+	 */
 	public Map<Integer, Integer> getFifoData() {
 		return fifoData;
 	}
 	
+	/**
+	 * @return the data from the knapsack implementation
+	 */
 	public Map<Integer, Integer> getKnapsackData() {
 		return knapsackData;
 	}
 
+	/**
+	 * Picks a meal based on a random number generated
+	 * @param meals A list of meals to be picked from for this simulation
+	 * @return A meal that was chosen by the random number
+	 */
 	public Meal mealPicker(ArrayList<Meal> meals) {
 		Random rnd = new Random();
-		double rndNum = rnd.nextDouble();
+		double rndNum = rnd.nextDouble();	//Chose the random number between 0.0->1.0
 		Meal retMeal;
 		retMeal = meals.get(0);
 		
+		//Find which meal falls into that section of the probability
 		double curMaxProb = 0;
 		for(int i = 0; i < meals.size(); i++) {
+			//If the random number is greater than the current max probability and less than the future max probability 
 			if(rndNum >= curMaxProb && rndNum <= (meals.get(i).getProbability() + curMaxProb)) {
 				retMeal = new Meal(meals.get(i));
 			}
+			//Add the future max probability
 			curMaxProb += meals.get(i).getProbability();
 		}
 		return retMeal;
