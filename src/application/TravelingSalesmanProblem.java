@@ -5,12 +5,16 @@ import java.util.ArrayList;
 public class TravelingSalesmanProblem {
 
     private ArrayList<Location> locations = new ArrayList<Location>();
+    private ArrayList<Order> orderList = new ArrayList<Order>();
     private int locSize;
 
     /**
      * Constructor
      */
     public TravelingSalesmanProblem(ArrayList<Order> orders) {
+        orderList = orders;
+        locations.add(new Location("Home",0,0));
+
         for (int i = 0; i < orders.size(); i++) {
             locations.add(orders.get(i).getDeliveryPoint());
         }
@@ -59,23 +63,30 @@ public class TravelingSalesmanProblem {
      * 
      * @return
      */
-    public Location[] GreedyTSP() {
+    public ArrayList<Order> GreedyTSP() {
 
         Location[] orderedLocations = new Location[locSize];
         double[][] locationGraph = generateLocationGraph();
         ArrayList<Integer> visitedLocations = new ArrayList<Integer>();
-        int row, col, index;
-        double currentMin;
+        int col, index, currentLocation, nextLocation;
+        double currentMin = Double.MAX_VALUE;
 
         visitedLocations.add(0);
-        for (col = 0; col < locSize - 1 && !visitedLocations.contains(col); col++) {
-            currentMin = locationGraph[0][col];
-            for (row = 0; row < locSize && !visitedLocations.contains(row); row++) {
-                if (locationGraph[row][col] < currentMin) {
-                    currentMin = locationGraph[row][col];
+        currentLocation = 0;
+        nextLocation = 0;
+        
+        while (visitedLocations.size() != locSize) {
+            for (col = 0; col < locSize; col++) {
+                if (!visitedLocations.contains(col)) {
+                    if (locationGraph[currentLocation][col] < currentMin) {
+                        currentMin = locationGraph[currentLocation][col];
+                        nextLocation = col;
+                    }
                 }
             }
-            visitedLocations.add(row);
+            currentLocation = nextLocation;
+            visitedLocations.add(currentLocation);
+            currentMin = Double.MAX_VALUE;
         }
 
         for (index = 0; index < locSize; index++) {
@@ -83,9 +94,22 @@ public class TravelingSalesmanProblem {
         }
 
 
-        return orderedLocations;
+        return locationToOrder(orderedLocations);
     }
 
+    private ArrayList<Order> locationToOrder(Location[] locs) {
+        ArrayList<Order> orderedListOfOrders = new ArrayList<Order>();
+        for (int index = 0; index < locs.length; index++) {
+            for (int indexTwo = 0; indexTwo < orderList.size(); indexTwo++) {
+                if (orderList.get(indexTwo).getDeliveryPoint().equals(locs[index])) {
+                    orderedListOfOrders.add(orderList.get(indexTwo));
+                    orderList.remove(indexTwo);
+                }
+            }
+        }
+        return orderedListOfOrders;
+
+    }
 
 
 
