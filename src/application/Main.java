@@ -28,8 +28,8 @@ public class Main extends Application {
 		Simulation s = new Simulation();
 		s.runSimulation();
 		
-		System.out.println("FIFO: " + s.getFifoData());
-		System.out.println("Knapsack: " + s.getKnapsackData());
+		System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
+		System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(s.getKnapsackData()) + " Worst Time: " + s.findWorst(s.getKnapsackData()));
 		
 		//launch(args);
 	}

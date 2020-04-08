@@ -279,21 +279,30 @@ public class Simulation {
 	}
 	
 	/**
+	 * @param map The map that needs to be calculated on
 	 * @return Average of all of the times of the deliveries
 	 */
-	public double findAverage() {
-		//TODO: Populate the method
-		return 0;
+	public double findAverage(Map<Integer, Integer> map) {
+		double ret = 0;	//The average time taken
+		int totalDeliveries = 0;	//The total number of deliveries made
+		
+		//Loop through all the keys
+		for(Integer key : map.keySet()) {
+			totalDeliveries += map.get(key);	//Add up all the deliveries
+			ret += map.get(key) * key;	//Add up all the deliveries
+		}
+		
+		ret /= totalDeliveries;	//Make the final average calcualtion
+		
+		return ret;
 	}
 	
 	/**
-	 * 
-	 * @return The worst of all of the times of the deliveries
-	 * TODO: Do we need to return a double here or can we just return an integer?
+	 * @param map The map that needs to be calculated on
+	 * @return Worst of all of the times of the deliveries
 	 */
-	public double findWorst() {
-		//TODO: Populate the method
-		return 0;
+	public double findWorst(Map<Integer, Integer> map) {
+		return Collections.max(map.keySet());
 	}
 		
 	/**
