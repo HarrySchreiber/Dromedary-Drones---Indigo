@@ -773,12 +773,12 @@ public class Main extends Application{
 			
 			
 			//TODO: Decide on default
-			simulationScreen = new Scene(simulationScreenLayout,1200,600);
+			simulationScreen = new Scene(simulationScreenLayout,1000,600);
 			//TODO: Are we going to use this ever?
 			//simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			
 			//TODO: Decide on default 
-			settingsScreen = new Scene(settingsScreenLayout,800,600);
+			settingsScreen = new Scene(settingsScreenLayout,1000,600);
 			
 			
 			primaryStage.setScene(simulationScreen);
