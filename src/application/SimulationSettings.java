@@ -3,6 +3,7 @@ package application;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * The settings for a simulation
@@ -56,7 +57,7 @@ public class SimulationSettings {
 			scan.close();
 		}
 		catch (Exception e) {
-			System.out.println("FAILURE TO OPEN FILE.");
+			System.out.println(e.getMessage());
 		}
 		
 		return deliveryLocations;
