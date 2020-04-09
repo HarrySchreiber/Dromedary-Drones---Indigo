@@ -31,6 +31,8 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.beans.binding.Bindings;
 
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 public class Main extends Application{
 	
@@ -786,13 +788,12 @@ public class Main extends Application{
 			primaryStage.setResizable(false);
 			primaryStage.setTitle("Dromedary Drones Simulation");
 			primaryStage.show();
-			
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-	public static void main(String[] args) {
+
+	public static void main(String[] args) throws FileNotFoundException {
 		launch(args);
 	}
 	

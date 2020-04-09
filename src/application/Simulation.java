@@ -89,8 +89,8 @@ public class Simulation {
 		for(int simulationNum = 0; simulationNum < 50; simulationNum++) {
 			ArrayList<Order> orders = new ArrayList<Order>();
 			//TODO: Set these up to dynamically populate: ie take out 4 and 15 and populate from settings
-			for(int i = 0; i<4; i++) {
-				for(int j = 0; j<15; j++) {
+			for(int i = 0; i<16; i++) {
+				for(int j = 0; j<25; j++) {
 					Order o = new Order(mealPicker(meals), rnd.nextInt(60)+1 + (i*60), locations.get(rnd.nextInt(locations.size())));
 					orders.add(o);
 				}
