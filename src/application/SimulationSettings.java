@@ -1,6 +1,8 @@
 package application;
 
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.io.File;
 
 /**
  * The settings for a simulation
@@ -29,5 +31,34 @@ public class SimulationSettings {
 	public boolean checkPercentage() {
 		//TODO: Add real logic here
 		return true;
+	}
+
+	public ArrayList<Location> populateLocations(String deliveryPoints) throws FileNotFoundException {
+		ArrayList<Location> deliveryLocations = new ArrayList<Location>();
+		
+		try{
+			File deliveryMap = new File(deliveryPoints);
+			Scanner scan = new Scanner(deliveryMap);
+			String line;
+			Scanner lineScan;
+			Location current;
+
+
+			while (scan.hasNextLine()) {
+				line = scan.nextLine();
+				lineScan = new Scanner(line);
+				lineScan.useDelimiter(",");
+				current = new Location(lineScan.next(), lineScan.nextInt(), lineScan.nextInt());
+				deliveryLocations.add(current);
+
+			}
+
+			scan.close();
+		}
+		catch (Exception e) {
+			System.out.println("FAILURE TO OPEN FILE.");
+		}
+		
+		return deliveryLocations;
 	}
 }
