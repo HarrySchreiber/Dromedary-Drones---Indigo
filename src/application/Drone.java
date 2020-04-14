@@ -17,7 +17,7 @@ public class Drone {
 	/**
 	 * No argument constructor for all default values as specified in the instructions
 	 * will be option to select from the drones list as "Default Drone"
-	 * So we can call this argument easier when its seleted from drone list..
+	 * So we can call this argument easier when its selected from drone list..
 	 */
 	public Drone() {
 		this.name = "Default Grove City Drone";

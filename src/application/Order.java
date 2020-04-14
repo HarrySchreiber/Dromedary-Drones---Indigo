@@ -5,10 +5,11 @@ package application;
  * @author Harry Schreiber, Matthew Lew, Jacob Ramseyer, Nicholas Grube
  *
  */
-public class Order {
+public class Order implements Comparable<Order> {
 	private Meal meal;
 	private int timeStamp;
 	private Location deliveryPoint;
+	private boolean skipped;
 	
 	/**
 	 * Order Constructor
@@ -22,6 +23,33 @@ public class Order {
 		this.meal = meal;
 		this.timeStamp = timeStamp;
 		this.deliveryPoint = deliveryPoint;
+		this.skipped = false;
+	}
+	
+	/**
+	 * Copy Constructor
+	 * 
+	 * @param other The Original Order to be Copied
+	 */
+	public Order(Order other) {
+		this.meal = new Meal(other.meal);
+		this.timeStamp = other.timeStamp;
+		this.deliveryPoint = other.deliveryPoint;
+		this.skipped = false;
+	}
+
+	/**
+	 * @return If the order has been skipped
+	 */
+	public boolean isSkipped() {
+		return skipped;
+	}
+
+	/**
+	 * @param skipped If the order has been skipped
+	 */
+	public void setSkipped(boolean skipped) {
+		this.skipped = skipped;
 	}
 
 	/**
@@ -68,6 +96,20 @@ public class Order {
 		//TODO: Do we even need setters and if so do we need to do deep copys?
 		this.deliveryPoint = deliveryPoint;
 	}
+
+	/**
+	 * Logic to compare numbers so we can sort by time
+	 */
+	@Override
+	public int compareTo(Order o) {
+		// TODO Auto-generated method stub
+		return Integer.valueOf(this.getTimeStamp()).compareTo(o.getTimeStamp());
+	}
 	
+	//TODO: Remove after testing
+	@Override
+	public String toString() {
+		return String.valueOf(this.getTimeStamp());
+	}
 	
 }

@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -30,6 +31,8 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.beans.binding.Bindings;
 
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 public class Main extends Application{
 	
@@ -173,15 +176,15 @@ public class Main extends Application{
 			
 			//TODO: Add FIFO results graph here
 			
-		     final CategoryAxis xAxis = new CategoryAxis(); // we are gonna plot against time
+		     final NumberAxis xAxis = new NumberAxis(); // we are gonna plot against time
 		     final NumberAxis yAxis = new NumberAxis();
-		     xAxis.setLabel("Orders");
+		     xAxis.setLabel("Time Between Order and Delivery (min)");
 		     xAxis.setAnimated(false); // axis animations are removed
-	         yAxis.setLabel("Delivery Times");
+	         yAxis.setLabel("Number of Orders Delivered");
 		     yAxis.setAnimated(false); // axis animations are removed
 
 		     //creating the line chart with two axis created above
-		     final LineChart<String, Number> fifoLineChart = new LineChart<>(xAxis, yAxis);
+		     final LineChart<Number, Number> fifoLineChart = new LineChart<>(xAxis, yAxis);
 		     fifoLineChart.setTitle("FIFO Results");
 		     fifoLineChart.setAnimated(false); // disable animations
 			
@@ -196,8 +199,8 @@ public class Main extends Application{
 			Label knapsackWrstLabel = new Label("Worst Delivery Time: ");	//TODO: Add variable here
 			
 			//TODO: Add Knapsack results graph here
-			final LineChart<String, Number> knapLineChart = new LineChart<>(xAxis, yAxis);
-		     knapLineChart.setTitle("FIFO Results");
+			final LineChart<Number, Number> knapLineChart = new LineChart<>(xAxis, yAxis);
+		     knapLineChart.setTitle("Knapsack Results");
 		     knapLineChart.setAnimated(false); // disable animations
 			
 			knapsackResultsBox.getChildren().addAll(knapsackLabel,knapsackAvgLabel,knapsackWrstLabel, knapLineChart);
@@ -215,7 +218,38 @@ public class Main extends Application{
 			Button runSimulationBtn = new Button("Run Simulation");
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
-				System.out.println("TODO: Run Simulation");
+				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
+				s.runSimulation();
+				
+				//TODO: Do we want to truncate this?
+				knapsackAvgLabel.setText("Average Time: " + s.findAverage(s.getKnapsackData()));
+				fifoAvgLabel.setText("Average Time: " + s.findAverage(s.getFifoData()));
+				
+				knapsackWrstLabel.setText("Worst Time: " + s.findWorst(s.getKnapsackData()));
+				fifoWrstLabel.setText("Worst Time: " + s.findWorst(s.getFifoData()));
+				
+				//Clear the chart
+				knapLineChart.getData().clear();
+				XYChart.Series<Number, Number> knapSeries = new XYChart.Series<Number, Number>();
+				//Fill the series with data
+				for(Integer minute : s.getKnapsackData().keySet()) {
+					knapSeries.getData().add(new XYChart.Data<Number, Number>(minute,s.getKnapsackData().get(minute)));
+				}
+				knapLineChart.getData().add(knapSeries);
+				
+				//Clear the chart
+				fifoLineChart.getData().clear();
+				XYChart.Series<Number, Number> fifoSeries = new XYChart.Series<Number, Number>();
+				//Fill the series with data
+				for(Integer minute : s.getFifoData().keySet()) {
+					fifoSeries.getData().add(new XYChart.Data<Number, Number>(minute,s.getFifoData().get(minute)));
+				}
+				fifoLineChart.getData().add(fifoSeries);
+				
+				//TODO:Remove from testing
+				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
+				System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(s.getKnapsackData()) + " Worst Time: " + s.findWorst(s.getKnapsackData()));
+				
 			}); //TODO: Add some logic to run the simulation
 			simulationScreenLayout.add(runSimulationBtn, 0, 1);	//Add the button to the screen
 			
@@ -741,12 +775,12 @@ public class Main extends Application{
 			
 			
 			//TODO: Decide on default
-			simulationScreen = new Scene(simulationScreenLayout,800,600);
+			simulationScreen = new Scene(simulationScreenLayout,1000,600);
 			//TODO: Are we going to use this ever?
 			//simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			
 			//TODO: Decide on default 
-			settingsScreen = new Scene(settingsScreenLayout,800,600);
+			settingsScreen = new Scene(settingsScreenLayout,1000,600);
 			
 			
 			primaryStage.setScene(simulationScreen);
@@ -754,13 +788,12 @@ public class Main extends Application{
 			primaryStage.setResizable(false);
 			primaryStage.setTitle("Dromedary Drones Simulation");
 			primaryStage.show();
-			
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-	public static void main(String[] args) {
+
+	public static void main(String[] args) throws FileNotFoundException {
 		launch(args);
 	}
 	

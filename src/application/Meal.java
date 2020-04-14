@@ -9,17 +9,26 @@ import java.util.ArrayList;
  *
  */
 public class Meal {
-	FoodItem burgers = new FoodItem("Burger", 6);
-	FoodItem fries = new FoodItem("Fries", 4);
-	FoodItem coke = new FoodItem("coke", 14);
+	FoodItem burgers = new FoodItem("Burger", 0.375);
+	FoodItem fries = new FoodItem("Fries", 0.25);
+	FoodItem coke = new FoodItem("coke", 0.875);
 	ArrayList<FoodItem> foodItems;
-	int totalWeight;
+	private double totalWeight;
+	private double probability;
 	
 	/**
 	 * Meal Constructor
 	 */
-	public Meal() {
+	public Meal(double probability) {
 		this.foodItems = new ArrayList<FoodItem>();
+		this.totalWeight = 0;
+		this.probability = probability;
+	}
+	
+	public Meal(Meal other) {
+		this.foodItems = other.foodItems;
+		this.totalWeight = other.totalWeight;
+		this.probability = other.probability;
 	}
 	
 	/**
@@ -41,5 +50,13 @@ public class Meal {
 	public void addFoodItem(FoodItem item) {
 		foodItems.add(item);
 		totalWeight += item.getWeight();
+	}
+
+	public double getProbability() {
+		return probability;
+	}
+
+	public void setProbability(double probability) {
+		this.probability = probability;
 	}
 }
