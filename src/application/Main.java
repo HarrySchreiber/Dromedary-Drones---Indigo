@@ -45,7 +45,8 @@ public class Main extends Application{
 	private int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private double sumPercent= 100; //a total 
 	private String realFileContents = ""; //what we want to print to the file
-	private ArrayList<Location> locations = new ArrayList<Location>();
+	private ArrayList<Location> locations = new ArrayList<Location>(); //edit as it goes and clear when finished
+	private ArrayList<Location> finalLocations = new ArrayList<Location>(); //final set of locations to use in sim
 	private SimulationSettings currentSettings = new SimulationSettings();
 	@Override
 	public void start(Stage primaryStage) {
@@ -848,6 +849,10 @@ public class Main extends Application{
 			
 			saveLocationFileBtn.setOnAction(e->{
 				//TODO: Add logic for saving points
+				Location extraLocation = new Location(addNameTextField.toString(), Integer.parseInt(addXTextField.toString()), Integer.parseInt(addYTextField.toString()));
+				locations.add(extraLocation);
+				finalLocations = locations;
+				locations.clear();
 				//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
 				primaryStage.setScene(settingsScreen); 	
 			});
@@ -857,6 +862,7 @@ public class Main extends Application{
 			cancelLocationFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			
 			cancelLocationFileBtn.setOnAction(e->{
+				//DO NOTHING
 				//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
 				primaryStage.setScene(settingsScreen);
 			});
