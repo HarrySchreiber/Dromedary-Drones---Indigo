@@ -11,6 +11,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -35,6 +36,7 @@ import javafx.beans.binding.Bindings;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.awt.Desktop;
 
 public class Main extends Application{
 	
@@ -43,7 +45,8 @@ public class Main extends Application{
 	private int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private double sumPercent= 100; //a total 
 	private String realFileContents = ""; //what we want to print to the file
-	
+	private ArrayList<Location> locations = new ArrayList<Location>();
+	private SimulationSettings currentSettings = new SimulationSettings();
 	@Override
 	public void start(Stage primaryStage) {
 		try {
@@ -417,7 +420,8 @@ public class Main extends Application{
 			//TODO: Clear the delivery points
 			Button clearDeliveryPointsBtn = new Button("Clear Delivery Points");
 			clearDeliveryPointsBtn.setOnAction(e->{
-				System.out.println("TODO: Add logic here for clearing delivery points");
+				locations.clear();
+							
 			});
 			
 			//add everything to column one
@@ -824,7 +828,15 @@ public class Main extends Application{
 			
 			//TODO: Add logic for file upload/selection, probably throw exceptions here if something is wrong
 			uploadLocationFileBtn.setOnAction(e->{
-				System.out.println("TODO: Open A file browser and upload points, throw exceptions if something went wrong");
+				FileChooser fileChooser = new FileChooser();
+				File selectedFile = fileChooser.showOpenDialog(primaryStage);
+				uploadLocationFileLabel.setText("CurrentFile: " + selectedFile.getName());
+				try {
+					locations = currentSettings.populateLocations(selectedFile.getAbsolutePath());
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			});
 			
 			addLocationScreenLayout.add(uploadLocationFileLabel,0,4);
