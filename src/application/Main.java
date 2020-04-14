@@ -8,6 +8,8 @@ import java.util.Scanner;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -37,7 +39,7 @@ import java.util.ArrayList;
 public class Main extends Application{
 	
 	//global variables
-	private Scene simulationScreen, settingsScreen; //scenes 
+	private Scene simulationScreen, settingsScreen, addLocationScreen; //scenes 
 	private int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private double sumPercent= 100; //a total 
 	private String realFileContents = ""; //what we want to print to the file
@@ -362,7 +364,7 @@ public class Main extends Application{
 			};
             schemeKCB.setOnAction(knapEvent);//sets up the event here
             
-          //Event handler for FIFO Check Box and replaces the new status of Fifo 
+            //Event handler for FIFO Check Box and replaces the new status of Fifo 
 			EventHandler<ActionEvent> fifoEvent = new EventHandler<ActionEvent>() { 
                 public void handle(ActionEvent e) { 
                 	//TODO: FIFO method
@@ -403,12 +405,25 @@ public class Main extends Application{
 			};
 			defaultDroneCB.setOnAction(defaultDroneEvent);
 			
+			//TODO: Add method for upload new campus map
+			//Add Locations Buttons
+			Label locationPointsLabel = new Label("Add Delivery Points");
+			Button addDeliveryPointsBtn = new Button("Add Delivery Point(s)");
+			
+			addDeliveryPointsBtn.setOnAction(e->{
+				 primaryStage.setScene(addLocationScreen);
+			});
+			
+			//TODO: Clear the delivery points
+			Button clearDeliveryPointsBtn = new Button("Clear Delivery Points");
+			clearDeliveryPointsBtn.setOnAction(e->{
+				System.out.println("TODO: Add logic here for clearing delivery points");
+			});
+			
 			//add everything to column one
-			columnOne.getChildren().addAll(schemeL, schemeKCB, schemeFCB, dronesL, defaultDroneCB);
+			columnOne.getChildren().addAll(schemeL, schemeKCB, schemeFCB, dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn);
 			
 			settingsScreenLayout.add(columnOne,0,1);
-			
-			//TODO: Add method for upload new campus map
 			
 			//TODO: Add method for add new drone
 			
@@ -772,6 +787,73 @@ public class Main extends Application{
 			
 			
 			//------------------------------------------------------------------------------------------------
+
+			//Logic for setting up the add a location screen
+			GridPane addLocationScreenLayout = new GridPane();
+			addLocationScreenLayout.setAlignment(Pos.CENTER);
+			addLocationScreenLayout.setHgap(10);	//Set some spacing for horizontal
+			addLocationScreenLayout.setVgap(10);	//Set some spacing for vertical
+			
+			//Add Delivery point name
+			Label addNameLabel = new Label("Add Delivery Point Name:");
+			TextField addNameTextField = new TextField();
+			addLocationScreenLayout.add(addNameLabel, 0, 0);
+			addLocationScreenLayout.add(addNameTextField, 1, 0);
+			
+			//Add Delivery point X value
+			Label addXLabel = new Label("Value for X:");
+			TextField addXTextField = new TextField();
+			addLocationScreenLayout.add(addXLabel, 0, 1);
+			addLocationScreenLayout.add(addXTextField, 1, 1);
+			
+			//Add Delivery point Y value
+			Label addYLabel = new Label("Value for Y:");
+			TextField addYTextField = new TextField();
+			addLocationScreenLayout.add(addYLabel, 0, 2);
+			addLocationScreenLayout.add(addYTextField, 1, 2);
+			
+			//Just a label to give the person the option
+			Label orLabel = new Label("or");
+			GridPane.setHalignment(orLabel, HPos.CENTER);
+			addLocationScreenLayout.add(orLabel, 0, 3, 2, 1);
+			
+			//Add delivery points via file upload
+			Label uploadLocationFileLabel = new Label("Upload Delivery Points:");
+			Button uploadLocationFileBtn = new Button("Browse");
+			GridPane.setHalignment(uploadLocationFileBtn, HPos.RIGHT);
+			
+			//TODO: Add logic for file upload/selection, probably throw exceptions here if something is wrong
+			uploadLocationFileBtn.setOnAction(e->{
+				System.out.println("TODO: Open A file browser and upload points, throw exceptions if something went wrong");
+			});
+			
+			addLocationScreenLayout.add(uploadLocationFileLabel,0,4);
+			addLocationScreenLayout.add(uploadLocationFileBtn,1,4);
+			
+			//Button for saving points
+			Button saveLocationFileBtn = new Button("Save");
+			saveLocationFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+			
+			saveLocationFileBtn.setOnAction(e->{
+				//TODO: Add logic for saving points
+				//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
+				primaryStage.setScene(settingsScreen); 	
+			});
+			
+			//Button for canceling the points
+			Button cancelLocationFileBtn = new Button("Cancel");
+			cancelLocationFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+			
+			cancelLocationFileBtn.setOnAction(e->{
+				//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
+				primaryStage.setScene(settingsScreen);
+			});
+			
+			addLocationScreenLayout.add(saveLocationFileBtn, 0, 5);
+			addLocationScreenLayout.add(cancelLocationFileBtn, 1, 5);
+			
+			
+			//-----------------------------------------------------------------------------------
 			
 			
 			//TODO: Decide on default
@@ -782,6 +864,9 @@ public class Main extends Application{
 			//TODO: Decide on default 
 			settingsScreen = new Scene(settingsScreenLayout,1000,600);
 			
+			
+			//TODO: Decide on default
+			addLocationScreen = new Scene(addLocationScreenLayout, 1000, 600);
 			
 			primaryStage.setScene(simulationScreen);
 			//TODO: Decide if we want to be able to resize
