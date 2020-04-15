@@ -1,6 +1,6 @@
 Simulation Name: 
 Knapsack Packing: false
-Fifo: false
+Fifo: true
 Default Grove City Drone: true
 Percentage Used: 100.0
 Percentage Left: 0

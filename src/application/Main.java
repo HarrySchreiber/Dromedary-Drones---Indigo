@@ -33,6 +33,7 @@ import javafx.beans.binding.Bindings;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class Main extends Application{
 	
@@ -41,6 +42,13 @@ public class Main extends Application{
 	private int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private double sumPercent= 100; //a total 
 	private String realFileContents = ""; //what we want to print to the file
+	//Test variables for printing to file
+	Map<Integer, Integer> fifoData;
+	Map<Integer, Integer> knapData;
+	double fifoAverage;
+	double knapAverage;
+	double fifoWorst;
+	double knapWorst;
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -247,6 +255,12 @@ public class Main extends Application{
 				fifoLineChart.getData().add(fifoSeries);
 				
 				//TODO:Remove from testing
+				fifoData = s.getFifoData();
+				knapData = s.getKnapsackData();
+				fifoAverage = s.findAverage(s.getFifoData());
+				knapAverage = s.findAverage(s.getKnapsackData());
+				fifoWorst = s.findWorst(s.getFifoData());
+				knapWorst = s.findWorst(s.getKnapsackData());
 				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
 				System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(s.getKnapsackData()) + " Worst Time: " + s.findWorst(s.getKnapsackData()));
 				
@@ -282,6 +296,19 @@ public class Main extends Application{
 			Button saveDataFileBtn = new Button("Save Data File");
 			saveDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			saveDataFileBtn.setOnAction(e ->{
+				File dataFile = new File("dataFile.txt");
+				try {
+					FileWriter writer = new FileWriter("dataFile.txt");
+					writer.write("FIFO: " + fifoData + " Average Time: " + fifoAverage + " Worst Time: " + fifoWorst);
+					writer.write("Knapsack: " + knapData  + " Average Time: " + knapAverage + " Worst Time: " + knapWorst);
+					writer.close();
+					//TODO Delete this print statement
+					System.out.println("Successfully wrote to the file");
+
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				System.out.println("TODO: Save a Results File");	//TODO: Add the logic here
 			});
 			dataButtonsBox.getChildren().add(saveDataFileBtn);	//Add button to screen
