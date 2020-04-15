@@ -36,7 +36,7 @@ import javafx.beans.binding.Bindings;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.awt.Desktop;
+
 
 public class Main extends Application{
 	
@@ -224,6 +224,7 @@ public class Main extends Application{
 			Button runSimulationBtn = new Button("Run Simulation");
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
+
 				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
 				s.runSimulation();
 				
@@ -849,8 +850,11 @@ public class Main extends Application{
 			
 			saveLocationFileBtn.setOnAction(e->{
 				//TODO: Add logic for saving points
-				Location extraLocation = new Location(addNameTextField.toString(), Integer.parseInt(addXTextField.toString()), Integer.parseInt(addYTextField.toString()));
-				locations.add(extraLocation);
+				if (!addNameTextField.getText().isEmpty() && !addXTextField.getText().isEmpty() && !addYTextField.getText().isEmpty()) {
+					Location extraLocation = new Location(addNameTextField.toString(), Integer.parseInt(addXTextField.toString()), Integer.parseInt(addYTextField.toString()));
+					locations.add(extraLocation);
+				}
+				
 				finalLocations = locations;
 				locations.clear();
 				//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
@@ -863,6 +867,7 @@ public class Main extends Application{
 			
 			cancelLocationFileBtn.setOnAction(e->{
 				//DO NOTHING
+				locations.clear();
 				//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
 				primaryStage.setScene(settingsScreen);
 			});
