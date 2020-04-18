@@ -75,7 +75,7 @@ public class Simulation {
 	    int burgerCountsB [] = new int [50];
 	    int fryCountsB [] = new int [50];
 	    int cokeCountsB [] = new int [50];
-	    int hoursPerShiftB= 0;
+	    int hoursPerShiftB= 0, lowerBoundB = 0, upperBoundB = 0;
 		
 		 for(int i = 0; i < fileLines.length; i++) {
 		    	String curLine = fileLines[i];
@@ -103,7 +103,10 @@ public class Simulation {
 		    	
 		    	if (curLine.contains("Hours Per Shift:")) 
 		    		hoursPerShiftB = Integer.valueOf(splitVal[1]);
-		    	
+		    	if(curLine.contains("Upper Bound of Orders per Hour:"))
+		    		upperBoundB = Integer.valueOf(splitVal[1]);
+		    	if(curLine.contains("Lower Bound of Orders per Hour:"))	
+		    		lowerBoundB = Integer.valueOf(splitVal[1]);
 		 }
 		
 		 System.out.println(hoursPerShiftB);
@@ -161,7 +164,8 @@ public class Simulation {
 			ArrayList<Order> orders = new ArrayList<Order>();
 			//TODO: Set these up to dynamically populate: ie take out 4 and 15 and populate from settings
 			for(int i = 0; i<hoursPerShiftB; i++) {
-				for(int j = 0; j<15; j++) {
+				int randomNumberofOrders = rnd.nextInt();
+				for(int j = 0; j<randomNumberofOrders; j++) {
 					Order o = new Order(mealPicker(meals), rnd.nextInt(60)+1 + (i*60), locations.get(rnd.nextInt(locations.size())));
 					orders.add(o);
 				}
