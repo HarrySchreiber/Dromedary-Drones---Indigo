@@ -47,7 +47,7 @@ public class Main extends Application{
 		try {
 			
 			//opens the file with the default values
-			Scanner sc = new Scanner(new File("DefSimData.txt")); 
+			Scanner sc = new Scanner(new File("NewSimData.txt")); 
 			StringBuffer buffer = new StringBuffer();
 			
 			//reads all the lines of the file to buffer
