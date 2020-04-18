@@ -9,6 +9,7 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -296,7 +297,10 @@ public class Main extends Application{
 			Button saveDataFileBtn = new Button("Save Data File");
 			saveDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			saveDataFileBtn.setOnAction(e ->{
-				File dataFile = new File("dataFile.txt");
+				FileChooser fileLocation = new FileChooser();
+				File selectedLocation = fileLocation.showOpenDialog(primaryStage);
+				
+				//File dataFile = new File("dataFile.txt");
 				try {
 					FileWriter writer = new FileWriter("dataFile.txt");
 					writer.write("FIFO: " + fifoData + " Average Time: " + fifoAverage + " Worst Time: " + fifoWorst);
