@@ -4,6 +4,7 @@ package application;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -29,6 +30,7 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -36,6 +38,7 @@ import javafx.beans.binding.Bindings;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Map;
 
 
 public class Main extends Application{
@@ -45,9 +48,22 @@ public class Main extends Application{
 	private int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private double sumPercent= 100; //a total 
 	private String realFileContents = ""; //what we want to print to the file
+<<<<<<< HEAD
 	private ArrayList<Location> locations = new ArrayList<Location>(); //edit as it goes and clear when finished
 	private ArrayList<Location> finalLocations = new ArrayList<Location>(); //final set of locations to use in sim
 	private SimulationSettings currentSettings = new SimulationSettings();
+=======
+	//Test variables for printing to file
+	Map<Integer, Integer> fifoData;
+	Map<Integer, Integer> knapData;
+	double fifoAverage;
+	double knapAverage;
+	double fifoWorst;
+	double knapWorst;
+	String fifoText;
+	String knapText;
+	
+>>>>>>> 460bf30124a6d856fc3c48402f3eefa51b5b0683
 	@Override
 	public void start(Stage primaryStage) {
 		try {
@@ -259,6 +275,14 @@ public class Main extends Application{
 				fifoLineChart.getData().add(fifoSeries);
 				
 				//TODO:Remove from testing
+				fifoData = s.getFifoData();
+				knapData = s.getKnapsackData();
+				fifoAverage = s.findAverage(s.getFifoData());
+				knapAverage = s.findAverage(s.getKnapsackData());
+				fifoWorst = s.findWorst(s.getFifoData());
+				knapWorst = s.findWorst(s.getKnapsackData());
+				String fifoText = ("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
+				String knapText = ("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(s.getKnapsackData()) + " Worst Time: " + s.findWorst(s.getKnapsackData()));
 				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
 				System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(s.getKnapsackData()) + " Worst Time: " + s.findWorst(s.getKnapsackData()));
 				
@@ -290,11 +314,42 @@ public class Main extends Application{
 			});
 			dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
 			
+			Text sample = new Text(fifoText);
+			sample.setFont(new Font(14));
+			
 			//Button for saving a data file
 			Button saveDataFileBtn = new Button("Save Data File");
 			saveDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			saveDataFileBtn.setOnAction(e ->{
-				System.out.println("TODO: Save a Results File");	//TODO: Add the logic here
+				FileChooser fileLocation = new FileChooser();
+				
+				//Set extension filtre for text files
+				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
+				fileLocation.getExtensionFilters().add(extFilter);
+				
+				//Show save file dialog
+				File selectedLocation = fileLocation.showSaveDialog(primaryStage);
+				
+				if( selectedLocation != null) {
+					//File dataFile = new File("dataFile.txt");
+					try {
+						PrintWriter writer;
+						writer = new PrintWriter(selectedLocation);
+						writer.println("FIFO: " + fifoData + " Average Time: " + fifoAverage + " Worst Time: " + fifoWorst);
+						writer.println("Knapsack: " + knapData  + " Average Time: " + knapAverage + " Worst Time: " + knapWorst);
+						writer.close();
+						//TODO Delete this print statement
+						System.out.println("Successfully wrote to the file");
+
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+
+
+
+				//System.out.println("TODO: Save a Results File");	//TODO: Add the logic here
 			});
 			dataButtonsBox.getChildren().add(saveDataFileBtn);	//Add button to screen
 			
