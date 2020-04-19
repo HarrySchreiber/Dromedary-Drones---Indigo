@@ -35,31 +35,9 @@ public class Simulation {
 	 * Contains the logic required to run the full simulation
 	 * @throws FileNotFoundException 
 	 */
-	public void runSimulation() throws FileNotFoundException {
+	public void runSimulation(ArrayList<Location> locations) throws FileNotFoundException {
 		
-		//TODO: Remove this crap once we set up the real values to pull from
-		Location l1 = new Location("SAC",0,0);
-		Location l2 = new Location("HAL",46,-121);
-		Location l3 = new Location("PLC",-106,115);
-		Location l4 = new Location("TLC",-419,-487);
-		Location l5 = new Location("PFAC",27,-784);
-		Location l6 = new Location("Hoyt",-318,-98);
-		Location l7 = new Location("STEM",-303,78);
-		Location l8 = new Location("Hicks",-272,-542);
-		Location l9 = new Location("Zerbe",-964,-239);
-		Location l10 = new Location("Ketler",-781,164);
-		
-		ArrayList<Location> locations = new ArrayList<Location>();
-		locations.add(l1);
-		locations.add(l2);
-		locations.add(l3);
-		locations.add(l4);
-		locations.add(l5);
-		locations.add(l6);
-		locations.add(l7);
-		locations.add(l8);
-		locations.add(l9);
-		locations.add(l10);
+
 		
 		Scanner sc = new Scanner(new File("NewSimData.txt")); 
 		StringBuffer buffer = new StringBuffer();
@@ -164,7 +142,7 @@ public class Simulation {
 			ArrayList<Order> orders = new ArrayList<Order>();
 			//TODO: Set these up to dynamically populate: ie take out 4 and 15 and populate from settings
 			for(int i = 0; i<hoursPerShiftB; i++) {
-				int randomNumberofOrders = rnd.nextInt();
+				int randomNumberofOrders = rnd.nextInt(((upperBoundB - lowerBoundB) +1) + lowerBoundB);
 				for(int j = 0; j<randomNumberofOrders; j++) {
 					Order o = new Order(mealPicker(meals), rnd.nextInt(60)+1 + (i*60), locations.get(rnd.nextInt(locations.size())));
 					orders.add(o);

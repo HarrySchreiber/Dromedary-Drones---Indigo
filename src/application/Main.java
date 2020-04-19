@@ -226,7 +226,12 @@ public class Main extends Application{
 			runSimulationBtn.setOnAction(e -> {
 
 				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
-				s.runSimulation();
+				try {
+					s.runSimulation(finalLocations);
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				
 				//TODO: Do we want to truncate this?
 				knapsackAvgLabel.setText("Average Time: " + s.findAverage(s.getKnapsackData()));
@@ -699,7 +704,7 @@ public class Main extends Application{
         	
         	//NOTE: spinner can't go higher than 30 orders but can change this 
         	SpinnerValueFactory<Integer> valueFactoryUH = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 30, upperOrdersB);
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 50, upperOrdersB);
         	spinnerUpperHours.setValueFactory(valueFactoryUH);
         	spinnerUpperHours.setMaxWidth(70);
         	spinnerUpperHours.setEditable(true);
@@ -719,7 +724,7 @@ public class Main extends Application{
         	//spinner for the lower limits of thr orders per hour
         	//NOTE: spinner can't go higher than 30 orders but can change this         	
         	SpinnerValueFactory<Integer> valueFactoryLH = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 30, lowerOrdersB);
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 50, lowerOrdersB);
         	spinnerLowerHours.setValueFactory(valueFactoryLH);
         	spinnerLowerHours.setMaxWidth(70);
         	spinnerLowerHours.setEditable(true);
@@ -835,6 +840,7 @@ public class Main extends Application{
 				uploadLocationFileLabel.setText("CurrentFile: " + selectedFile.getName());
 				try {
 					locations = currentSettings.populateLocations(selectedFile.getAbsolutePath());
+
 				} catch (FileNotFoundException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -856,7 +862,7 @@ public class Main extends Application{
 				}
 				
 				finalLocations = locations;
-				locations.clear();
+				//locations.clear();
 				//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
 				primaryStage.setScene(settingsScreen); 	
 			});
@@ -880,7 +886,7 @@ public class Main extends Application{
 			
 			
 			//TODO: Decide on default
-			simulationScreen = new Scene(simulationScreenLayout,1000,600);
+			simulationScreen = new Scene(simulationScreenLayout,1000,650);
 			//TODO: Are we going to use this ever?
 			//simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			
@@ -889,7 +895,7 @@ public class Main extends Application{
 			
 			
 			//TODO: Decide on default
-			addLocationScreen = new Scene(addLocationScreenLayout, 1000, 600);
+			addLocationScreen = new Scene(addLocationScreenLayout, 1000, 650);
 			
 			primaryStage.setScene(simulationScreen);
 			//TODO: Decide if we want to be able to resize
