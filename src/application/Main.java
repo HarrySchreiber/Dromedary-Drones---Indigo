@@ -48,11 +48,9 @@ public class Main extends Application{
 	private int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private double sumPercent= 100; //a total 
 	private String realFileContents = ""; //what we want to print to the file
-<<<<<<< HEAD
 	private ArrayList<Location> locations = new ArrayList<Location>(); //edit as it goes and clear when finished
 	private ArrayList<Location> finalLocations = new ArrayList<Location>(); //final set of locations to use in sim
 	private SimulationSettings currentSettings = new SimulationSettings();
-=======
 	//Test variables for printing to file
 	Map<Integer, Integer> fifoData;
 	Map<Integer, Integer> knapData;
@@ -63,7 +61,6 @@ public class Main extends Application{
 	String fifoText;
 	String knapText;
 	
->>>>>>> 460bf30124a6d856fc3c48402f3eefa51b5b0683
 	@Override
 	public void start(Stage primaryStage) {
 		try {
@@ -203,10 +200,17 @@ public class Main extends Application{
 		     xAxis.setLabel("Time Between Order and Delivery (min)");
 		     xAxis.setAnimated(false); // axis animations are removed
 	         yAxis.setLabel("Number of Orders Delivered");
-		     yAxis.setAnimated(false); // axis animations are removed
+			 yAxis.setAnimated(false); // axis animations are removed
+			 
+			 final NumberAxis xAxis1 = new NumberAxis(); // we are gonna plot against time
+		     final NumberAxis yAxis1 = new NumberAxis();
+		     xAxis1.setLabel("Time Between Order and Delivery (min)");
+		     xAxis1.setAnimated(false); // axis animations are removed
+	         yAxis1.setLabel("Number of Orders Delivered");
+		     yAxis1.setAnimated(false); // axis animations are removed
 
 		     //creating the line chart with two axis created above
-		     final LineChart<Number, Number> fifoLineChart = new LineChart<>(xAxis, yAxis);
+		     final LineChart<Number, Number> fifoLineChart = new LineChart<>(xAxis1, yAxis1);
 		     fifoLineChart.setTitle("FIFO Results");
 		     fifoLineChart.setAnimated(false); // disable animations
 			
@@ -299,7 +303,7 @@ public class Main extends Application{
 			Button createSimulationBtn = new Button("Create New Simulation");
 			createSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			createSimulationBtn.setOnAction(e -> primaryStage.setScene(settingsScreen));	//Adds function to the button TODO: Expand function to grab which simulation we need to edit from the radio buttons
-			simulationScreenLayout.add(createSimulationBtn, 0, 3);	//Add the button to the screen
+			//simulationScreenLayout.add(createSimulationBtn, 0, 3);	//Add the button to the screen
 			
 			//A Horizontal Stack Box to put buttons for save data and open data
 			HBox dataButtonsBox = new HBox();
@@ -312,7 +316,7 @@ public class Main extends Application{
 			loadDataFileBtn.setOnAction(e ->{
 				System.out.println("TODO: Load a Results File");	//TODO: Add the logic here
 			});
-			dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
+			//dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
 			
 			Text sample = new Text(fifoText);
 			sample.setFont(new Font(14));
@@ -487,8 +491,8 @@ public class Main extends Application{
 			});
 			
 			//add everything to column one
-			columnOne.getChildren().addAll(schemeL, schemeKCB, schemeFCB, dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn);
-			
+			//columnOne.getChildren().addAll(schemeL, schemeKCB, schemeFCB, dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn);
+			columnOne.getChildren().addAll( dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn);
 			settingsScreenLayout.add(columnOne,0,1);
 			
 			//TODO: Add method for add new drone
@@ -846,7 +850,7 @@ public class Main extends Application{
 			Button cancelSimulationSetngsBtn = new Button("Cancel");
 			cancelSimulationSetngsBtn.setOnAction(e -> primaryStage.setScene(simulationScreen));	//Adds function to the button TODO: Idk if there's anything else were gonna have to do here cause as long as we dont save anything we should be good
 			cancelSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-			saveAndCancelButtonsBox.getChildren().add(cancelSimulationSetngsBtn);
+			//saveAndCancelButtonsBox.getChildren().add(cancelSimulationSetngsBtn);
 			
 			settingsScreenLayout.add(saveAndCancelButtonsBox,0,2,3,1);
 			
@@ -946,7 +950,7 @@ public class Main extends Application{
 			//simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			
 			//TODO: Decide on default 
-			settingsScreen = new Scene(settingsScreenLayout,1000,600);
+			settingsScreen = new Scene(settingsScreenLayout,1000,650);
 			
 			
 			//TODO: Decide on default
