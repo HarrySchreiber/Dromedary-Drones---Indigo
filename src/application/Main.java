@@ -38,6 +38,7 @@ import javafx.beans.binding.Bindings;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 
@@ -60,6 +61,7 @@ public class Main extends Application{
 	double knapWorst;
 	String fifoText;
 	String knapText;
+	ArrayList<Integer> CSV = new ArrayList<Integer>();
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -285,6 +287,7 @@ public class Main extends Application{
 				knapAverage = s.findAverage(s.getKnapsackData());
 				fifoWorst = s.findWorst(s.getFifoData());
 				knapWorst = s.findWorst(s.getKnapsackData());
+				
 				String fifoText = ("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
 				String knapText = ("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(s.getKnapsackData()) + " Worst Time: " + s.findWorst(s.getKnapsackData()));
 				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
@@ -327,7 +330,7 @@ public class Main extends Application{
 			saveDataFileBtn.setOnAction(e ->{
 				FileChooser fileLocation = new FileChooser();
 				
-				//Set extension filtre for text files
+				//Set extension filter for text files
 				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
 				fileLocation.getExtensionFilters().add(extFilter);
 				
@@ -339,8 +342,16 @@ public class Main extends Application{
 					try {
 						PrintWriter writer;
 						writer = new PrintWriter(selectedLocation);
-						writer.println("FIFO: " + fifoData + " Average Time: " + fifoAverage + " Worst Time: " + fifoWorst);
-						writer.println("Knapsack: " + knapData  + " Average Time: " + knapAverage + " Worst Time: " + knapWorst);
+						writer.println("Fifo Data");
+						for(int key:fifoData.keySet()) {
+							writer.println(key +"," + fifoData.get(key));
+						}
+						writer.println("Knapsack Data");
+						for(int key:knapData.keySet()) {
+							writer.println(key +"," + knapData.get(key));
+						}
+						writer.println("FIFO Average Time: " + fifoAverage + " Worst Time: " + fifoWorst);
+						writer.println("Knapsack Average Time: " + knapAverage + " Worst Time: " + knapWorst);
 						writer.close();
 						//TODO Delete this print statement
 						System.out.println("Successfully wrote to the file");
