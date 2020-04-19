@@ -1,7 +1,7 @@
 # Dromedary-Drones---Indigo
 
-READEME for running team Indigo's project in Eclipse (assumes you have Git downloaded)
-And to save a local copy on your eclipse workspace
+READEME for running team Indigo's project in Eclipse (assumes you have Git downloaded) and to save a local copy on your eclipse workspace
+NOTE: Assumes your Eclipse workspace does not have anything from our project already in it.
 
 
 1) Click on the big green "Clone or Download" on the Github website
