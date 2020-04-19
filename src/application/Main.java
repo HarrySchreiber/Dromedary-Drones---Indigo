@@ -309,7 +309,7 @@ public class Main extends Application{
 				FileChooser fileLocation = new FileChooser();
 				
 				//Set extension filtre for text files
-				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
 				fileLocation.getExtensionFilters().add(extFilter);
 				
 				//Show save file dialog
