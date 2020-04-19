@@ -4,6 +4,7 @@ package application;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -27,6 +28,7 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -50,6 +52,8 @@ public class Main extends Application{
 	double knapAverage;
 	double fifoWorst;
 	double knapWorst;
+	String fifoText;
+	String knapText;
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -262,6 +266,8 @@ public class Main extends Application{
 				knapAverage = s.findAverage(s.getKnapsackData());
 				fifoWorst = s.findWorst(s.getFifoData());
 				knapWorst = s.findWorst(s.getKnapsackData());
+				String fifoText = ("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
+				String knapText = ("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(s.getKnapsackData()) + " Worst Time: " + s.findWorst(s.getKnapsackData()));
 				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
 				System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(s.getKnapsackData()) + " Worst Time: " + s.findWorst(s.getKnapsackData()));
 				
@@ -293,27 +299,42 @@ public class Main extends Application{
 			});
 			dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
 			
+			Text sample = new Text(fifoText);
+			sample.setFont(new Font(14));
+			
 			//Button for saving a data file
 			Button saveDataFileBtn = new Button("Save Data File");
 			saveDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			saveDataFileBtn.setOnAction(e ->{
 				FileChooser fileLocation = new FileChooser();
-				File selectedLocation = fileLocation.showOpenDialog(primaryStage);
 				
-				//File dataFile = new File("dataFile.txt");
-				try {
-					FileWriter writer = new FileWriter("dataFile.txt");
-					writer.write("FIFO: " + fifoData + " Average Time: " + fifoAverage + " Worst Time: " + fifoWorst);
-					writer.write("Knapsack: " + knapData  + " Average Time: " + knapAverage + " Worst Time: " + knapWorst);
-					writer.close();
-					//TODO Delete this print statement
-					System.out.println("Successfully wrote to the file");
+				//Set extension filtre for text files
+				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+				fileLocation.getExtensionFilters().add(extFilter);
+				
+				//Show save file dialog
+				File selectedLocation = fileLocation.showSaveDialog(primaryStage);
+				
+				if( selectedLocation != null) {
+					//File dataFile = new File("dataFile.txt");
+					try {
+						PrintWriter writer;
+						writer = new PrintWriter(selectedLocation);
+						writer.println("FIFO: " + fifoData + " Average Time: " + fifoAverage + " Worst Time: " + fifoWorst);
+						writer.println("Knapsack: " + knapData  + " Average Time: " + knapAverage + " Worst Time: " + knapWorst);
+						writer.close();
+						//TODO Delete this print statement
+						System.out.println("Successfully wrote to the file");
 
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
-				System.out.println("TODO: Save a Results File");	//TODO: Add the logic here
+
+
+
+				//System.out.println("TODO: Save a Results File");	//TODO: Add the logic here
 			});
 			dataButtonsBox.getChildren().add(saveDataFileBtn);	//Add button to screen
 			
