@@ -266,6 +266,9 @@ public class Main extends Application{
 				knapAverage = s.findAverage(s.getKnapsackData());
 				fifoWorst = s.findWorst(s.getFifoData());
 				knapWorst = s.findWorst(s.getKnapsackData());
+				String fifoDelimited = s.getFifoData().toString();
+				int strSize = fifoDelimited.length();
+				System.out.println(fifoDelimited.substring(1,strSize -1));
 				String fifoText = ("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
 				String knapText = ("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(s.getKnapsackData()) + " Worst Time: " + s.findWorst(s.getKnapsackData()));
 				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
@@ -308,7 +311,7 @@ public class Main extends Application{
 			saveDataFileBtn.setOnAction(e ->{
 				FileChooser fileLocation = new FileChooser();
 				
-				//Set extension filtre for text files
+				//Set extension filter for text files
 				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
 				fileLocation.getExtensionFilters().add(extFilter);
 				
