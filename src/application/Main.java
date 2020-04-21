@@ -5,6 +5,16 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -41,6 +51,11 @@ public class Main extends Application{
 	private int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private double sumPercent= 100; //a total 
 	private String realFileContents = ""; //what we want to print to the file
+	private static Document simulationSettingsXML;
+	private static ArrayList<Integer> simulationSettingsIDs;
+	private static int currentSimulationSettingID;
+	private ArrayList<Location> temporaryLocations;
+	private ArrayList<Meal> temporaryMeals;
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -792,10 +807,6 @@ public class Main extends Application{
 			e.printStackTrace();
 		}
 	}
-
-	public static void main(String[] args) throws FileNotFoundException {
-		launch(args);
-	}
 	
 	/**
 	 * A method to extract away some of the setup for the simulation screen
@@ -881,5 +892,43 @@ public class Main extends Application{
 			sumPercent =  sumPercent + plus;	
 	}
 	
+	/**
+	 * Populates an ArrayList with simulation setting IDs from the simualtionSettings.xml
+	 * @return ArrayList of simulation IDs
+	 */
+	public static ArrayList<Integer> getSimulationSettingsIDs() {
+		ArrayList<Integer> ret = new ArrayList<Integer>();
+		//Grab all of the documents with the simulationsetting tag name
+		NodeList simulationSettingsList = simulationSettingsXML.getElementsByTagName("simulationsetting");
+		for(int i = 0; i < simulationSettingsList.getLength(); i++) {
+			//Grab each simulationsetting item
+			Element currentSettings = (Element) simulationSettingsList.item(i);
+			//Grab the id of that simulationsetting
+			ret.add(Integer.valueOf(currentSettings.getAttribute("id")));
+		}
+		return ret;
+	}
+	
+	
+	
+	public static void main(String[] args) throws FileNotFoundException {
+		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+		try {
+			DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
+			simulationSettingsXML = documentBuilder.parse("simulationSettings.xml");
+			simulationSettingsIDs = getSimulationSettingsIDs();
+			currentSimulationSettingID = 1;
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		launch(args);
+	}
 	
 }
