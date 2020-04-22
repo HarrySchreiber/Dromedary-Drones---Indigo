@@ -149,6 +149,13 @@ public class Main extends Application{
 		    	
 		    }
 		     
+			//change the 4 later
+		    //But gets the weight so we can use at the beginning...
+		   for(int i  = 0; i < 4; i++) {
+			   weightPerOrder[i] += (burgerCountsB[i] * 6);
+			   weightPerOrder[i] += (fryCountsB[i] * 4);
+			   weightPerOrder[i] += (fryCountsB[i] * 14);
+		   }
 
 		     sc.close();
 		     //FileWriter writer = new FileWriter("NewSimData.txt" ,false);
@@ -528,15 +535,15 @@ public class Main extends Application{
 	        	Label currentSliderVal = new Label("");
 	        	Label burgerL = new Label("Burger");
 	        	final Spinner<Integer> spinnerB = new Spinner<Integer>();
-	        	Label burgerWeight = new Label("0 oz");
+	        	Label burgerWeight = new Label(String.valueOf(burgerCountsB[i] * 6) + " oz");
 	        	Label friesL = new Label("Fries");
 	        	final Spinner<Integer> spinnerF = new Spinner<Integer>();
-	        	Label friesWeight = new Label("0 oz");
+	        	Label friesWeight = new Label(String.valueOf(fryCountsB[i] * 4) + " oz");
 	        	Label cokeL = new Label("Coke");
 	        	final Spinner<Integer> spinnerC = new Spinner<Integer>();
-	        	Label cokeWeight = new Label("0 oz");
+	        	Label cokeWeight = new Label(String.valueOf(cokeCountsB[i] *14) + " oz");
 	        	Label totalWeightL = new Label("Total:");
-	        	Label weightPerOrderL = new Label("0 oz");
+	        	Label weightPerOrderL = new Label(String.valueOf(weightPerOrder[i]) + " oz");
 	        	
 	      
 
