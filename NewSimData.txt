@@ -5,21 +5,21 @@ Default Grove City Drone: true
 Percentage Used: 100.0
 Percentage Left: 0
 Order 1 Percentage: 25
-Order 1 Burgers: 0
-Order 1 Fries: 0
-Order 1 Cokes: 0
+Order 1 Burgers: 2
+Order 1 Fries: 1
+Order 1 Cokes: 1
 Order 2 Percentage: 25
-Order 2 Burgers: 0
-Order 2 Fries: 0
+Order 2 Burgers: 1
+Order 2 Fries: 1
 Order 2 Cokes: 0
 Order 3 Percentage: 25
-Order 3 Burgers: 0
-Order 3 Fries: 0
+Order 3 Burgers: 2
+Order 3 Fries: 1
 Order 3 Cokes: 0
 Order 4 Percentage: 25
-Order 4 Burgers: 0
-Order 4 Fries: 0
-Order 4 Cokes: 0
+Order 4 Burgers: 1
+Order 4 Fries: 1
+Order 4 Cokes: 1
 Hours Per Shift: 4
 Upper Bound of Orders per Hour: 50
 Lower Bound of Orders per Hour: 50
