@@ -909,8 +909,8 @@ public class Main extends Application{
 				File selectedFile = fileChooser.showOpenDialog(primaryStage);
 				uploadLocationFileLabel.setText("CurrentFile: " + selectedFile.getName());
 				try {
+					locations.clear();
 					locations = currentSettings.populateLocations(selectedFile.getAbsolutePath());
-
 				} catch (FileNotFoundException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

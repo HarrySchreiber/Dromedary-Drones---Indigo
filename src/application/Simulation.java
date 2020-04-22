@@ -37,8 +37,11 @@ public class Simulation {
 	 */
 	public void runSimulation(ArrayList<Location> locations) throws FileNotFoundException {
 		
+		SimulationSettings simSettings = new SimulationSettings();
 
-		
+		if (locations.isEmpty()) {
+			locations = simSettings.populateLocations("src/application/gccLocationPoints.csv");
+		}
 		Scanner sc = new Scanner(new File("NewSimData.txt")); 
 		StringBuffer buffer = new StringBuffer();
 		
