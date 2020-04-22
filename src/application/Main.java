@@ -154,7 +154,7 @@ public class Main extends Application{
 		   for(int i  = 0; i < 4; i++) {
 			   weightPerOrder[i] += (burgerCountsB[i] * 6);
 			   weightPerOrder[i] += (fryCountsB[i] * 4);
-			   weightPerOrder[i] += (fryCountsB[i] * 14);
+			   weightPerOrder[i] += (cokeCountsB[i] * 14);
 		   }
 
 		     sc.close();
