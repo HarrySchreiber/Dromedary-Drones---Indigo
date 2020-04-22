@@ -179,8 +179,8 @@
                 </fooditems>
             </meal>
         </meals>
-        <hourpershift>4</hourpershift>
-        <ordersperhourupper>22</ordersperhourupper>
-        <ordersperhourlower>15</ordersperhourlower>
+        <hourspershift>4</hourspershift>
+        <ordersperhourupper>30</ordersperhourupper>
+        <ordersperhourlower>60</ordersperhourlower>
     </simulationsetting>
 </simulationsettings>
