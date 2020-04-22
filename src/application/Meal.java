@@ -59,4 +59,8 @@ public class Meal {
 	public void setProbability(double probability) {
 		this.probability = probability;
 	}
+	
+	public String toString() {
+		return "Prob: " + probability + " Items: " + foodItems;
+	}
 }
