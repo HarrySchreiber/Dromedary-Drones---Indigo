@@ -911,7 +911,7 @@ public class Main extends Application{
 	}
 	
 	//TODO: Set back to SimulationSettings instead of void
-	public static void buildSimulationSettingsFromXML(String id) {
+	public static SimulationSettings buildSimulationSettingsFromXML(String id) {
 		//Get a list of all of the simulation settings
 		NodeList simulationsettingList = simulationSettingsXML.getElementsByTagName("simulationsetting");
 		//Get the current simulationsetting we want to look at
@@ -947,12 +947,10 @@ public class Main extends Application{
 				//If the element is the simulation name then we set it
 				if(field.getTagName().equals("name")) {
 					simulationName = field.getTextContent();
-					System.out.println(simulationName);
 				}
 				//If the element is the drone id then we set it
 				if(field.getTagName().equals("droneID")) {
 					droneIDNumber = field.getTextContent();
-					System.out.println(droneIDNumber);
 				}
 				//If the element is the locations then we set them
 				if(field.getTagName().equals("locations")) {
@@ -990,27 +988,65 @@ public class Main extends Application{
 						locations.add(curLocation);
 					}
 				}
-				System.out.println(locations);
-				
-				//TODO: Parse out meals
-				
+				//If the element is the meals then we set them
+				if(field.getTagName().equals("meals")) {
+					//Grab all of the meals
+					NodeList mealNodes = field.getElementsByTagName("meal");
+					for(int j = 0; j < mealNodes.getLength(); j++) {
+						//Grab all of the elements of a meal
+						NodeList mealInfo = mealNodes.item(j).getChildNodes();
+						Meal meal = new Meal(0);	//Temporary meal to be updated
+						for(int k = 0; k < mealInfo.getLength(); k++) {
+							//Grab all the info about one meal and save as a node to make sure its an element node
+							Node mealInfoNode = mealInfo.item(k);
+							if(mealInfoNode.getNodeType()==Node.ELEMENT_NODE) {
+								//Turn node into an element 
+								Element mealInfoElement = (Element) mealInfoNode;
+								//If its the probability then make a new meal with the probability attribute
+								if(mealInfoElement.getTagName().equals("probability")) {
+									meal = new Meal(Double.valueOf(mealInfoElement.getTextContent()));
+								}
+								//If its the food items themselves then add the food items
+								if(mealInfoElement.getTagName().equals("fooditems")) {
+									//Grab all of the food item elements
+									NodeList foodItemsList = mealInfoElement.getElementsByTagName("fooditem");
+									for(int l = 0; l < foodItemsList.getLength(); l++) {
+										//If there is a burger then we add a burger
+										if(foodItemsList.item(l).getTextContent().equals("burger")) {
+											meal.addFoodItem(meal.burgers);
+										}
+										//If there is fries then we add fries
+										if(foodItemsList.item(l).getTextContent().equals("fries")) {
+											meal.addFoodItem(meal.fries);
+										}
+										//If there is a coke then we add the coke
+										if(foodItemsList.item(l).getTextContent().equals("coke")) {
+											meal.addFoodItem(meal.coke);
+										}
+									}
+								}
+							}
+						}
+						//Add the meal back to the arraylist
+						meals.add(meal);
+					}
+				}
 				//If the element is the hours per shift then we set it
 				if(field.getTagName().equals("hourspershift")) {
 					hoursInShift = Integer.valueOf(field.getTextContent());
-					System.out.println(hoursInShift);
 				}
 				//If the element is the upper bound of orders per hour then we set it
 				if(field.getTagName().equals("ordersperhourupper")) {
 					upperOrdersPerHour = Integer.valueOf(field.getTextContent());
-					System.out.println(upperOrdersPerHour);
 				}
 				//If the element is the lower bound of orders per hour then we set it
 				if(field.getTagName().equals("ordersperhourlower")) {
 					lowerOrdersPerHour = Integer.valueOf(field.getTextContent());
-					System.out.println(lowerOrdersPerHour);
 				}
 			}
 		}
+		//Build and return the object from the set variables
+		return new SimulationSettings(simulationName, droneIDNumber, locations, meals, hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
 	}
 	
 	public static void main(String[] args) throws FileNotFoundException {
