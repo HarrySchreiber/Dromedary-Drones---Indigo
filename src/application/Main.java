@@ -12,6 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -52,8 +53,8 @@ public class Main extends Application{
 	private double sumPercent= 100; //a total 
 	private String realFileContents = ""; //what we want to print to the file
 	private static Document simulationSettingsXML;
-	private static ArrayList<Integer> simulationSettingsIDs;
-	private static int currentSimulationSettingID;
+	private static ArrayList<String> simulationSettingsIDs;
+	private static String currentSimulationSettingID;
 	private ArrayList<Location> temporaryLocations;
 	private ArrayList<Meal> temporaryMeals;
 	
@@ -896,20 +897,121 @@ public class Main extends Application{
 	 * Populates an ArrayList with simulation setting IDs from the simualtionSettings.xml
 	 * @return ArrayList of simulation IDs
 	 */
-	public static ArrayList<Integer> getSimulationSettingsIDs() {
-		ArrayList<Integer> ret = new ArrayList<Integer>();
+	public static ArrayList<String> getSimulationSettingsIDs() {
+		ArrayList<String> ret = new ArrayList<String>();
 		//Grab all of the documents with the simulationsetting tag name
 		NodeList simulationSettingsList = simulationSettingsXML.getElementsByTagName("simulationsetting");
 		for(int i = 0; i < simulationSettingsList.getLength(); i++) {
 			//Grab each simulationsetting item
 			Element currentSettings = (Element) simulationSettingsList.item(i);
 			//Grab the id of that simulationsetting
-			ret.add(Integer.valueOf(currentSettings.getAttribute("id")));
+			ret.add(currentSettings.getAttribute("id"));
 		}
 		return ret;
 	}
 	
-	
+	//TODO: Set back to SimulationSettings instead of void
+	public static void buildSimulationSettingsFromXML(String id) {
+		//Get a list of all of the simulation settings
+		NodeList simulationsettingList = simulationSettingsXML.getElementsByTagName("simulationsetting");
+		//Get the current simulationsetting we want to look at
+		Element currentSimulationSettingElement = (Element) simulationsettingList.item(0);
+		for(int i = 0; i < simulationsettingList.getLength(); i++) {
+			Element otherSimulationSettingElement = (Element) simulationsettingList.item(i);
+			if(otherSimulationSettingElement.hasAttribute("id")) {
+				//Find the simulationsetting by id and then update the current simulation setting
+				if(otherSimulationSettingElement.getAttribute("id").contentEquals(id)) {
+					currentSimulationSettingElement = otherSimulationSettingElement;
+				}
+			}	
+		}
+		
+		//Simulation Variables for later use in building the simulationsetting object
+		String simulationName = "";
+		String droneIDNumber = "";
+		ArrayList<Location> locations = new ArrayList<Location>();
+		ArrayList<Meal> meals = new ArrayList<Meal>();
+		int hoursInShift = 0;
+		int upperOrdersPerHour = 0;
+		int lowerOrdersPerHour = 0;
+		
+		//Break up all of the elements in the list
+		NodeList elementList = currentSimulationSettingElement.getChildNodes();
+		//Loop through the elements
+		for(int i = 0; i < elementList.getLength(); i++) {
+			//Set each child to a node, and then check if its an element node
+			Node n = elementList.item(i);
+			if(n.getNodeType()==Node.ELEMENT_NODE) {
+				//Turn the node into an element
+				Element field = (Element) n;
+				//If the element is the simulation name then we set it
+				if(field.getTagName().equals("name")) {
+					simulationName = field.getTextContent();
+					System.out.println(simulationName);
+				}
+				//If the element is the drone id then we set it
+				if(field.getTagName().equals("droneID")) {
+					droneIDNumber = field.getTextContent();
+					System.out.println(droneIDNumber);
+				}
+				//If the element is the locations then we set them
+				if(field.getTagName().equals("locations")) {
+					//Make a list of all of the locations in the locations element 
+					NodeList locationNodes = field.getElementsByTagName("location");
+					for(int j = 0; j < locationNodes.getLength(); j++) {
+						//Break each location into a list of nodes
+						NodeList locInfo = locationNodes.item(j).getChildNodes();
+						//Location variables to save for later
+						String locName = "";
+						int locX = 0;
+						int locY = 0;
+						for(int k = 0; k < locInfo.getLength(); k++) {
+							//Add the location info into a node to check to make sure its an element
+							Node locInfoFieldNode = locInfo.item(k);
+							if(locInfoFieldNode.getNodeType()==Node.ELEMENT_NODE) {
+								//Turn node into an element
+								Element locInfoField = (Element) locInfoFieldNode;
+								//If the element is the location name then we set it
+								if(locInfoField.getTagName().equals("name")) {
+									locName = locInfoField.getTextContent();
+								}
+								//If the element is the x coordinate then we set it
+								if(locInfoField.getTagName().equals("xCoordinate")) {
+									locX = Integer.valueOf(locInfoField.getTextContent());
+								}
+								//If the element is the y coordinate then we set it
+								if(locInfoField.getTagName().equals("yCoordinate")) {
+									locY = Integer.valueOf(locInfoField.getTextContent());
+								}
+							}
+						}
+						//Create location object from variables and then add those to the array
+						Location curLocation = new Location(locName, locX, locY);
+						locations.add(curLocation);
+					}
+				}
+				System.out.println(locations);
+				
+				//TODO: Parse out meals
+				
+				//If the element is the hours per shift then we set it
+				if(field.getTagName().equals("hourspershift")) {
+					hoursInShift = Integer.valueOf(field.getTextContent());
+					System.out.println(hoursInShift);
+				}
+				//If the element is the upper bound of orders per hour then we set it
+				if(field.getTagName().equals("ordersperhourupper")) {
+					upperOrdersPerHour = Integer.valueOf(field.getTextContent());
+					System.out.println(upperOrdersPerHour);
+				}
+				//If the element is the lower bound of orders per hour then we set it
+				if(field.getTagName().equals("ordersperhourlower")) {
+					lowerOrdersPerHour = Integer.valueOf(field.getTextContent());
+					System.out.println(lowerOrdersPerHour);
+				}
+			}
+		}
+	}
 	
 	public static void main(String[] args) throws FileNotFoundException {
 		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
@@ -917,7 +1019,8 @@ public class Main extends Application{
 			DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
 			simulationSettingsXML = documentBuilder.parse("simulationSettings.xml");
 			simulationSettingsIDs = getSimulationSettingsIDs();
-			currentSimulationSettingID = 1;
+			currentSimulationSettingID = "1";
+			buildSimulationSettingsFromXML(currentSimulationSettingID);
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -928,7 +1031,7 @@ public class Main extends Application{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		launch(args);
+		//launch(args);
 	}
 	
 }
