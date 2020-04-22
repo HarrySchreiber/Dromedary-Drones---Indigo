@@ -22,8 +22,9 @@ public class SimulationSettings {
 	
 	//TODO: IMPORTANT Lets discuss this class again to figure out what we have to actually have here and how we need to populate this stuff
 	//Like what are we going to pass it? An XML of all of the settings already filled out? Or are we giving it all of the variables?
-	public SimulationSettings(String name, ArrayList<Location> locations, ArrayList<Meal> meals, int hoursPerShift, int orderUpper, int orderLower) {
+	public SimulationSettings(String name, String droneID, ArrayList<Location> locations, ArrayList<Meal> meals, int hoursPerShift, int orderUpper, int orderLower) {
 		this.name = name;
+		//TODO: Pass drone ID to drone object?
 		this.currentDrone = new Drone();	//TODO: This will have to be updated with whatever drone the user wants
 		this.locations = locations;
 		this.meals = meals;	//TODO: Question 1: I feel like we need to pull this in from it being built in the main frontend side Question 2: Do we need a deep copy constructor here?

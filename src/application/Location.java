@@ -66,6 +66,9 @@ public class Location {
 		this.y = y;
 	}
 	
+	public String toString() {
+		return name;
+	}
 	
 	
 }
