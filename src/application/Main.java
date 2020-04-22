@@ -9,6 +9,8 @@ import java.util.Scanner;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -39,13 +41,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
+
 public class Main extends Application{
 	
 	//global variables
-	private Scene simulationScreen, settingsScreen; //scenes 
+	private Scene simulationScreen, settingsScreen, addLocationScreen; //scenes 
 	private int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private double sumPercent= 100; //a total 
 	private String realFileContents = ""; //what we want to print to the file
+	private ArrayList<Location> locations = new ArrayList<Location>(); //edit as it goes and clear when finished
+	private ArrayList<Location> finalLocations = new ArrayList<Location>(); //final set of locations to use in sim
+	private SimulationSettings currentSettings = new SimulationSettings();
 	//Test variables for printing to file
 	Map<Integer, Integer> fifoData;
 	Map<Integer, Integer> knapData;
@@ -62,7 +68,7 @@ public class Main extends Application{
 		try {
 			
 			//opens the file with the default values
-			Scanner sc = new Scanner(new File("DefSimData.txt")); 
+			Scanner sc = new Scanner(new File("NewSimData.txt")); 
 			StringBuffer buffer = new StringBuffer();
 			
 			//reads all the lines of the file to buffer
@@ -196,10 +202,17 @@ public class Main extends Application{
 		     xAxis.setLabel("Time Between Order and Delivery (min)");
 		     xAxis.setAnimated(false); // axis animations are removed
 	         yAxis.setLabel("Number of Orders Delivered");
-		     yAxis.setAnimated(false); // axis animations are removed
+			 yAxis.setAnimated(false); // axis animations are removed
+			 
+			 final NumberAxis xAxis1 = new NumberAxis(); // we are gonna plot against time
+		     final NumberAxis yAxis1 = new NumberAxis();
+		     xAxis1.setLabel("Time Between Order and Delivery (min)");
+		     xAxis1.setAnimated(false); // axis animations are removed
+	         yAxis1.setLabel("Number of Orders Delivered");
+		     yAxis1.setAnimated(false); // axis animations are removed
 
 		     //creating the line chart with two axis created above
-		     final LineChart<Number, Number> fifoLineChart = new LineChart<>(xAxis, yAxis);
+		     final LineChart<Number, Number> fifoLineChart = new LineChart<>(xAxis1, yAxis1);
 		     fifoLineChart.setTitle("FIFO Results");
 		     fifoLineChart.setAnimated(false); // disable animations
 			
@@ -233,8 +246,14 @@ public class Main extends Application{
 			Button runSimulationBtn = new Button("Run Simulation");
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
+
 				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
-				s.runSimulation();
+				try {
+					s.runSimulation(finalLocations);
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				
 				//TODO: Do we want to truncate this?
 				knapsackAvgLabel.setText("Average Time: " + s.findAverage(s.getKnapsackData()));
@@ -287,7 +306,7 @@ public class Main extends Application{
 			Button createSimulationBtn = new Button("Create New Simulation");
 			createSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			createSimulationBtn.setOnAction(e -> primaryStage.setScene(settingsScreen));	//Adds function to the button TODO: Expand function to grab which simulation we need to edit from the radio buttons
-			simulationScreenLayout.add(createSimulationBtn, 0, 3);	//Add the button to the screen
+			//simulationScreenLayout.add(createSimulationBtn, 0, 3);	//Add the button to the screen
 			
 			//A Horizontal Stack Box to put buttons for save data and open data
 			HBox dataButtonsBox = new HBox();
@@ -300,7 +319,7 @@ public class Main extends Application{
 			loadDataFileBtn.setOnAction(e ->{
 				System.out.println("TODO: Load a Results File");	//TODO: Add the logic here
 			});
-			dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
+			//dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
 			
 			Text sample = new Text(fifoText);
 			sample.setFont(new Font(14));
@@ -425,7 +444,7 @@ public class Main extends Application{
 			};
             schemeKCB.setOnAction(knapEvent);//sets up the event here
             
-          //Event handler for FIFO Check Box and replaces the new status of Fifo 
+            //Event handler for FIFO Check Box and replaces the new status of Fifo 
 			EventHandler<ActionEvent> fifoEvent = new EventHandler<ActionEvent>() { 
                 public void handle(ActionEvent e) { 
                 	//TODO: FIFO method
@@ -466,12 +485,26 @@ public class Main extends Application{
 			};
 			defaultDroneCB.setOnAction(defaultDroneEvent);
 			
-			//add everything to column one
-			columnOne.getChildren().addAll(schemeL, schemeKCB, schemeFCB, dronesL, defaultDroneCB);
-			
-			settingsScreenLayout.add(columnOne,0,1);
-			
 			//TODO: Add method for upload new campus map
+			//Add Locations Buttons
+			Label locationPointsLabel = new Label("Add Delivery Points");
+			Button addDeliveryPointsBtn = new Button("Add Delivery Point(s)");
+			
+			addDeliveryPointsBtn.setOnAction(e->{
+				 primaryStage.setScene(addLocationScreen);
+			});
+			
+			//TODO: Clear the delivery points
+			Button clearDeliveryPointsBtn = new Button("Clear Delivery Points");
+			clearDeliveryPointsBtn.setOnAction(e->{
+				locations.clear();
+							
+			});
+			
+			//add everything to column one
+			//columnOne.getChildren().addAll(schemeL, schemeKCB, schemeFCB, dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn);
+			columnOne.getChildren().addAll( dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn);
+			settingsScreenLayout.add(columnOne,0,1);
 			
 			//TODO: Add method for add new drone
 			
@@ -741,7 +774,7 @@ public class Main extends Application{
         	
         	//NOTE: spinner can't go higher than 30 orders but can change this 
         	SpinnerValueFactory<Integer> valueFactoryUH = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 30, upperOrdersB);
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 50, upperOrdersB);
         	spinnerUpperHours.setValueFactory(valueFactoryUH);
         	spinnerUpperHours.setMaxWidth(70);
         	spinnerUpperHours.setEditable(true);
@@ -761,7 +794,7 @@ public class Main extends Application{
         	//spinner for the lower limits of thr orders per hour
         	//NOTE: spinner can't go higher than 30 orders but can change this         	
         	SpinnerValueFactory<Integer> valueFactoryLH = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 30, lowerOrdersB);
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 50, lowerOrdersB);
         	spinnerLowerHours.setValueFactory(valueFactoryLH);
         	spinnerLowerHours.setMaxWidth(70);
         	spinnerLowerHours.setEditable(true);
@@ -828,23 +861,111 @@ public class Main extends Application{
 			Button cancelSimulationSetngsBtn = new Button("Cancel");
 			cancelSimulationSetngsBtn.setOnAction(e -> primaryStage.setScene(simulationScreen));	//Adds function to the button TODO: Idk if there's anything else were gonna have to do here cause as long as we dont save anything we should be good
 			cancelSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-			saveAndCancelButtonsBox.getChildren().add(cancelSimulationSetngsBtn);
+			//saveAndCancelButtonsBox.getChildren().add(cancelSimulationSetngsBtn);
 			
 			settingsScreenLayout.add(saveAndCancelButtonsBox,0,2,3,1);
 			
 			
 			
 			//------------------------------------------------------------------------------------------------
+
+			//Logic for setting up the add a location screen
+			GridPane addLocationScreenLayout = new GridPane();
+			addLocationScreenLayout.setAlignment(Pos.CENTER);
+			addLocationScreenLayout.setHgap(10);	//Set some spacing for horizontal
+			addLocationScreenLayout.setVgap(10);	//Set some spacing for vertical
+			
+			//Add Delivery point name
+			Label addNameLabel = new Label("Add Delivery Point Name:");
+			TextField addNameTextField = new TextField();
+			addLocationScreenLayout.add(addNameLabel, 0, 0);
+			addLocationScreenLayout.add(addNameTextField, 1, 0);
+			
+			//Add Delivery point X value
+			Label addXLabel = new Label("Value for X:");
+			TextField addXTextField = new TextField();
+			addLocationScreenLayout.add(addXLabel, 0, 1);
+			addLocationScreenLayout.add(addXTextField, 1, 1);
+			
+			//Add Delivery point Y value
+			Label addYLabel = new Label("Value for Y:");
+			TextField addYTextField = new TextField();
+			addLocationScreenLayout.add(addYLabel, 0, 2);
+			addLocationScreenLayout.add(addYTextField, 1, 2);
+			
+			//Just a label to give the person the option
+			Label orLabel = new Label("or");
+			GridPane.setHalignment(orLabel, HPos.CENTER);
+			addLocationScreenLayout.add(orLabel, 0, 3, 2, 1);
+			
+			//Add delivery points via file upload
+			Label uploadLocationFileLabel = new Label("Upload Delivery Points:");
+			Button uploadLocationFileBtn = new Button("Browse");
+			GridPane.setHalignment(uploadLocationFileBtn, HPos.RIGHT);
+			
+			//TODO: Add logic for file upload/selection, probably throw exceptions here if something is wrong
+			uploadLocationFileBtn.setOnAction(e->{
+				FileChooser fileChooser = new FileChooser();
+				File selectedFile = fileChooser.showOpenDialog(primaryStage);
+				uploadLocationFileLabel.setText("CurrentFile: " + selectedFile.getName());
+				try {
+					locations = currentSettings.populateLocations(selectedFile.getAbsolutePath());
+
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			});
+			
+			addLocationScreenLayout.add(uploadLocationFileLabel,0,4);
+			addLocationScreenLayout.add(uploadLocationFileBtn,1,4);
+			
+			//Button for saving points
+			Button saveLocationFileBtn = new Button("Save");
+			saveLocationFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+			
+			saveLocationFileBtn.setOnAction(e->{
+				//TODO: Add logic for saving points
+				if (!addNameTextField.getText().isEmpty() && !addXTextField.getText().isEmpty() && !addYTextField.getText().isEmpty()) {
+					Location extraLocation = new Location(addNameTextField.toString(), Integer.parseInt(addXTextField.toString()), Integer.parseInt(addYTextField.toString()));
+					locations.add(extraLocation);
+				}
+				
+				finalLocations = locations;
+				//locations.clear();
+				//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
+				primaryStage.setScene(settingsScreen); 	
+			});
+			
+			//Button for canceling the points
+			Button cancelLocationFileBtn = new Button("Cancel");
+			cancelLocationFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+			
+			cancelLocationFileBtn.setOnAction(e->{
+				//DO NOTHING
+				locations.clear();
+				//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
+				primaryStage.setScene(settingsScreen);
+			});
+			
+			addLocationScreenLayout.add(saveLocationFileBtn, 0, 5);
+			addLocationScreenLayout.add(cancelLocationFileBtn, 1, 5);
+			
+			
+			//-----------------------------------------------------------------------------------
 			
 			
 			//TODO: Decide on default
-			simulationScreen = new Scene(simulationScreenLayout,1000,600);
+			simulationScreen = new Scene(simulationScreenLayout,1000,650);
 			//TODO: Are we going to use this ever?
 			//simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			
 			//TODO: Decide on default 
-			settingsScreen = new Scene(settingsScreenLayout,1000,600);
+			settingsScreen = new Scene(settingsScreenLayout,1000,650);
 			
+			
+			//TODO: Decide on default
+			addLocationScreen = new Scene(addLocationScreenLayout, 1000, 650);
 			
 			primaryStage.setScene(simulationScreen);
 			//TODO: Decide if we want to be able to resize
