@@ -43,3 +43,16 @@ NOTE: You may have to change your "Directory" location, so just rename the end i
 15)In the "Import Projects" box, click the "Dromedary Drones -- Indigo" + where you saved in your git project in Step 12.
 
 16) Then click "Finish" and you should be good to go!
+
+Runing Our Simulation:
+
+1) Click the ">" arrow next to "Dromedary Drones -- Indigo"
+
+2) Click "src", then "application" and open up Main.java like you normally would to edit your code
+
+3) Run "Main.java" and our simulation page with our blank graphs should open up.
+
+4) Clicking "Run Simulation" will run with the typical orders and our GCC locations
+
+5) If you want to edit your simulation, click "Edit Simulation" and change what you want
+
