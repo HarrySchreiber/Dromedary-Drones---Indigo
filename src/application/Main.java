@@ -22,6 +22,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -519,6 +520,7 @@ public class Main extends Application{
 			VBox columnTwo = new VBox();
 			columnTwo.setAlignment(Pos.TOP_LEFT);
 			
+			
         	//Slider sliderO1 = new Slider();
 			Label perUsedL = new Label("Percentage Used: "  + String.valueOf(perUsedB));		
 		    columnTwo.getChildren().add(perUsedL);
@@ -528,12 +530,13 @@ public class Main extends Application{
 			GridPane grid = new GridPane();
 	        grid.setVgap(1);
 	        grid.setHgap(1);
+	        ScrollPane scrollPaneOrders = new ScrollPane();
 	        
 	        //Names of the 4 orders that we are using
-	        String [] orderNames = {"Order 1: ", "Order 2: ", "Order 3: ", "Order 4: "};
+	        String [] orderNames = {"Order 1: ", "Order 2: ", "Order 3: ", "Order 4: ", "Order 5: "};
 	       
 	        
-	        for(int i = 0; i < 4; i++){
+	        for(int i = 0; i < 5; i++){
 	        	
 	        	//variable dictionary for the for loop 
 	        	int curLoopVal = i;
@@ -716,10 +719,12 @@ public class Main extends Application{
 	        	
 	        	
 	        	
+	        	
 		}
 	        	        	        
 			//TODO: Use this to add things in column two
-			columnTwo.getChildren().addAll(grid);
+	        scrollPaneOrders.setContent(grid);
+			columnTwo.getChildren().addAll(scrollPaneOrders);
 			
 			settingsScreenLayout.add(columnTwo,1,1);
 			
