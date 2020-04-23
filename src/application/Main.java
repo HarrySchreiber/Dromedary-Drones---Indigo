@@ -9,6 +9,13 @@ import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -1070,6 +1077,55 @@ public class Main extends Application{
 		temporaryLocations = buildSimulationSettingsFromXML(id).getLocations();
 	}
 	
+	/**
+	 * Method to remove a simulation from the simulationsettings XML file
+	 * @param id ID String of the simulation we want to remove
+	 * @throws Exception If the default simulation has an attempt on its life then we throw an exception
+	 */
+	public static void removeSimulationSettingFromXML(String id) throws Exception {
+		//If someone tries to remove or edit the default settings
+		if(id.equals("1")) {
+			throw new Exception("Cannot remove default simulation");
+		}
+		
+		//Loop through all of the simulations to find the one to remove
+		NodeList simulationSettingsList = simulationSettingsXML.getElementsByTagName("simulationsetting");
+		for(int i = 0; i < simulationSettingsList.getLength(); i++) {
+			Element simulationSettingElement = (Element) simulationSettingsList.item(i);
+			//If the id attribute exists
+			if(simulationSettingElement.hasAttribute("id")) {
+				//If the id is the id that needs to be removed
+				if(simulationSettingElement.getAttribute("id").equals(id)) {
+					simulationSettingElement.getParentNode().removeChild(simulationSettingElement);
+				}
+			}
+		}
+		//Run the updater to update and write the actual file
+		updateSimulationSettingsXML();
+	}
+	
+	/**
+	 * Helper method to update and write out to the simulation settings xml
+	 */
+	public static void updateSimulationSettingsXML() {
+		TransformerFactory transformerFactory = TransformerFactory.newInstance();
+		try {
+			Transformer transformer = transformerFactory.newTransformer();
+			DOMSource domSource = new DOMSource(simulationSettingsXML);
+			StreamResult streamResult = new StreamResult(new File("simulationSettings.xml"));
+			
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");	//Indents the XML file instead of just listing the nodes out
+			transformer.transform(domSource, streamResult);
+		} catch (TransformerConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
 	public static void main(String[] args) throws FileNotFoundException {
 		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 		try {
@@ -1077,6 +1133,7 @@ public class Main extends Application{
 			simulationSettingsXML = documentBuilder.parse("simulationSettings.xml");
 			simulationSettingsIDs = getSimulationSettingsIDs();
 			currentSimulationSettingID = "1";
+			removeSimulationSettingFromXML("2");
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1088,6 +1145,10 @@ public class Main extends Application{
 			e.printStackTrace();
 		}
 		//launch(args);
+		catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }
