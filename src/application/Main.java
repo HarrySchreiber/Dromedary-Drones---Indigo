@@ -55,8 +55,8 @@ public class Main extends Application{
 	private static Document simulationSettingsXML;
 	private static ArrayList<String> simulationSettingsIDs;
 	private static String currentSimulationSettingID;
-	private ArrayList<Location> temporaryLocations;
-	private ArrayList<Meal> temporaryMeals;
+	private static ArrayList<Location> temporaryLocations;
+	private static ArrayList<Meal> temporaryMeals;
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -910,7 +910,12 @@ public class Main extends Application{
 		return ret;
 	}
 	
-	//TODO: Set back to SimulationSettings instead of void
+	
+	/**
+	 * a SimulationSettings builder from XML Document
+	 * @param id The ID string of the simulation we want to parse out
+	 * @return A SimulationSettings object that is populated from the xml
+	 */
 	public static SimulationSettings buildSimulationSettingsFromXML(String id) {
 		//Get a list of all of the simulation settings
 		NodeList simulationsettingList = simulationSettingsXML.getElementsByTagName("simulationsetting");
@@ -1049,6 +1054,22 @@ public class Main extends Application{
 		return new SimulationSettings(simulationName, droneIDNumber, locations, meals, hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
 	}
 	
+	/**
+	 * Helper method that populates the temporaryMeals ArrayList with the simulation that is given to it
+	 * @param id The id String of the simulation setting that is desired
+	 */
+	public static void populateDynamicMealArray(String id){
+		temporaryMeals = buildSimulationSettingsFromXML(id).getMeals();
+	}
+	
+	/**
+	 * Helper method that populates the temporaryLocations ArrayList with the simulation that is given to it
+	 * @param id The id String of the simulation setting that is desired
+	 */
+	public static void populateDynamicLocationArray(String id){
+		temporaryLocations = buildSimulationSettingsFromXML(id).getLocations();
+	}
+	
 	public static void main(String[] args) throws FileNotFoundException {
 		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 		try {
@@ -1056,7 +1077,6 @@ public class Main extends Application{
 			simulationSettingsXML = documentBuilder.parse("simulationSettings.xml");
 			simulationSettingsIDs = getSimulationSettingsIDs();
 			currentSimulationSettingID = "1";
-			buildSimulationSettingsFromXML(currentSimulationSettingID);
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

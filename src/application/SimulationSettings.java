@@ -38,6 +38,106 @@ public class SimulationSettings {
 		//TODO: Add real logic here
 		return true;
 	}
+	
+	
+	/**
+	 * @return The Locations in a simulation
+	 */
+	public ArrayList<Location> getLocations() {
+		return locations;
+	}
+
+	/**
+	 * @param locations The locations in a simulation
+	 */
+	public void setLocations(ArrayList<Location> locations) {
+		this.locations = locations;
+	}
+
+	/**
+	 * @return The Meals in a simulation
+	 */
+	public ArrayList<Meal> getMeals() {
+		return meals;
+	}
+
+	/**
+	 * @param meals The Meals in a simulation
+	 */
+	public void setMeals(ArrayList<Meal> meals) {
+		this.meals = meals;
+	}
+	
+	
+	/**
+	 * @return Name of the current simulation
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name Name of the current simulation
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return Drone of the current simulation
+	 */
+	public Drone getCurrentDrone() {
+		return currentDrone;
+	}
+
+	/**
+	 * @param currentDrone Drone of the current simulation
+	 */
+	public void setCurrentDrone(Drone currentDrone) {
+		this.currentDrone = currentDrone;
+	}
+
+	/**
+	 * @return Hours Per Shift in the current simulation
+	 */
+	public int getHoursPerShift() {
+		return hoursPerShift;
+	}
+
+	/**
+	 * @param hoursPerShift Hours Per Shift in the current simulation
+	 */
+	public void setHoursPerShift(int hoursPerShift) {
+		this.hoursPerShift = hoursPerShift;
+	}
+
+	/**
+	 * @return Upper bound of the orders per hour in the simulation
+	 */
+	public int getOrderUpper() {
+		return orderUpper;
+	}
+
+	/**
+	 * @param orderUpper Upper bound of the orders per hour in the simulation
+	 */
+	public void setOrderUpper(int orderUpper) {
+		this.orderUpper = orderUpper;
+	}
+
+	/**
+	 * @return Lower bound of the orders per hour in the simulation
+	 */
+	public int getOrderLower() {
+		return orderLower;
+	}
+
+	/**
+	 * @param orderLower Lower bound of the orders per hour in the simulation
+	 */
+	public void setOrderLower(int orderLower) {
+		this.orderLower = orderLower;
+	}
 
 	public ArrayList<Location> populateLocations(String deliveryPoints) throws FileNotFoundException {
 		ArrayList<Location> deliveryLocations = new ArrayList<Location>();
