@@ -1088,6 +1088,9 @@ public class Main extends Application{
 			throw new Exception("Cannot remove default simulation");
 		}
 		
+		//Remove the id from the list used to parse grab simulation names
+		simulationSettingsIDs.remove(id);
+		
 		//Loop through all of the simulations to find the one to remove
 		NodeList simulationSettingsList = simulationSettingsXML.getElementsByTagName("simulationsetting");
 		for(int i = 0; i < simulationSettingsList.getLength(); i++) {
@@ -1133,7 +1136,6 @@ public class Main extends Application{
 			simulationSettingsXML = documentBuilder.parse("simulationSettings.xml");
 			simulationSettingsIDs = getSimulationSettingsIDs();
 			currentSimulationSettingID = "1";
-			removeSimulationSettingFromXML("2");
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
