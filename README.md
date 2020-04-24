@@ -31,23 +31,23 @@ NOTE: You may have to change your "Directory" location, so just rename the end i
 
 
 If you get to this point and there are JavaFX import errors in "Main.java" follow these steps:
-	1. Download JavaFX JDK: https://gluonhq.com/download/javafx-14-0-1-sdk-windows/
-	2. Extract the files anywhere and write down the file path
-	3. In eclipse go to window>preferences>Java>Build Path>User Libraries
-	4. Click "New..."
-	5. Name the user library "JavaFX" and click ok
-	6. Click on "Add External JARs"
-	7. Navigate to where you saved those extracted files
-	8. Go into the "lib" folder and just select all of the JAR files and click open
-	9. Click "Apply and Close"
-	10. Right click on your eclipse project and navigate to Build Path> Add Libraries...
-	11. Click "User Library" and Click "Next" and Select "JavaFX" and Click "Finish"
+	1) Download JavaFX JDK: https://gluonhq.com/download/javafx-14-0-1-sdk-windows/
+	2) Extract the files anywhere and write down the file path
+	3) In eclipse go to window>preferences>Java>Build Path>User Libraries
+	4) Click "New..."
+	5) Name the user library "JavaFX" and click ok
+	6) Click on "Add External JARs"
+	7) Navigate to where you saved those extracted files
+	8) Go into the "lib" folder and just select all of the JAR files and click open
+	9) Click "Apply and Close"
+	10) Right click on your eclipse project and navigate to Build Path> Add Libraries...
+	11) Click "User Library" and Click "Next" and Select "JavaFX" and Click "Finish"
 If at this point you cannot run the application because of missing runtime components follow these steps:
-	1. In eclipse, next to the run button there is a drop down arrow, select it and Click "run configurations"
-	2. Select Arguments Tab on the main page
-	3. In the VM Arguments box type: --module-path <the file path of your JavaFX jars to the lib level, the file path between quotation marks> --add-modules javafx.controls,javafx.fxml
-	4. Hit apply
-	5. You should now be able to run the program if you were previously unable to do so
+	1) In eclipse, next to the run button there is a drop down arrow, select it and Click "run configurations"
+	2) Select Arguments Tab on the main page
+	3) In the VM Arguments box type: --module-path <the file path of your JavaFX jars to the lib level, the file path between quotation marks> --add-modules javafx.controls,javafx.fxml
+	4) Hit apply
+	5) You should now be able to run the program if you were previously unable to do so
 
 A video breakdown of the buildpath steps can be found here: https://www.youtube.com/watch?v=oVn6_2KuYbM
 
