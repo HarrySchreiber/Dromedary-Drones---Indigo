@@ -1129,6 +1129,102 @@ public class Main extends Application{
 		
 	}
 	
+	/**
+	 * A method to write simulation settings to an xml
+	 * @param id The id of the new simulation or existing simulation that has new data
+	 * @param simulationSetting A SimulationSettings object that contains all of the data needed to be put into the XML
+	 * @throws Exception If someone tries to edit the first document
+	 */
+	public static void simulationSettingToXML(String id, SimulationSettings simulationSetting) throws Exception {
+		//Remove the old one if were editing a simulation
+		removeSimulationSettingFromXML(id);
+		
+		//Get the root of the file
+		Element root = (Element) simulationSettingsXML.getElementsByTagName("simulationsettings").item(0);
+		
+		//Make a new simulationsetting element and add its id to its attributes and add it to the root
+		Element currentSimulationDocument = simulationSettingsXML.createElement("simulationsetting");
+		currentSimulationDocument.setAttribute("id", id);
+		root.appendChild(currentSimulationDocument);
+		
+		//Add a name element to the current simulationsetting
+		Element simulationNameElement = simulationSettingsXML.createElement("name");
+		simulationNameElement.setTextContent(simulationSetting.getName());
+		currentSimulationDocument.appendChild(simulationNameElement);
+		
+		//Add a droneID element to the current simulationsetting
+		Element droneIDElement = simulationSettingsXML.createElement("droneID");
+		droneIDElement.setTextContent(simulationSetting.getCurrentDrone().getDroneID());
+		currentSimulationDocument.appendChild(droneIDElement);
+		
+		//Add locations element to current simulation setting
+		Element locationsElement = simulationSettingsXML.createElement("locations");
+		currentSimulationDocument.appendChild(locationsElement);
+		for(Location location : simulationSetting.getLocations()) {
+			//Add a location element to the locations
+			Element locationElement = simulationSettingsXML.createElement("location");
+			locationsElement.appendChild(locationElement);
+			
+			//Give the location a name
+			Element locationNameElement = simulationSettingsXML.createElement("name");
+			locationNameElement.setTextContent(location.getName());
+			locationElement.appendChild(locationNameElement);
+			
+			//Give the location an x coordinate
+			Element xCoordinateElement = simulationSettingsXML.createElement("xCoordinate");
+			xCoordinateElement.setTextContent(String.valueOf(location.getX()));
+			locationElement.appendChild(xCoordinateElement);
+			
+			//Give the location a y coordinate
+			Element yCoordinateElement = simulationSettingsXML.createElement("yCoordinate");
+			yCoordinateElement.setTextContent(String.valueOf(location.getY()));
+			locationElement.appendChild(yCoordinateElement);
+		}
+		
+		//Add meals element to the XML
+		Element mealsElement = simulationSettingsXML.createElement("meals");
+		currentSimulationDocument.appendChild(mealsElement);
+		for(Meal meal : simulationSetting.getMeals()) {
+			//Add meal element to the meals
+			Element mealElement = simulationSettingsXML.createElement("meal");
+			mealsElement.appendChild(mealElement);
+			
+			//Add the meal probability
+			Element probabilityElement = simulationSettingsXML.createElement("probability");
+			probabilityElement.setTextContent(String.valueOf(meal.getProbability()));
+			mealElement.appendChild(probabilityElement);
+			
+			//Add the food items element
+			Element foodItemsElement = simulationSettingsXML.createElement("fooditems");
+			mealElement.appendChild(foodItemsElement);
+			
+			for(FoodItem foodItem : meal.getFoodItems()) {
+				//Add the food items to fooditems element
+				Element foodItemElement = simulationSettingsXML.createElement("fooditem");
+				foodItemElement.setTextContent(foodItem.getName());
+				foodItemsElement.appendChild(foodItemElement);
+			}
+		}
+		
+		//Add a hours per shift element to the current simulationsetting
+		Element hoursPerShiftElement = simulationSettingsXML.createElement("hourspershift");
+		hoursPerShiftElement.setTextContent(String.valueOf(simulationSetting.getHoursPerShift()));
+		currentSimulationDocument.appendChild(hoursPerShiftElement);
+		
+		//Add a upper orders per hour element to the current simulationsetting
+		Element upperOrdersPerHourElement = simulationSettingsXML.createElement("ordersperhourupper");
+		upperOrdersPerHourElement.setTextContent(String.valueOf(simulationSetting.getOrderUpper()));
+		currentSimulationDocument.appendChild(upperOrdersPerHourElement);
+		
+		//Add a lower orders per hour element to the current simulationsetting
+		Element lowerOrdersPerHourElement = simulationSettingsXML.createElement("ordersperhourlower");
+		lowerOrdersPerHourElement.setTextContent(String.valueOf(simulationSetting.getOrderLower()));
+		currentSimulationDocument.appendChild(lowerOrdersPerHourElement);
+		
+		//Run the updater to update and write the actual file
+		updateSimulationSettingsXML();
+	}
+	
 	public static void main(String[] args) throws FileNotFoundException {
 		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 		try {
@@ -1146,11 +1242,11 @@ public class Main extends Application{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//launch(args);
 		catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		//launch(args);
 	}
 	
 }

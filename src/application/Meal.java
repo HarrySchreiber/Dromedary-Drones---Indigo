@@ -12,7 +12,7 @@ public class Meal {
 	FoodItem burgers = new FoodItem("Burger", 0.375);
 	FoodItem fries = new FoodItem("Fries", 0.25);
 	FoodItem coke = new FoodItem("coke", 0.875);
-	ArrayList<FoodItem> foodItems;
+	private ArrayList<FoodItem> foodItems;
 	private double totalWeight;
 	private double probability;
 	
@@ -62,5 +62,13 @@ public class Meal {
 	
 	public String toString() {
 		return "Prob: " + probability + " Items: " + foodItems;
+	}
+	
+	public ArrayList<FoodItem> getFoodItems() {
+		return foodItems;
+	}
+
+	public void setFoodItems(ArrayList<FoodItem> foodItems) {
+		this.foodItems = foodItems;
 	}
 }
