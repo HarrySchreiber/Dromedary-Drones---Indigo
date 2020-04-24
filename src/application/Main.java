@@ -1225,6 +1225,21 @@ public class Main extends Application{
 		updateSimulationSettingsXML();
 	}
 	
+	/**
+	 * Find the next available ID for the SimulationSettings
+	 * @return The next available ID for a SimulationSettings
+	 */
+	public static String findAvailableSimulationSettingID() {
+		int counter = 1;
+		
+		//Find a value that is not in the simulation already
+		while(simulationSettingsIDs.contains(String.valueOf(counter))) {
+			counter++;
+		}
+		
+		return String.valueOf(counter);
+	}
+	
 	public static void main(String[] args) throws FileNotFoundException {
 		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 		try {
