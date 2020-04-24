@@ -36,7 +36,10 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -162,7 +165,34 @@ public class Main extends Application{
 			//Simulation Screen Layout
 			GridPane simulationScreenLayout = buildSimulationScreen();
 			
-			//TODO: Add Scroll panel and radio buttons
+			
+			//Scroll Pane for Radio Buttons Section
+			ScrollPane simulationSelectorPane = new ScrollPane();
+			
+			//Sets which group of radio buttons this simulation is a part of
+			ToggleGroup simulationSelectorButtons = new ToggleGroup();
+			//Make and populate the radio buttons
+			VBox simulationSelectorVBox = new VBox();
+			for(String idNumber : simulationSettingsIDs) {
+				//Make a radio button with the name of the SimulationSetting
+				RadioButton radioButton = new RadioButton(getSimulationNameFromID(idNumber));
+				//Upon clicking on a radio button the currentSimulationID is set to the current ID
+				radioButton.setOnAction(e->{
+					currentSimulationSettingID = idNumber;
+				});
+				//Start the simulation with the default settings
+				if(idNumber.equals("1")) {
+					radioButton.setSelected(true);
+				}
+				//Add radio button to toggle group and add it to the screen
+				radioButton.setToggleGroup(simulationSelectorButtons);
+				simulationSelectorVBox.getChildren().add(radioButton);
+			}
+			//Add the content to the screen
+			simulationSelectorPane.setContent(simulationSelectorVBox);
+			simulationScreenLayout.add(simulationSelectorPane, 0, 0);
+			
+			
 			
 			//Section that holds results
 			GridPane resultsBox = new GridPane();
@@ -1240,6 +1270,14 @@ public class Main extends Application{
 		return String.valueOf(counter);
 	}
 	
+	/**
+	 * @param id The ID of the simulation in question
+	 * @return The Name of the simulation
+	 */
+	public String getSimulationNameFromID(String id) {
+		return buildSimulationSettingsFromXML(id).getName();
+	}
+	
 	public static void main(String[] args) throws FileNotFoundException {
 		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 		try {
@@ -1261,7 +1299,7 @@ public class Main extends Application{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//launch(args);
+		launch(args);
 	}
 	
 }
