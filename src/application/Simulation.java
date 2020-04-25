@@ -94,8 +94,8 @@ public class Simulation {
 		for(int simulationNum = 0; simulationNum < 50; simulationNum++) {
 			ArrayList<Order> orders = new ArrayList<Order>();
 			//TODO: Set these up to dynamically populate: ie take out 4 and 15 and populate from settings
-			for(int i = 0; i<16; i++) {
-				for(int j = 0; j<25; j++) {
+			for(int i = 0; i<4; i++) {
+				for(int j = 0; j<15; j++) {
 					Order o = new Order(mealPicker(meals), rnd.nextInt(60)+1 + (i*60), locations.get(rnd.nextInt(locations.size())));
 					orders.add(o);
 				}
@@ -141,7 +141,7 @@ public class Simulation {
 				
 				//Loop through skipped orders to add to the drone
 				for(Order ordr : skipped) {
-					if(ordr.getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo()) {
+					if(ordr.getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo() && checkDroneCargoAgainstMaxDeliveryPoints(onDrone, ordr)) {
 						onDrone.add(ordr);
 						foodListDeepCopy.remove(ordr);
 					}
@@ -159,7 +159,7 @@ public class Simulation {
 				}
 				
 				//Make sure we have a valid index, make sure that the food can actually fit on the drone
-				if(max_index >= 0 && foodListDeepCopy.get(max_index).getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo()) {
+				if(max_index >= 0 && foodListDeepCopy.get(max_index).getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo()&& checkDroneCargoAgainstMaxDeliveryPoints(onDrone, foodListDeepCopy.get(max_index))) {
 					//Add delivery to drone 
 					onDrone.add(foodListDeepCopy.remove(max_index));
 					//Mark anything as skipped if it was skipped
@@ -240,7 +240,7 @@ public class Simulation {
 			//If the drone is not at capacity already, if the food list has items still, and if the item were looking at came in before or at the current time
 			while(!full && !foodListDeepCopy.isEmpty() && foodListDeepCopy.get(0).getTimeStamp() <= time) {
 				//If the weight of the next item to be added to the drone comes under the drones weight capacity when added to the drone
-				if(foodListDeepCopy.get(0).getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo()) {
+				if(foodListDeepCopy.get(0).getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo() && checkDroneCargoAgainstMaxDeliveryPoints(onDrone, foodListDeepCopy.get(0))) {
 					onDrone.add(foodListDeepCopy.remove(0));
 				}else {
 					full = true;
