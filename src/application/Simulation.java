@@ -18,6 +18,7 @@ public class Simulation {
 	private static final int FEET_IN_A_MILE = 5280;
 	private Map<Integer, Integer> fifoData;
 	private Map<Integer, Integer> knapsackData;
+	private int maxLocations;
 
 	/**
 	 * Creates a simulation object
@@ -56,6 +57,11 @@ public class Simulation {
 		locations.add(l8);
 		locations.add(l9);
 		locations.add(l10);
+		
+		maxLocations = maxNumberOfLocationsToDeliverTo(new Drone(), locations);
+		
+		
+		
 		
 		Meal m1 = new Meal(0.55);
 		Meal m2 = new Meal(0.10);
@@ -392,5 +398,45 @@ public class Simulation {
 		double timeToGoMaxDistance = maxDistance/drone.getAvgCruisingSpeed() * MINUTES_IN_AN_HOUR;
 		ret = (int) (drone.getMaxFlightTime()/timeToGoMaxDistance);
 		return ret;
+	}
+	
+	/**
+	 * Checks to see if a drone can make it to all of the locations in the alloted max flight time
+	 * @param ordersOnDrone The items currently on the drone
+	 * @param prospectiveOrder The item were trying to pack on the drone
+	 * @return true if we can fit the order on the drone, false if we cannot fit the item on the drone
+	 */
+	public boolean checkDroneCargoAgainstMaxDeliveryPoints(ArrayList<Order> ordersOnDrone, Order prospectiveOrder) {
+		//Add all of the current items on the drone to a list of locations
+		ArrayList<Location> locations = new ArrayList<Location>();
+		for(Order order : ordersOnDrone) {
+			boolean locationNotPresent = true;
+			
+			for(Location location : locations) {
+				if(location.equals(order.getDeliveryPoint())) {
+					locationNotPresent = false;
+				}
+			}
+			
+			if(locationNotPresent) {
+				locations.add(order.getDeliveryPoint());
+			}
+		}
+		
+		//If the prospective order had a location outside of the locations already present then we add that to the locations array
+		boolean locationNotPresent = true;
+		
+		for(Location location : locations) {
+			if(location.equals(prospectiveOrder.getDeliveryPoint())) {
+				locationNotPresent = false;
+			}
+		}
+		
+		if(locationNotPresent) {
+			locations.add(prospectiveOrder.getDeliveryPoint());
+		}
+		
+		//If the number of locations exceeds the max number of locations we can have return false
+		return locations.size() <= maxLocations;
 	}
 }
