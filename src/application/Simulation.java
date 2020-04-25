@@ -58,6 +58,7 @@ public class Simulation {
 		locations.add(l10);
 		
 		
+		
 		Meal m1 = new Meal(0.55);
 		Meal m2 = new Meal(0.10);
 		Meal m3 = new Meal(0.20);
@@ -363,4 +364,21 @@ public class Simulation {
 		return retMeal;
 	}
 	
+	/**
+	 * Method for finding the max distance between any 2 points on our map
+	 * @param locations The array of locations to be assessed
+	 * @return The max distance between to points on the map
+	 */
+	public double getMaxDistanceOnMap(ArrayList<Location> locations) {
+		//Standard distance formula mixed with standard max finding, the nested loop run n(n+1)/2 times rather than n*n, thanks Gauss
+		double max = 0;
+		for(int i = 0; i < locations.size(); i++) {
+			for(int j = i; j < locations.size(); j++) {
+				if((Math.sqrt(Math.pow((locations.get(i).getX()-locations.get(j).getX()), 2)+Math.pow((locations.get(i).getY()-locations.get(j).getY()), 2))) > max) {
+					max = (Math.sqrt(Math.pow((locations.get(i).getX()-locations.get(j).getX()), 2)+Math.pow((locations.get(i).getY()-locations.get(j).getY()), 2)));
+				}
+			}
+		}
+		return max;
+	}
 }
