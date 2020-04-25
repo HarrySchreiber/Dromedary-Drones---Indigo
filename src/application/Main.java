@@ -33,6 +33,8 @@ import javafx.beans.binding.Bindings;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main extends Application{
 	
@@ -41,6 +43,8 @@ public class Main extends Application{
 	private int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private double sumPercent= 100; //a total 
 	private String realFileContents = ""; //what we want to print to the file
+	private Map<Integer,Integer> fifoData;
+	private Map<Integer,Integer> knapsackData;
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -221,19 +225,23 @@ public class Main extends Application{
 				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
 				s.runSimulation();
 				
-				//TODO: Do we want to truncate this?
-				knapsackAvgLabel.setText("Average Time: " + s.findAverage(s.getKnapsackData()));
-				fifoAvgLabel.setText("Average Time: " + s.findAverage(s.getFifoData()));
+				//Reduce the data down to just the summary data in the graph
+				reduceKnapsackToMapFromArrayListOrders(s.getKnapsackData());
+				reduceFifoToMapFromArrayListOrders(s.getFifoData());
 				
-				knapsackWrstLabel.setText("Worst Time: " + s.findWorst(s.getKnapsackData()));
-				fifoWrstLabel.setText("Worst Time: " + s.findWorst(s.getFifoData()));
+				//TODO: Do we want to truncate this?
+				knapsackAvgLabel.setText("Average Time: " + s.findAverage(knapsackData));
+				fifoAvgLabel.setText("Average Time: " + s.findAverage(fifoData));
+				
+				knapsackWrstLabel.setText("Worst Time: " + s.findWorst(knapsackData));
+				fifoWrstLabel.setText("Worst Time: " + s.findWorst(fifoData));
 				
 				//Clear the chart
 				knapLineChart.getData().clear();
 				XYChart.Series<Number, Number> knapSeries = new XYChart.Series<Number, Number>();
 				//Fill the series with data
-				for(Integer minute : s.getKnapsackData().keySet()) {
-					knapSeries.getData().add(new XYChart.Data<Number, Number>(minute,s.getKnapsackData().get(minute)));
+				for(Integer minute : knapsackData.keySet()) {
+					knapSeries.getData().add(new XYChart.Data<Number, Number>(minute,knapsackData.get(minute)));
 				}
 				knapLineChart.getData().add(knapSeries);
 				
@@ -241,14 +249,14 @@ public class Main extends Application{
 				fifoLineChart.getData().clear();
 				XYChart.Series<Number, Number> fifoSeries = new XYChart.Series<Number, Number>();
 				//Fill the series with data
-				for(Integer minute : s.getFifoData().keySet()) {
-					fifoSeries.getData().add(new XYChart.Data<Number, Number>(minute,s.getFifoData().get(minute)));
+				for(Integer minute : fifoData.keySet()) {
+					fifoSeries.getData().add(new XYChart.Data<Number, Number>(minute,fifoData.get(minute)));
 				}
 				fifoLineChart.getData().add(fifoSeries);
 				
 				//TODO:Remove from testing
-				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
-				System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(s.getKnapsackData()) + " Worst Time: " + s.findWorst(s.getKnapsackData()));
+				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(fifoData) + " Worst Time: " + s.findWorst(fifoData));
+				System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(knapsackData) + " Worst Time: " + s.findWorst(knapsackData));
 				
 			}); //TODO: Add some logic to run the simulation
 			simulationScreenLayout.add(runSimulationBtn, 0, 1);	//Add the button to the screen
@@ -881,5 +889,45 @@ public class Main extends Application{
 			sumPercent =  sumPercent + plus;	
 	}
 	
+	/**
+	 * @param orders Array of order data from the simulation run
+	 */
+	public void reduceKnapsackToMapFromArrayListOrders(ArrayList<Order> orders) {
+		knapsackData = new HashMap<Integer,Integer>();
+		
+		//Find the difference in time and add it to the map data
+		for(Order order : orders) {
+			int minutesTaken = order.getTimeStampDelivered() - order.getTimeStampOrder();
+			if(knapsackData.containsKey(minutesTaken)) {
+				knapsackData.put(minutesTaken, knapsackData.get(minutesTaken) + 1);
+			}else {
+				knapsackData.put(minutesTaken, 1);
+			}
+		}
+	}
 	
+	/**
+	 * @param orders Array of order data from the simulation run
+	 */
+	public void reduceFifoToMapFromArrayListOrders(ArrayList<Order> orders) {
+		fifoData = new HashMap<Integer,Integer>();
+		
+		//Find the difference in time and add it to the map data
+		for(Order order : orders) {
+			int minutesTaken = order.getTimeStampDelivered() - order.getTimeStampOrder();
+			if(fifoData.containsKey(minutesTaken)) {
+				fifoData.put(minutesTaken, fifoData.get(minutesTaken) + 1);
+			}else {
+				fifoData.put(minutesTaken, 1);
+			}
+		}
+	}
+	
+	public void reduceKnapsackToMapFromDataFile() {
+		
+	}
+	
+	public void reduceFifoToMapFromDataFile() {
+		
+	}
 }

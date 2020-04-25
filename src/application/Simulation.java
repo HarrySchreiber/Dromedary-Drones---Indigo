@@ -16,16 +16,16 @@ public class Simulation {
 	
 	private static final int MINUTES_IN_AN_HOUR = 60;
 	private static final int FEET_IN_A_MILE = 5280;
-	private Map<Integer, Integer> fifoData;
-	private Map<Integer, Integer> knapsackData;
+	private ArrayList<Order> fifoData;
+	private ArrayList<Order> knapsackData;
 
 	/**
 	 * Creates a simulation object
 	 * TODO: Possibly send in a SimulationSettings Object to be used in the simulation
 	 */
 	public Simulation() {
-		fifoData = new HashMap<Integer,Integer>();
-		knapsackData = new HashMap<Integer,Integer>();
+		fifoData = new ArrayList<Order>();
+		knapsackData = new ArrayList<Order>();
 	}
 	
 	/**
@@ -91,7 +91,7 @@ public class Simulation {
 			//TODO: Set these up to dynamically populate: ie take out 4 and 15 and populate from settings
 			for(int i = 0; i<16; i++) {
 				for(int j = 0; j<25; j++) {
-					Order o = new Order(mealPicker(meals), rnd.nextInt(60)+1 + (i*60), locations.get(rnd.nextInt(locations.size())));
+					Order o = new Order(simulationNum, mealPicker(meals), rnd.nextInt(60)+1 + (i*60), locations.get(rnd.nextInt(locations.size())));
 					orders.add(o);
 				}
 			}
@@ -147,7 +147,7 @@ public class Simulation {
 				int max_index = -1;	
 				for(int i = 0; i < foodListDeepCopy.size(); i++) {
 					//Check its weight and if its within the time frame of execution
-					if(max_weight < foodListDeepCopy.get(i).getMeal().calculateWeight() && foodListDeepCopy.get(i).getTimeStamp() <= time) {
+					if(max_weight < foodListDeepCopy.get(i).getMeal().calculateWeight() && foodListDeepCopy.get(i).getTimeStampOrder() <= time) {
 						max_weight = foodListDeepCopy.get(i).getMeal().calculateWeight();
 						max_index = i;
 					}
@@ -190,15 +190,10 @@ public class Simulation {
 				double curTime = distance/d.getAvgCruisingSpeed() * MINUTES_IN_AN_HOUR;
 				//Add that time and the unload time to the current time
 				time += curTime + d.getUnloadTime();
-				//Calculate the number of minutes between order and receiving the food
-				int minutesTaken = (int) Math.round(time-onDrone.get(i).getTimeStamp());
 				
-				//Add the data to the HashMap
-				if(knapsackData.containsKey(minutesTaken)) {
-					knapsackData.put(minutesTaken, knapsackData.get(minutesTaken) + 1);
-				}else {
-					knapsackData.put(minutesTaken, 1);
-				}
+				//Add the data to the ArrayList
+				onDrone.get(i).setTimeStampDelivered((int) Math.round(time));
+				knapsackData.add(onDrone.get(i));
 			}
 			//Finish out the simulation timings for returning to home base
 			if(!onDrone.isEmpty()) {
@@ -233,7 +228,7 @@ public class Simulation {
 			ArrayList<Order> onDrone = new ArrayList<Order>();
 			boolean full = false;
 			//If the drone is not at capacity already, if the food list has items still, and if the item were looking at came in before or at the current time
-			while(!full && !foodListDeepCopy.isEmpty() && foodListDeepCopy.get(0).getTimeStamp() <= time) {
+			while(!full && !foodListDeepCopy.isEmpty() && foodListDeepCopy.get(0).getTimeStampOrder() <= time) {
 				//If the weight of the next item to be added to the drone comes under the drones weight capacity when added to the drone
 				if(foodListDeepCopy.get(0).getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo()) {
 					onDrone.add(foodListDeepCopy.remove(0));
@@ -261,15 +256,10 @@ public class Simulation {
 				double curTime = distance/d.getAvgCruisingSpeed() * MINUTES_IN_AN_HOUR;
 				//Add that time and the unload time to the current time
 				time += curTime + d.getUnloadTime();
-				//Calculate the number of minutes between order and receiving the food
-				int minutesTaken = (int) Math.round(time-onDrone.get(i).getTimeStamp());
 				
-				//Add the data to the HashMap
-				if(fifoData.containsKey(minutesTaken)) {
-					fifoData.put(minutesTaken, fifoData.get(minutesTaken) + 1);
-				}else {
-					fifoData.put(minutesTaken, 1);
-				}
+				//Add the data to the ArrayList
+				onDrone.get(i).setTimeStampDelivered((int) Math.round(time));
+				fifoData.add(onDrone.get(i));
 			}
 			//Finish out the simulation timings for returning to home base
 			if(!onDrone.isEmpty()) {
@@ -328,14 +318,14 @@ public class Simulation {
 	/**
 	 * @return the data from the fifo implementation
 	 */
-	public Map<Integer, Integer> getFifoData() {
+	public ArrayList<Order> getFifoData() {
 		return fifoData;
 	}
 	
 	/**
 	 * @return the data from the knapsack implementation
 	 */
-	public Map<Integer, Integer> getKnapsackData() {
+	public ArrayList<Order> getKnapsackData() {
 		return knapsackData;
 	}
 
