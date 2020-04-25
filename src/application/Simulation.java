@@ -57,8 +57,6 @@ public class Simulation {
 		locations.add(l9);
 		locations.add(l10);
 		
-		
-		
 		Meal m1 = new Meal(0.55);
 		Meal m2 = new Meal(0.10);
 		Meal m3 = new Meal(0.20);
@@ -380,5 +378,19 @@ public class Simulation {
 			}
 		}
 		return max;
+	}
+	
+	/**
+	 * Will return the max locations a drone can deliver to on a single trip
+	 * @param drone The drone in this simulation
+	 * @param locations Array of all possible Locations
+	 * @return the max locations a drone can deliver to on a single trip
+	 */
+	public int maxNumberOfLocationsToDeliverTo(Drone drone, ArrayList<Location> locations) {
+		int ret = 0;
+		double maxDistance = getMaxDistanceOnMap(locations) / FEET_IN_A_MILE;
+		double timeToGoMaxDistance = maxDistance/drone.getAvgCruisingSpeed() * MINUTES_IN_AN_HOUR;
+		ret = (int) (drone.getMaxFlightTime()/timeToGoMaxDistance);
+		return ret;
 	}
 }
