@@ -41,6 +41,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
+import javafx.application.Application;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import javafx.stage.Stage;
+
 
 public class Main extends Application{
 	
@@ -498,7 +507,26 @@ public class Main extends Application{
 			Button addDeliveryPointsBtn = new Button("Add Delivery Point(s)");
 			
 			addDeliveryPointsBtn.setOnAction(e->{
-				 primaryStage.setScene(addLocationScreen);
+				
+				Scene scene = new Scene(new Group());
+
+        		VBox root = new VBox();     
+
+
+				final WebView browser = new WebView();
+				final WebEngine webEngine = browser.getEngine();
+		
+				ScrollPane scrollPane = new ScrollPane();
+				scrollPane.setContent(browser);
+				File f = new File("src/application/TSP.html");
+				webEngine.load(f.toURI().toString());
+
+				root.getChildren().addAll(scrollPane);
+				scene.setRoot(root);
+		
+				primaryStage.setScene(scene);
+				 //primaryStage.setScene(addLocationScreen);
+
 			});
 			
 			//TODO: Clear the delivery points

@@ -2,6 +2,7 @@ package application;
 
 import java.util.ArrayList;
 
+
 public class TravelingSalesmanProblem {
 
     private ArrayList<Location> locations = new ArrayList<Location>();
@@ -38,7 +39,7 @@ public class TravelingSalesmanProblem {
      * @return a graph-like structure that holds the weight/distance
      *          between two locations
      */
-    private double[][] generateLocationGraph() {
+    private double[][] generateDistanceMatrix() {
     
         double[][] locationGraph = new double[locSize][locSize];
         int row, col;
@@ -66,7 +67,7 @@ public class TravelingSalesmanProblem {
     public ArrayList<Order> GreedyTSP() {
 
         Location[] orderedLocations = new Location[locSize];
-        double[][] locationGraph = generateLocationGraph();
+        double[][] locationGraph = generateDistanceMatrix();
         ArrayList<Integer> visitedLocations = new ArrayList<Integer>();
         int col, index, currentLocation, nextLocation;
         double currentMin = Double.MAX_VALUE;
@@ -110,6 +111,8 @@ public class TravelingSalesmanProblem {
         return orderedListOfOrders;
 
     }
+
+
 
 
 
