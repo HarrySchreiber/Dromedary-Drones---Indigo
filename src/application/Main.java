@@ -227,14 +227,12 @@ public class Main extends Application{
 			Button editSimulationBtn = new Button("Edit Simulation");
 			editSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			editSimulationBtn.setOnAction(e -> {
-				
+				currentSimulationSettingID = "2";
 				populatedSettingsScreen(currentSimulationSettingID, primaryStage);
 				
 				//removes the radio buttons so we can update them
-				//simulationScreenLayout.getChildren().remove(simulationSelectorPane);
-				//Scene blankScene = null;
-				//simulationScreen = blankScene;
-				
+				simulationScreenLayout.getChildren().remove(simulationSelectorPane);
+				simulationScreen.setRoot(simulationScreenLayout);
 				primaryStage.setScene(settingsScreen);
 				
 			});	//Adds function to the button TODO: Expand function to grab which simulation we need to edit from the radio buttons
@@ -247,9 +245,8 @@ public class Main extends Application{
 				populatedSettingsScreen("1", primaryStage);
 				
 				//removes the radio buttons so we can update them
-				//simulationScreenLayout.getChildren().remove(simulationSelectorPane);
-				//Scene blankScene = null;
-				//simulationScreen = blankScene;
+				simulationScreenLayout.getChildren().remove(simulationSelectorPane);
+				simulationScreen.setRoot(simulationScreenLayout);
 				
 				primaryStage.setScene(settingsScreen);
 			});	//Adds function to the button TODO: Expand function to grab which simulation we need to edit from the radio buttons
@@ -527,6 +524,7 @@ public class Main extends Application{
 						meals.add(meal);
 					}
 				}
+
 				//If the element is the hours per shift then we set it
 				if(field.getTagName().equals("hourspershift")) {
 					hoursInShift = Integer.valueOf(field.getTextContent());
@@ -660,7 +658,7 @@ public class Main extends Application{
 		lowerOrdersPerHour = sim.getOrderLower();
 		ArrayList<Location> locations = sim.getLocations();
 		ArrayList<Meal> meals = sim.getMeals();
-		System.out.println("Read Meals: " + meals.get(2).toString());
+		//System.out.println("Read Meals: " + meals.get(2).toString());
 		
 		
 		
@@ -670,15 +668,17 @@ public class Main extends Application{
 			perCountsB[i] = meals.get(i).getProbability() * 100;
 			
 			for(FoodItem foodItem: meals.get(i).getFoodItems()) {
-				if(foodItem.toString() == "Burger") {
+				
+				if(foodItem.toString().equals("burger")) {
+
 					burgerCountsB[i] += 1 ;
 					weightPerOrder[i] += 6;
 				}
-				else if(foodItem.toString() == "Fries") {
+				else if(foodItem.toString().equals("fries")) {
 					fryCountsB[i] += 1;
 					weightPerOrder[i] += 4;
 				}
-				else if(foodItem.toString() == "Coke") {
+				else if(foodItem.toString().equals("coke")) {
 					cokeCountsB[i] += 1 ;
 					weightPerOrder[i] += 14;
 				}	
@@ -773,7 +773,7 @@ public class Main extends Application{
         				}
         				else { //standard add
         					saveNewWValue(curLoopVal, 6);
-        					meals.get(curLoopVal).addFoodItem(new FoodItem("Burger", 0.375));
+        					meals.get(curLoopVal).addFoodItem(new FoodItem("burger", 0.375));
         				}
         				
         				//updates the burger label
@@ -791,7 +791,7 @@ public class Main extends Application{
         					saveNewWValue(curLoopVal, -4);
         				else { //standard add
         					saveNewWValue(curLoopVal, 4);
-        					meals.get(curLoopVal).addFoodItem(new FoodItem("Fries", 0.25));
+        					meals.get(curLoopVal).addFoodItem(new FoodItem("fries", 0.25));
         				}
         				
         				//updates fries labels
@@ -807,7 +807,7 @@ public class Main extends Application{
         					saveNewWValue(curLoopVal, -14);
         				else{ //standard add
         					saveNewWValue(curLoopVal, 14);
-        					meals.get(curLoopVal).addFoodItem(new FoodItem("Coke", 0.875));
+        					meals.get(curLoopVal).addFoodItem(new FoodItem("coke", 0.875));
         				}
         				
         				
@@ -974,21 +974,22 @@ public class Main extends Application{
 		Button saveSimulationSetngsBtn = new Button("Save Settings");
 		//listener so we can go back to the simulation screen and write to the file
 		saveSimulationSetngsBtn.setOnAction(e  ->  {
-			System.out.println("Added Meals: " + meals.get(2).toString());
+			//System.out.println("Added Meals: " + meals.get(2).toString());
 			SimulationSettings newSimulation = new SimulationSettings(simulationName, "1" , locations, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
 				try {
 					if(id == "1") {
 						simulationSettingToXML(findAvailableSimulationSettingID(), newSimulation);
 					}
-					else
+					else {
 						simulationSettingToXML(id, newSimulation);
+					}
 					
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				
-				/*
+				
 				//Rebuilds the radio button
 				//Scroll Pane for Radio Buttons Section
 				ScrollPane simulationSelectorPane = new ScrollPane();
@@ -996,7 +997,9 @@ public class Main extends Application{
 				ToggleGroup simulationSelectorButtons = new ToggleGroup();
 				//Make and populate the radio buttons
 				VBox simulationSelectorVBox = new VBox();
+				simulationSettingsIDs = getSimulationSettingsIDs();
 				for(String idNumber : simulationSettingsIDs) {
+
 					//Make a radio button with the name of the SimulationSetting
 					RadioButton radioButton = new RadioButton(getSimulationNameFromID(idNumber));
 					//Upon clicking on a radio button the currentSimulationID is set to the current ID
@@ -1013,11 +1016,11 @@ public class Main extends Application{
 				}
 				//Add the content to the screen
 				simulationSelectorPane.setContent(simulationSelectorVBox);
+				
 				simulationScreenLayout.add(simulationSelectorPane, 0, 0);
 				
-				
-				simulationScreen = new Scene(simulationScreenLayout,1000,600);
-				//simulationScreen.*/
+				simulationScreen.setRoot(simulationScreenLayout);
+
 				primaryStage.setScene(simulationScreen); //saves the stage
 			});	//Adds function to the button TODO: Expand function to not save if the user has not inputed correct values, possibly able to be done with throwing exceptions in a constructor
 		
