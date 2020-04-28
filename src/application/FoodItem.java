@@ -54,5 +54,7 @@ public class FoodItem {
 		this.weight = weight;
 	}
 	
-	
+	public String toString() {
+		return name;
+	}
 }
