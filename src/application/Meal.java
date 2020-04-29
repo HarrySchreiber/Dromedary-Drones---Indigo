@@ -51,7 +51,17 @@ public class Meal {
 		foodItems.add(item);
 		totalWeight += item.getWeight();
 	}
-
+	
+	public void removeFoodItem(FoodItem item) {
+		for(int i = 0; i < foodItems.size(); i++) {
+			if(foodItems.get(i).getName() == item.getName()) {
+				foodItems.remove(i);
+				break;
+			}
+		}
+			totalWeight -= item.getWeight();
+	}
+	
 	public double getProbability() {
 		return probability;
 	}

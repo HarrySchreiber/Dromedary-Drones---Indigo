@@ -35,119 +35,15 @@ public class Simulation {
 	 * Contains the logic required to run the full simulation
 	 * @throws FileNotFoundException 
 	 */
-	public void runSimulation(ArrayList<Location> locations) throws FileNotFoundException {
-		
-		SimulationSettings simSettings = new SimulationSettings();
-
-		if (locations.isEmpty()) {
-			locations = simSettings.populateLocations("src/application/gccLocationPoints.csv");
-		}
-		Scanner sc = new Scanner(new File("NewSimData.txt")); 
-		StringBuffer buffer = new StringBuffer();
-		
-		//reads all the lines of the file to buffer
-		while (sc.hasNextLine()) {
-	         buffer.append(sc.nextLine()+System.lineSeparator());
-	    }
-		
-		String fileContents = buffer.toString();
-		String[] fileLines = fileContents.split(System.getProperty("line.separator"));
-		int perCountsB [] = new int [50];
-	    int burgerCountsB [] = new int [50];
-	    int fryCountsB [] = new int [50];
-	    int cokeCountsB [] = new int [50];
-	    int hoursPerShiftB= 0, lowerBoundB = 0, upperBoundB = 0;
-		
-		 for(int i = 0; i < fileLines.length; i++) {
-		    	String curLine = fileLines[i];
-		    	String [] splitVal = curLine.split(": ");
-		    	for(int j = 1; j <= 4; j++) {
-		    		if(curLine.contains("Order " + String.valueOf(j) + " Percentage:" )){
-		    			perCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(perCountsB[j-1]);
-		    		}
-		    		else if (curLine.contains("Order " + String.valueOf(j) + " Burgers:" )){
-		    			burgerCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(burgerCountsB[j-1]);
-		    			
-		    		}
-		    		else if (curLine.contains("Order " + String.valueOf(j) + " Fries:") ){
-		    			fryCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(fryCountsB[j-1]);
-		    		}
-		    		else if (curLine.contains("Order " + String.valueOf(j) + " Cokes:")){
-		    			cokeCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(cokeCountsB[j-1]);
-		    		}
-		    		
-		    	}
-		    	
-		    	if (curLine.contains("Hours Per Shift:")) 
-		    		hoursPerShiftB = Integer.valueOf(splitVal[1]);
-		    	if(curLine.contains("Upper Bound of Orders per Hour:"))
-		    		upperBoundB = Integer.valueOf(splitVal[1]);
-		    	if(curLine.contains("Lower Bound of Orders per Hour:"))	
-		    		lowerBoundB = Integer.valueOf(splitVal[1]);
-		 }
-		
-		 System.out.println(hoursPerShiftB);
-		 
-		 Meal m1 = new Meal((double) perCountsB[0] / 100);
-		 Meal m2 = new Meal((double) perCountsB[1] / 100);
-		 Meal m3 = new Meal((double) perCountsB[2] / 100);
-		 Meal m4 = new Meal((double) perCountsB[3] / 100);
-		
-		
-		//old 
-		/*Meal m1 = new Meal(0.55);
-		Meal m2 = new Meal(0.10);
-		Meal m3 = new Meal(0.20);
-		Meal m4 = new Meal(0.15);*/
-		 
-		for(int i = 0; i < burgerCountsB[0]; i++) 
-			m1.addFoodItem(m1.burgers);
-		for(int i = 0; i < fryCountsB[0]; i++) 
-			m1.addFoodItem(m1.fries);
-		for(int i = 0; i < cokeCountsB[0]; i++) 
-			m1.addFoodItem(m1.coke);
-		
-
-		
-		for(int i = 0; i < burgerCountsB[1]; i++) 
-			m2.addFoodItem(m2.burgers);
-		for(int i = 0; i < fryCountsB[1]; i++) 
-			m2.addFoodItem(m2.fries);
-		for(int i = 0; i < cokeCountsB[1]; i++)
-		m2.addFoodItem(m2.coke);
-		
-		for(int i = 0; i < burgerCountsB[2]; i++) 
-			m3.addFoodItem(m3.burgers);
-		for(int i = 0; i < fryCountsB[2]; i++) 
-			m3.addFoodItem(m3.fries);
-		for(int i = 0; i < cokeCountsB[0]; i++)
-			m3.addFoodItem(m3.coke);
-		
-		for(int i = 0; i < burgerCountsB[3]; i++) 
-			m4.addFoodItem(m4.burgers);
-		for(int i = 0; i < fryCountsB[3]; i++) 
-			m4.addFoodItem(m4.fries);
-		for(int i = 0; i < cokeCountsB[3]; i++) 
-			m4.addFoodItem(m4.coke);
-		
-		ArrayList<Meal> meals = new ArrayList<Meal>();
-		meals.add(m1);
-		meals.add(m2);
-		meals.add(m3);
-		meals.add(m4);
+	public void runSimulation(SimulationSettings sim) {
 		
 		Random rnd = new Random();
 		for(int simulationNum = 0; simulationNum < 50; simulationNum++) {
 			ArrayList<Order> orders = new ArrayList<Order>();
 			//TODO: Set these up to dynamically populate: ie take out 4 and 15 and populate from settings
-			for(int i = 0; i<hoursPerShiftB; i++) {
-				int randomNumberofOrders = rnd.nextInt(((upperBoundB - lowerBoundB) +1) + lowerBoundB);
-				for(int j = 0; j<randomNumberofOrders; j++) {
-					Order o = new Order(mealPicker(meals), rnd.nextInt(60)+1 + (i*60), locations.get(rnd.nextInt(locations.size())));
+			for(int i = 0; i< sim.getOrderLower(); i++) {
+				for(int j = 0; j< sim.getOrderUpper(); j++) {
+					Order o = new Order(mealPicker(sim.getMeals()), rnd.nextInt(60)+1 + (i*60), sim.getLocations().get(rnd.nextInt(sim.getLocations().size())));
 					orders.add(o);
 				}
 			}

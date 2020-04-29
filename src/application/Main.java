@@ -189,7 +189,7 @@ public class Main extends Application{
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
 				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
-				s.runSimulation();
+				s.runSimulation( buildSimulationSettingsFromXML(currentSimulationSettingID));
 				
 				//TODO: Do we want to truncate this?
 				knapsackAvgLabel.setText("Average Time: " + s.findAverage(s.getKnapsackData()));
@@ -658,6 +658,8 @@ public class Main extends Application{
 		lowerOrdersPerHour = sim.getOrderLower();
 		ArrayList<Location> locations = sim.getLocations();
 		ArrayList<Meal> meals = sim.getMeals();
+		//resets total weight
+		weightPerOrder = new int [amountOfOrders];
 		//System.out.println("Read Meals: " + meals.get(2).toString());
 		
 		
@@ -670,7 +672,6 @@ public class Main extends Application{
 			for(FoodItem foodItem: meals.get(i).getFoodItems()) {
 				
 				if(foodItem.toString().equals("burger")) {
-
 					burgerCountsB[i] += 1 ;
 					weightPerOrder[i] += 6;
 				}
@@ -767,13 +768,14 @@ public class Main extends Application{
         	//burger spinner per each order with a listener
         	spinnerB.valueProperty().addListener((obs, oldVal, newVal) 
         			->{
+        				FoodItem burger = new FoodItem("burger", 0.375);
         				if(oldVal > newVal){ // so we can remove weight
         					saveNewWValue(curLoopVal, -6);
-        					
+        					meals.get(curLoopVal).removeFoodItem(burger);
         				}
         				else { //standard add
         					saveNewWValue(curLoopVal, 6);
-        					meals.get(curLoopVal).addFoodItem(new FoodItem("burger", 0.375));
+        					meals.get(curLoopVal).addFoodItem(burger);
         				}
         				
         				//updates the burger label
@@ -787,11 +789,14 @@ public class Main extends Application{
         	//fries spinner per each order with a listener
         	spinnerF.valueProperty().addListener((obs, oldVal, newVal) 
         			->{
-        				if(oldVal > newVal)//so we remove weight
+        				FoodItem fries = new FoodItem("fries", 0.25);
+        				if(oldVal > newVal) {//so we remove weight
         					saveNewWValue(curLoopVal, -4);
+        					meals.get(curLoopVal).removeFoodItem(fries);
+        				}
         				else { //standard add
         					saveNewWValue(curLoopVal, 4);
-        					meals.get(curLoopVal).addFoodItem(new FoodItem("fries", 0.25));
+        					meals.get(curLoopVal).addFoodItem(fries);
         				}
         				
         				//updates fries labels
@@ -803,11 +808,14 @@ public class Main extends Application{
         	//coke spinner per each order with a listener
         	spinnerC.valueProperty().addListener((obs, oldVal, newVal) 
         			-> {
-        				if(oldVal > newVal) //so we remove weight 
+        				FoodItem coke = new FoodItem("coke", 0.875);
+        				if(oldVal > newVal) { //so we remove weight 
         					saveNewWValue(curLoopVal, -14);
+        					meals.get(curLoopVal).removeFoodItem(coke);
+        				}
         				else{ //standard add
         					saveNewWValue(curLoopVal, 14);
-        					meals.get(curLoopVal).addFoodItem(new FoodItem("coke", 0.875));
+        					meals.get(curLoopVal).addFoodItem(coke);
         				}
         				
         				
@@ -1029,7 +1037,41 @@ public class Main extends Application{
 		
 		//Cancel Simulation Settings button on Simulation settings screen
 		Button cancelSimulationSetngsBtn = new Button("Cancel");
-		cancelSimulationSetngsBtn.setOnAction(e -> primaryStage.setScene(simulationScreen));	//Adds function to the button TODO: Idk if there's anything else were gonna have to do here cause as long as we dont save anything we should be good
+		cancelSimulationSetngsBtn.setOnAction(e -> {
+			
+			//Rebuilds the radio button
+			//Scroll Pane for Radio Buttons Section
+			ScrollPane simulationSelectorPane = new ScrollPane();
+			//Sets which group of radio buttons this simulation is a part of
+			ToggleGroup simulationSelectorButtons = new ToggleGroup();
+			//Make and populate the radio buttons
+			VBox simulationSelectorVBox = new VBox();
+			simulationSettingsIDs = getSimulationSettingsIDs();
+			for(String idNumber : simulationSettingsIDs) {
+
+				//Make a radio button with the name of the SimulationSetting
+				RadioButton radioButton = new RadioButton(getSimulationNameFromID(idNumber));
+				//Upon clicking on a radio button the currentSimulationID is set to the current ID
+				radioButton.setOnAction(f ->{
+					currentSimulationSettingID = idNumber;
+				});
+				//Start the simulation with the default settings
+				if(idNumber.equals("1")) {
+					radioButton.setSelected(true);
+				}
+				//Add radio button to toggle group and add it to the screen
+				radioButton.setToggleGroup(simulationSelectorButtons);
+				simulationSelectorVBox.getChildren().add(radioButton);
+			}
+			//Add the content to the screen
+			simulationSelectorPane.setContent(simulationSelectorVBox);
+			
+			simulationScreenLayout.add(simulationSelectorPane, 0, 0);
+			
+			simulationScreen.setRoot(simulationScreenLayout);
+			
+			primaryStage.setScene(simulationScreen);
+		});	//Adds function to the button TODO: Idk if there's anything else were gonna have to do here cause as long as we dont save anything we should be good
 		cancelSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		saveAndCancelButtonsBox.getChildren().add(cancelSimulationSetngsBtn);
 		
