@@ -58,112 +58,29 @@ import java.util.ArrayList;
 public class Main extends Application{
 	
 	//global variables
-	private Scene simulationScreen, settingsScreen; //scenes 
-	private int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
-	private double sumPercent= 100; //a total 
-	private String realFileContents = ""; //what we want to print to the file
+	private static Scene simulationScreen; //scenes 
+	private static Scene settingsScreen;
+	private static int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
+	private static int sumPercent= 100; //a total 
 	private static Document simulationSettingsXML;
 	private static ArrayList<String> simulationSettingsIDs;
 	private static String currentSimulationSettingID;
+	private static String currentDroneID;
 	private static ArrayList<Location> temporaryLocations;
 	private static ArrayList<Meal> temporaryMeals;
+	private static int hoursInShift;
+	private static int upperOrdersPerHour;
+	private static int lowerOrdersPerHour;
+	private static String simulationName;
+	private static GridPane simulationScreenLayout;
 	
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			
-			//opens the file with the default values
-			Scanner sc = new Scanner(new File("DefSimData.txt")); 
-			StringBuffer buffer = new StringBuffer();
-			
-			//reads all the lines of the file to buffer
-			while (sc.hasNextLine()) {
-		         buffer.append(sc.nextLine()+System.lineSeparator());
-		      }
-		     
-			 //saves all the old file into the global variables
-		     realFileContents = buffer.toString();
-		     String defaultFileContents = buffer.toString();
-		     
-		     //Not quite done yet
-		     String[] defaultFileLines = defaultFileContents.split(System.getProperty("line.separator"));
-		     
-		     boolean knapB = false, fifoB = false, defDroneB = false;
-		     double perUsedB = 0, perLeftB = 0;
-		     int perCountsB [] = new int [50];
-		     int burgerCountsB [] = new int [50];
-		     int fryCountsB [] = new int [50];
-		     int cokeCountsB [] = new int [50];
-		     int hoursPerShiftB = 0, upperOrdersB = 0, lowerOrdersB = 0;
-		     
-		    for(int i = 0; i < defaultFileLines.length; i++) {
-		    	String curLine = defaultFileLines[i];
-		    	String [] splitVal = curLine.split(": ");
-		    	for(int j = 1; j <= 4; j++) {
-		    		
-		    		if(curLine.contains("Order " + String.valueOf(j) + " Percentage:" )){
-		    			perCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(perCountsB[j-1]);
-		    		}
-		    		else if (curLine.contains("Order " + String.valueOf(j) + " Burgers:" )){
-		    			burgerCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(burgerCountsB[j-1]);
-		    			
-		    		}
-		    		else if (curLine.contains("Order " + String.valueOf(j) + " Fries:") ){
-		    			fryCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(fryCountsB[j-1]);
-		    		}
-		    		else if (curLine.contains("Order " + String.valueOf(j) + " Cokes:")){
-		    			cokeCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(cokeCountsB[j-1]);
-		    		}
-		    		
-		    	}
-		    	
-		    	if(curLine.contains("Percentage Used:")) {
-		    		perUsedB = Double.valueOf(splitVal[1]);
-		    		//System.out.println(perUsedB);
-		    	}
-		    	else if (curLine.contains("Percentage Left:")) {
-		    		perLeftB = Double.valueOf(splitVal[1]);
-		    		//System.out.println(perLeftB);
-		    	}
-		    	else if (curLine.contains("Hours Per Shift:")) {
-		    		hoursPerShiftB = Integer.valueOf(splitVal[1]);
-		    		//System.out.println(hoursPerShiftB);
-		    	}
-		    	else if (curLine.contains("Upper Bound")) {
-		    		upperOrdersB = Integer.valueOf(splitVal[1]);
-		    		//System.out.println(upperOrdersB);
-		    	}
-		    	else if (curLine.contains("Lower Bound")) {
-		    		lowerOrdersB = Integer.valueOf(splitVal[1]);
-		    		//System.out.println(lowerOrdersB);
-		    	}
-		    	else if(curLine.contains("Knapsack Packing")){
-		    		knapB = Boolean.valueOf(splitVal[1]);
-		    		//System.out.println(knapB);
-		    	}
-		    	else if(curLine.contains("Fifo")) {
-		    		fifoB = Boolean.valueOf(splitVal[1]);
-		    		//System.out.println(fifoB);
-		    	}
-		    	else if(curLine.contains("Default Grove City Drone")){
-		    		defDroneB = Boolean.valueOf(splitVal[1]);
-		    		//System.out.println(defDroneB);
-		    	}
-		    	
-		    }
-		     
 
-		     sc.close();
-		     //FileWriter writer = new FileWriter("NewSimData.txt" ,false);
-		     //writer.write("We writing this..");
-		     
-			
+					
 			//Simulation Screen Layout
-			GridPane simulationScreenLayout = buildSimulationScreen();
+			simulationScreenLayout = buildSimulationScreen();
 			
 			
 			//Scroll Pane for Radio Buttons Section
@@ -272,7 +189,7 @@ public class Main extends Application{
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
 				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
-				s.runSimulation();
+				s.runSimulation( buildSimulationSettingsFromXML(currentSimulationSettingID));
 				
 				//TODO: Do we want to truncate this?
 				knapsackAvgLabel.setText("Average Time: " + s.findAverage(s.getKnapsackData()));
@@ -309,13 +226,29 @@ public class Main extends Application{
 			//Edit Simulation Button on Simulation Screen
 			Button editSimulationBtn = new Button("Edit Simulation");
 			editSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
-			editSimulationBtn.setOnAction(e -> primaryStage.setScene(settingsScreen));	//Adds function to the button TODO: Expand function to grab which simulation we need to edit from the radio buttons
+			editSimulationBtn.setOnAction(e -> {
+				populatedSettingsScreen(currentSimulationSettingID, primaryStage);
+				
+				//removes the radio buttons so we can update them
+				simulationScreenLayout.getChildren().remove(simulationSelectorPane);
+				simulationScreen.setRoot(simulationScreenLayout);
+				primaryStage.setScene(settingsScreen);
+				
+			});	//Adds function to the button TODO: Expand function to grab which simulation we need to edit from the radio buttons
 			simulationScreenLayout.add(editSimulationBtn, 0, 2);	//Add the button to the screen
 			
 			//Create Simulation Button on Simulation Screen
 			Button createSimulationBtn = new Button("Create New Simulation");
 			createSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
-			createSimulationBtn.setOnAction(e -> primaryStage.setScene(settingsScreen));	//Adds function to the button TODO: Expand function to grab which simulation we need to edit from the radio buttons
+			createSimulationBtn.setOnAction(e -> {
+				populatedSettingsScreen("1", primaryStage);
+				
+				//removes the radio buttons so we can update them
+				simulationScreenLayout.getChildren().remove(simulationSelectorPane);
+				simulationScreen.setRoot(simulationScreenLayout);
+				
+				primaryStage.setScene(settingsScreen);
+			});	//Adds function to the button TODO: Expand function to grab which simulation we need to edit from the radio buttons
 			simulationScreenLayout.add(createSimulationBtn, 0, 3);	//Add the button to the screen
 			
 			//A Horizontal Stack Box to put buttons for save data and open data
@@ -327,6 +260,7 @@ public class Main extends Application{
 			Button loadDataFileBtn = new Button("Load a Results File");
 			loadDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			loadDataFileBtn.setOnAction(e ->{
+			
 				System.out.println("TODO: Load a Results File");	//TODO: Add the logic here
 			});
 			dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
@@ -342,485 +276,7 @@ public class Main extends Application{
 			//Add the box to the grid layout
 			simulationScreenLayout.add(dataButtonsBox, 1, 3);
 			
-			
-			
-			//-----------------------------------------------------------------------------------
-			
-			
-			
-			//Settings Screen Layout
-			GridPane settingsScreenLayout = buildSettingsScreen();
-			
-			//HBox for the naming components of the simulation settings
-			HBox simNameBox = new HBox();
-			simNameBox.setAlignment(Pos.CENTER);	//Center the box
-			simNameBox.setSpacing(5);	//Space between elements is 5
-			
-			//Label and TextField for the simulation TODO: Formatting
-			Label simNameLabel = new Label("Simulation Name:");
-			TextField simNameField = new TextField();
-			
-			//Add Items to the HBox
-			simNameBox.getChildren().addAll(simNameLabel,simNameField);
-			//Add HBox to the grid and stretch it over 3 columns
-			settingsScreenLayout.add(simNameBox, 0, 0, 3, 1);
-			String temp = simNameField.getText();
-			
-			//Event for changing the values to the new Settings Name
-			EventHandler<ActionEvent> event = new EventHandler<ActionEvent>()  { 
-	            public void handle(ActionEvent e)   { 
-	            	String oldSimName = "Simulation Name: " + temp;
-	            	String newSimName = "Simulation Name: " + simNameField.getText();
-	            	realFileContents = realFileContents.replaceFirst(oldSimName, newSimName);
-	            		      	      
-	      
-			}}; 
-	        simNameField.setOnAction(event); //sets up the Event
-	                		
-			
-			//VBox for things in column 1
-			VBox columnOne = new VBox(20);
-			columnOne.setAlignment(Pos.TOP_LEFT);
-			
-			//TODO: Use this to add things in column one
-			
-			Label schemeL = new Label ("Delivery Scheme: ");
-			CheckBox schemeKCB = new CheckBox("Knapsack Packing");
-			schemeKCB.setSelected(knapB);
-			
-			CheckBox schemeFCB = new CheckBox("FIFO - First in First out");
-			schemeFCB.setSelected(fifoB);
-			
-			Boolean oneSchemeSelected = false;
-			
-			//Event handler for Knapsack Check Box and replaces the new status of Knapsack
-			EventHandler<ActionEvent> knapEvent = new EventHandler<ActionEvent>() { 
-                public void handle(ActionEvent e) { 
-                	//TODO: Knap method
-                	//So we know that only one method is selected.
-                    if (schemeKCB.isSelected() && !(schemeFCB.isSelected())) {
-                    	//System.out.println("knap" + " was selected");
-                    	String oldKnap = "Knapsack Packing: false";
-                    	String newKnap = "Knapsack Packing: true";
-                    	
-                    	//makes the replace here
-                    	realFileContents = realFileContents.replaceFirst(oldKnap, newKnap);
-                    	//KNAP method
-                    }
-                        
-                    else {
-                    	System.out.println("None or Two choices were selected");
-                    }
-                }
-			};
-            schemeKCB.setOnAction(knapEvent);//sets up the event here
-            
-          //Event handler for FIFO Check Box and replaces the new status of Fifo 
-			EventHandler<ActionEvent> fifoEvent = new EventHandler<ActionEvent>() { 
-                public void handle(ActionEvent e) { 
-                	//TODO: FIFO method
-                	//So we know that only one method is selected.
-                    if (schemeFCB.isSelected() && !(schemeKCB.isSelected())) {
-                    	//System.out.println("fifo" + " was selected");
-                    	String oldFifo = "Fifo: false";
-                    	String newFifo = "Fifo: true";
-                    
-                    	//makes the replace here
-                    	realFileContents = realFileContents.replaceFirst(oldFifo, newFifo);
-                    	// FIFO method here
-                    }
-                        
-                    else {
-                    	System.out.println("None or Two choices were selected");
-                    }
-                }
-			};
-			schemeFCB.setOnAction(fifoEvent);//sets up the event here
-			
 
-			
-			Label dronesL = new Label ("Drones: ");
-			CheckBox defaultDroneCB = new CheckBox("Default Grove City Drone");
-			defaultDroneCB.setSelected(defDroneB);
-			
-			EventHandler<ActionEvent> defaultDroneEvent = new EventHandler<ActionEvent>() { 
-                public void handle(ActionEvent e) { 
-                	//TODO: FIFO method
-                    if (defaultDroneCB.isSelected()) {
-                    	//System.out.println("Default Drone" + " was selected");
-                    }
-                        
-                    else {
-                    }
-                }
-			};
-			defaultDroneCB.setOnAction(defaultDroneEvent);
-			
-			//add everything to column one
-			columnOne.getChildren().addAll(schemeL, schemeKCB, schemeFCB, dronesL, defaultDroneCB);
-			
-			settingsScreenLayout.add(columnOne,0,1);
-			
-			//TODO: Add method for upload new campus map
-			
-			//TODO: Add method for add new drone
-			
-			//VBox for things in column 2
-			VBox columnTwo = new VBox();
-			columnTwo.setAlignment(Pos.TOP_LEFT);
-			
-        	//Slider sliderO1 = new Slider();
-			Label perUsedL = new Label("Percentage Used: "  + String.valueOf(perUsedB));		
-		    columnTwo.getChildren().add(perUsedL);
-		    Label perLeftL = new Label("Percentage Left: " + String.valueOf(perLeftB));
-		    columnTwo.getChildren().add(perLeftL);
-			
-			GridPane grid = new GridPane();
-	        grid.setVgap(1);
-	        grid.setHgap(1);
-	        
-	        //Names of the 4 orders that we are using
-	        String [] orderNames = {"Order 1: ", "Order 2: ", "Order 3: ", "Order 4: "};
-	       
-	        
-	        for(int i = 0; i < 4; i++){
-	        	
-	        	//variable dictionary for the for loop 
-	        	int curLoopVal = i;
-	        	Label order1L = new Label(orderNames[i]);
-	        	Slider sliderO1 = new Slider();
-	        	//Label order1L = new Label("Order 1");
-	        	//Label order2L = new Label("Order 2");
-	        	//Label order3L = new Label("Order 3");
-	        	//Label order4L = new Label("Order 4");
-	        	Label currentSliderVal = new Label("");
-	        	Label burgerL = new Label("Burger");
-	        	final Spinner<Integer> spinnerB = new Spinner<Integer>();
-	        	Label burgerWeight = new Label("0 oz");
-	        	Label friesL = new Label("Fries");
-	        	final Spinner<Integer> spinnerF = new Spinner<Integer>();
-	        	Label friesWeight = new Label("0 oz");
-	        	Label cokeL = new Label("Coke");
-	        	final Spinner<Integer> spinnerC = new Spinner<Integer>();
-	        	Label cokeWeight = new Label("0 oz");
-	        	Label totalWeightL = new Label("Total:");
-	        	Label weightPerOrderL = new Label("0 oz");
-	        	
-	      
-
-	        	//Spinner val that doesn't go up to 16 burgers (to not go over 96 oz)	        	
-	        	SpinnerValueFactory<Integer> valueFactoryB = //
-	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 16, burgerCountsB[i]);
-	        	spinnerB.setValueFactory(valueFactoryB);
-	        	spinnerB.setMaxWidth(50);
-	        	spinnerB.setEditable(true);
-
-	        	//Spinner val that doesn't go up to 24 fries (to not go over 96 oz)
-	        	SpinnerValueFactory<Integer> valueFactoryF = //
-	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24, fryCountsB[i]);
-	        	spinnerF.setValueFactory(valueFactoryF);
-	        	spinnerF.setMaxWidth(50);
-	        	spinnerF.setEditable(true);
-
-	        	//Spinner val that doesn't go up to 6 fries (to not go over 96 oz)
-	        	SpinnerValueFactory<Integer> valueFactoryC = //
-	        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 6, cokeCountsB[i]);
-	        	spinnerC.setValueFactory(valueFactoryC);
-	        	spinnerC.setMaxWidth(50);
-	        	spinnerC.setEditable(true);
-
-	        		
-	        	//slider for percentages
-	        	sliderO1.setMin(0);
-	        	sliderO1.setMax(100);
-	        	sliderO1.setValue(perCountsB[i]);
-	        	//sliderO1.setShowTickLabels(true);
-	        	sliderO1.setShowTickMarks(true);
-	        	sliderO1.setMajorTickUnit(50);
-	        	sliderO1.setMaxWidth(300);
-	        	
-	        	//order probability percentages
-	        	sliderO1.valueProperty().addListener((obs, oldVal, newVal)
-	        			->{
-	        				//difference we can add to the percentage label
-	        				double difference = newVal.intValue() - oldVal.intValue() ;
-	        				double  perLeftNum;
-	        				if(sumPercent >= 100 || (100-sumPercent) < 0)
-	        					perLeftNum = 0;
-	        				else
-	        					perLeftNum = 100 - sumPercent;
-	        				
-	        				//prints lables here
-	        				saveNewPValue(difference);
-	        				perUsedL.textProperty().bind(Bindings.format("%s %.0f %s", "Percentage Used: ", sumPercent, "%"));
-	        				perLeftL.textProperty().bind(Bindings.format("%s %.0f %s", "Percentage Used: ", perLeftNum , "%"));
-	        				
-	        				//makes new and old strings so we can write to the txt file.
-	        				String oldPerc = "Order " + String.valueOf(curLoopVal+1) + " Percentage: " + String.valueOf(oldVal.intValue());
-	        				String newPerc = "Order " + String.valueOf(curLoopVal+1) + " Percentage: " + String.valueOf(newVal.intValue());
-	        				
-	        				//does the replacement here	
-	        				realFileContents = realFileContents.replaceFirst(oldPerc, newPerc);
-	        			});
-	        	
-	        	//sends label here
-	        	totalWeightL.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
-	        	
-	        	//curent val of slider percentage
-	        	currentSliderVal.textProperty().bind(Bindings.format("%.0f %s ", sliderO1.valueProperty(), "%"));
-	        	
-	        	
-	        	//burger spinner per each order with a listener
-	        	spinnerB.valueProperty().addListener((obs, oldVal, newVal) 
-	        			->{
-	        				if(oldVal > newVal) // so we can remove weight
-	        					saveNewWValue(curLoopVal, -6);
-	        				else //standard add
-	        					saveNewWValue(curLoopVal, 6);
-	        				
-	        				//updates the burger label
-	        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
-	        				burgerWeight.textProperty().bind(Bindings.format("%d %s", newVal * 6, "oz"));
-	        				
-	        				//makes new and old strings so we can write to the txt file
-	        				String oldBurger = "Order " + String.valueOf(curLoopVal+1) + " Burgers: " + String.valueOf(oldVal);
-	        				String newBurger = "Order " + String.valueOf(curLoopVal+1) + " Burgers: " + String.valueOf(newVal);
-
-	        				//does the replacement here
-	        				realFileContents = realFileContents.replaceFirst(oldBurger, newBurger);
-	        				
-	        			});
-	        	
-	        	//fries spinner per each order with a listener
-	        	spinnerF.valueProperty().addListener((obs, oldVal, newVal) 
-	        			->{
-	        				if(oldVal > newVal)//so we remove weight
-	        					saveNewWValue(curLoopVal, -4);
-	        				else //standard add
-	        					saveNewWValue(curLoopVal, 4);
-	        				
-	        				//updates fries labels
-	        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
-	        				friesWeight.textProperty().bind(Bindings.format("%d %s", newVal * 4, "oz"));
-	        				
-	        				//makes new/old strings to write to the txt file
-	        				String oldFries = "Order " + String.valueOf(curLoopVal+1) + " Fries: " + String.valueOf(oldVal);
-	        				String newFries = "Order " + String.valueOf(curLoopVal+1) + " Fries: " + String.valueOf(newVal);
-
-	        				//does the replacement here
-	        				realFileContents = realFileContents.replaceFirst(oldFries, newFries);
-	        			});
-	        	
-	        	//coke spinner per each order with a listener
-	        	spinnerC.valueProperty().addListener((obs, oldVal, newVal) 
-	        			-> {
-	        				if(oldVal > newVal) //so we remove weight 
-	        					saveNewWValue(curLoopVal, -14);
-	        				else //standard add
-	        					saveNewWValue(curLoopVal, 14);
-	        				
-	        				
-	        				//updates the coke labels
-	        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
-	        				cokeWeight.textProperty().bind(Bindings.format("%d %s", newVal * 14, "oz"));
-	        				
-	        				//makes new/old strings to write to the txt file
-	        				String oldCoke = "Order " + String.valueOf(curLoopVal+1) + " Cokes: " + String.valueOf(oldVal);
-	        				String newCoke = "Order " + String.valueOf(curLoopVal+1) + " Cokes: " + String.valueOf(newVal);
-
-	        				//does the replacement here
-	        				realFileContents = realFileContents.replaceFirst(oldCoke, newCoke);
-	        			});
-	        		        	
-
-
-	        	//adds all labels and spinners to the grid pane here
-	        	GridPane.setConstraints(order1L, 0, 1 + (5*i));
-	        	grid.getChildren().add(order1L);
-	        	GridPane.setConstraints(currentSliderVal, 2, 1 + (5*i));
-	        	grid.getChildren().add(currentSliderVal);
-	        	GridPane.setConstraints(sliderO1, 1, 1 + (5*i));
-	        	grid.getChildren().add(sliderO1);
-	        	GridPane.setConstraints(burgerL, 0, 2 + (5*i));
-	        	grid.getChildren().add(burgerL);
-	        	GridPane.setConstraints(spinnerB, 1, 2 + (5*i));
-	        	grid.getChildren().add(spinnerB);
-	        	GridPane.setConstraints(burgerWeight, 2, 2 + (5*i));
-	        	grid.getChildren().add(burgerWeight);
-	        	GridPane.setConstraints(friesL, 0, 3 + (5*i));
-	        	grid.getChildren().add(friesL);
-	        	GridPane.setConstraints(spinnerF, 1, 3 + (5*i));
-	        	grid.getChildren().add(spinnerF);
-	        	GridPane.setConstraints(friesWeight, 2, 3 + (5*i));
-	        	grid.getChildren().add(friesWeight);
-	        	GridPane.setConstraints(cokeL, 0, 4 + (5*i));
-	        	grid.getChildren().add(cokeL);
-	        	GridPane.setConstraints(spinnerC, 1, 4 + (5*i));
-	        	grid.getChildren().add(spinnerC);
-	        	GridPane.setConstraints(cokeWeight, 2, 4 + (5*i));
-	        	grid.getChildren().add(cokeWeight);
-	        	GridPane.setConstraints(totalWeightL, 0, 5 + (5*i));
-	        	grid.getChildren().add(totalWeightL);
-	        	GridPane.setConstraints(weightPerOrderL, 1, 5 + (5*i));
-	        	grid.getChildren().add(weightPerOrderL);
-	        	
-	        	
-	        	
-		}
-	        	        	        
-			//TODO: Use this to add things in column two
-			columnTwo.getChildren().addAll(grid);
-			
-			settingsScreenLayout.add(columnTwo,1,1);
-			
-			//VBox for things in column 3
-			VBox columnThree = new VBox();
-			
-			GridPane gridC3= new GridPane(); 
-			gridC3.setVgap(10);
-			
-			columnThree.setAlignment(Pos.TOP_LEFT);
-			gridC3.setAlignment(Pos.CENTER_LEFT);
-			
-			/*
-			 * Variable dictionary
-			 */
-			Label hoursLabel = new Label("Hours Per Shift:");
-			final Spinner<Integer> spinnerHours = new Spinner<Integer>();
-			Label orderPerHourL = new Label("Orders Per Hour");
-			
-			Label upperHoursL = new Label("Upper Bound:");
-			final Spinner<Integer> spinnerUpperHours = new Spinner<Integer>();
-        	Label lowerHoursL = new Label("Lower Bound:");
-        	
-        	final Spinner<Integer> spinnerLowerHours = new Spinner<Integer>();
-        	
-			//Hours Per Shift can't got lower than 1 or higher than 8
-        	SpinnerValueFactory<Integer> valueFactoryH = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 8, hoursPerShiftB);
-        	spinnerHours.setValueFactory(valueFactoryH);
-        	spinnerHours.setMaxWidth(70);
-        	spinnerHours.setEditable(true);
-        	
-        	//spinner for the hours per shift
-    		spinnerHours.valueProperty().addListener((obs, oldVal, newVal)
-    				-> {
-				
-    					//makes new/old string we can write to the txt
-    					String oldHours = "Hours Per Shift: "  + String.valueOf(oldVal);
-    					String newHours = "Hours Per Shift: "  + String.valueOf(newVal);
-
-    					//does the replacement here
-    					realFileContents = realFileContents.replaceFirst(oldHours, newHours);
-			});
-        	
-        	
-    		//adds everything to grid pane 3
-        	GridPane.setConstraints(hoursLabel, 0, 1);
-        	gridC3.getChildren().add(hoursLabel);
-        	GridPane.setConstraints(spinnerHours, 1, 1);
-        	gridC3.getChildren().add(spinnerHours);
-        	
-        	
-        	orderPerHourL.setAlignment(Pos.BASELINE_RIGHT);
-        	GridPane.setConstraints(orderPerHourL, 0, 5);
-        	gridC3.getChildren().add(orderPerHourL);
-
-        	
-        	
-        	
-        	//NOTE: spinner can't go higher than 30 orders but can change this 
-        	SpinnerValueFactory<Integer> valueFactoryUH = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 30, upperOrdersB);
-        	spinnerUpperHours.setValueFactory(valueFactoryUH);
-        	spinnerUpperHours.setMaxWidth(70);
-        	spinnerUpperHours.setEditable(true);
-        	
-        	//spinner for the upper limit of the orders per hour
-        	spinnerUpperHours.valueProperty().addListener((obs, oldVal, newVal)
-    				-> {
-				
-    					//makes new and old strings to write to the txt
-    					String oldHours = "Upper Bound of Orders per Hour: "  + String.valueOf(oldVal);
-    					String newHours = "Upper Bound of Orders per Hour: "  + String.valueOf(newVal);
-
-    					//does the replacement
-    					realFileContents = realFileContents.replaceFirst(oldHours, newHours);
-			});
-        
-        	//spinner for the lower limits of thr orders per hour
-        	//NOTE: spinner can't go higher than 30 orders but can change this         	
-        	SpinnerValueFactory<Integer> valueFactoryLH = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 30, lowerOrdersB);
-        	spinnerLowerHours.setValueFactory(valueFactoryLH);
-        	spinnerLowerHours.setMaxWidth(70);
-        	spinnerLowerHours.setEditable(true);
-        	
-        	spinnerLowerHours.valueProperty().addListener((obs, oldVal, newVal)
-    				-> {
-				
-    					//makes new and old strings to write to the txt
-    					String oldHours = "Lower Bound of Orders per Hour: "  + String.valueOf(oldVal);
-    					String newHours = "Lower Bound of Orders per Hour: "  + String.valueOf(newVal);
-
-    					//does the replacement
-    					realFileContents = realFileContents.replaceFirst(oldHours, newHours);
-			});	
-        	
-        	//adds all this stuff to grid pane 3 
-        	GridPane.setConstraints(upperHoursL, 0, 8);
-        	gridC3.getChildren().add(upperHoursL);
-        	GridPane.setConstraints(spinnerUpperHours, 1, 8);
-        	gridC3.getChildren().add(spinnerUpperHours);
-        	
-        	GridPane.setConstraints(lowerHoursL, 0, 10);
-        	gridC3.getChildren().add(lowerHoursL);
-        	GridPane.setConstraints(spinnerLowerHours, 1, 10);
-        	gridC3.getChildren().add(spinnerLowerHours);
-        	
-        
-        	
-			
-			//TODO: Use this to add things in column three
-			columnThree.getChildren().addAll(gridC3);
-			
-			settingsScreenLayout.add(columnThree,2,1);
-			
-			//HBox for the save and Cancel Buttons
-			HBox saveAndCancelButtonsBox = new HBox();
-			saveAndCancelButtonsBox.setAlignment(Pos.CENTER);
-			saveAndCancelButtonsBox.setSpacing(100);
-			
-			//Save Simulation Settings button on Simulation settings screen
-			Button saveSimulationSetngsBtn = new Button("Save Settings");
-
-			//listener so we can go back to the simulation screen and write to the file
-			saveSimulationSetngsBtn.setOnAction(e  ->  {
-
-						//try catch to the write to the file
-						try(FileWriter writer = new FileWriter("NewSimData.txt" ,false)) {
-							writer.write(realFileContents);
-							writer.flush();
-							writer.close();
-							
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-						
-					primaryStage.setScene(simulationScreen); //saves the stage
-				});	//Adds function to the button TODO: Expand function to not save if the user has not inputed correct values, possibly able to be done with throwing exceptions in a constructor
-			
-			saveSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-			saveAndCancelButtonsBox.getChildren().add(saveSimulationSetngsBtn);
-			
-			//Cancel Simulation Settings button on Simulation settings screen
-			Button cancelSimulationSetngsBtn = new Button("Cancel");
-			cancelSimulationSetngsBtn.setOnAction(e -> primaryStage.setScene(simulationScreen));	//Adds function to the button TODO: Idk if there's anything else were gonna have to do here cause as long as we dont save anything we should be good
-			cancelSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-			saveAndCancelButtonsBox.getChildren().add(cancelSimulationSetngsBtn);
-			
-			settingsScreenLayout.add(saveAndCancelButtonsBox,0,2,3,1);
 			
 			
 			
@@ -833,7 +289,7 @@ public class Main extends Application{
 			//simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			
 			//TODO: Decide on default 
-			settingsScreen = new Scene(settingsScreenLayout,1000,600);
+			//settingsScreen = new Scene(settingsScreenLayout,1000,500);
 			
 			
 			primaryStage.setScene(simulationScreen);
@@ -911,7 +367,7 @@ public class Main extends Application{
 	 * @param int plus the number that we will add onto
 	 * 
 	 */
-	public void saveNewWValue(int elem, int plus) {
+	public static void saveNewWValue(int elem, int plus) {
 		//Checker to make sure the element exists
 		if(weightPerOrder.length - 1 < elem) 
 			throw new IndexOutOfBoundsException("Index " + elem + " is out of bounds!");
@@ -921,15 +377,7 @@ public class Main extends Application{
 			weightPerOrder[elem] =  temp + plus;
 		}
 	}
-	
-	/*
-	 * Simple helper that alters the sum of the percetanges of the sliders with the paramter
-	 * @param a double that we want to want add onto sumPercent
-	 */
-	public void saveNewPValue(double plus) {
-			sumPercent =  sumPercent + plus;	
-	}
-	
+
 	/**
 	 * Populates an ArrayList with simulation setting IDs from the simualtionSettings.xml
 	 * @return ArrayList of simulation IDs
@@ -954,6 +402,7 @@ public class Main extends Application{
 	 * @return A SimulationSettings object that is populated from the xml
 	 */
 	public static SimulationSettings buildSimulationSettingsFromXML(String id) {
+
 		//Get a list of all of the simulation settings
 		NodeList simulationsettingList = simulationSettingsXML.getElementsByTagName("simulationsetting");
 		//Get the current simulationsetting we want to look at
@@ -967,6 +416,7 @@ public class Main extends Application{
 				}
 			}	
 		}
+	
 		
 		//Simulation Variables for later use in building the simulationsetting object
 		String simulationName = "";
@@ -1073,6 +523,7 @@ public class Main extends Application{
 						meals.add(meal);
 					}
 				}
+
 				//If the element is the hours per shift then we set it
 				if(field.getTagName().equals("hourspershift")) {
 					hoursInShift = Integer.valueOf(field.getTextContent());
@@ -1089,6 +540,553 @@ public class Main extends Application{
 		}
 		//Build and return the object from the set variables
 		return new SimulationSettings(simulationName, droneIDNumber, locations, meals, hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
+	}
+	
+	/*
+	 * Method for when we need to build a setting screen with the id of the simulation settings object
+	 * builds the screen here
+	 * 
+	 */
+	public static void populatedSettingsScreen(String id, Stage primaryStage) {
+		
+		SimulationSettings sim =  buildSimulationSettingsFromXML(id);
+		
+		
+		//Settings Screen Layout
+		GridPane settingsScreenLayout = buildSettingsScreen();
+		
+		//HBox for the naming components of the simulation settings
+		HBox simNameBox = new HBox();
+		simNameBox.setAlignment(Pos.CENTER);	//Center the box
+		simNameBox.setSpacing(5);	//Space between elements is 5
+		
+		//Label and TextField for the simulation TODO: Formatting
+		Label simNameLabel = new Label("Simulation Name: ");
+		TextField simNameField = new TextField(sim.getName());
+		
+		
+		//Add Items to the HBox
+		simNameBox.getChildren().addAll(simNameLabel,simNameField);
+		//Add HBox to the grid and stretch it over 3 columns
+		settingsScreenLayout.add(simNameBox, 0, 0, 3, 1);
+		simulationName = sim.getName();
+		
+		//Event for changing the values to the new Settings Name
+		EventHandler<ActionEvent> event = new EventHandler<ActionEvent>()  { 
+            public void handle(ActionEvent e)   { 
+            	simulationName =  simNameField.getText();     
+            	
+		}}; 
+
+        simNameField.setOnAction(event); //sets up the Event
+                		
+		
+		//VBox for things in column 1
+		VBox columnOne = new VBox(20);
+		columnOne.setAlignment(Pos.TOP_LEFT);
+		
+		//TODO: Use this to add things in column one
+		//DRONE STUFF
+		
+		/*Label dronesL = new Label ("Drones: ");
+		
+		
+		ScrollPane droneSelectorPane = new ScrollPane();
+		
+		//Sets which group of radio buttons this simulation is a part of
+		ToggleGroup droneSelectorButtons = new ToggleGroup();
+		//Make and populate the radio buttons
+		VBox droneSelectorVBox = new VBox();
+		
+		for(String idNumber : simulationSettingsIDs) {
+			//Make a radio button with the name of the SimulationSetting
+			RadioButton radioButton = new RadioButton("Default Grove City Drone");
+			//Upon clicking on a radio button the currentSimulationID is set to the current ID
+			radioButton.setOnAction(e->{
+				currentDroneID = idNumber;
+			});
+			//Start the simulation with the default settings
+			if(idNumber.equals("1")) {
+				radioButton.setSelected(true);
+			}
+			//Add radio button to toggle group and add it to the screen
+			radioButton.setToggleGroup(droneSelectorButtons);
+			droneSelectorVBox.getChildren().add(radioButton);
+		}
+		//Add the content to the screen
+		droneSelectorPane.setContent(droneSelectorVBox);
+		settingsScreenLayout.add(droneSelectorPane, 0, 0);
+		
+		//add everything to column one
+		columnOne.getChildren().addAll(dronesL, droneSelectorPane);
+		
+		settingsScreenLayout.add(columnOne,0,1);*/
+		
+		//TODO: Add method for upload new campus map
+		
+		//TODO: Add method for add new drone
+		
+		//VBox for things in column 2
+		VBox columnTwo = new VBox();
+		columnTwo.setAlignment(Pos.TOP_LEFT);
+		
+    	//Slider sliderO1 = new Slider();
+		Label perUsedL = new Label("Percentage Used: "  + String.valueOf(100));		
+	    columnTwo.getChildren().add(perUsedL);
+	    Label perLeftL = new Label("Percentage Left: " + String.valueOf(0));
+	    columnTwo.getChildren().add(perLeftL);
+		
+		GridPane grid = new GridPane();
+        grid.setVgap(1);
+        grid.setHgap(1);
+        
+        ScrollPane scrollPaneOrders = new ScrollPane();
+        
+        
+        //NodeList mealList = simulationSettingsXML.getElementsByTagName("meal");
+        
+        int amountOfOrders = sim.getMeals().size();
+		//int amountOfOrders =  mealList.getLength();
+		String orderLabelNums [] = new String [amountOfOrders];
+		int burgerCountsB[] = new int[amountOfOrders];
+		int fryCountsB[] = new int[amountOfOrders];
+		int cokeCountsB[] = new int[amountOfOrders];
+		double perCountsB[] = new double [amountOfOrders];
+		hoursInShift = sim.getHoursPerShift();
+		upperOrdersPerHour = sim.getOrderUpper();
+		lowerOrdersPerHour = sim.getOrderLower();
+		ArrayList<Location> locations = sim.getLocations();
+		ArrayList<Meal> meals = sim.getMeals();
+		//resets total weight
+		weightPerOrder = new int [amountOfOrders];
+		//System.out.println("Read Meals: " + meals.get(2).toString());
+		
+		
+		
+		//intialize all the variables we need
+		for(int i = 0; i < amountOfOrders; i++) {
+			orderLabelNums[i] = "Order " + String.valueOf(i+1) + ":";
+			perCountsB[i] = meals.get(i).getProbability() * 100;
+			
+			for(FoodItem foodItem: meals.get(i).getFoodItems()) {
+				
+				if(foodItem.toString().equals("burger")) {
+					burgerCountsB[i] += 1 ;
+					weightPerOrder[i] += 6;
+				}
+				else if(foodItem.toString().equals("fries")) {
+					fryCountsB[i] += 1;
+					weightPerOrder[i] += 4;
+				}
+				else if(foodItem.toString().equals("coke")) {
+					cokeCountsB[i] += 1 ;
+					weightPerOrder[i] += 14;
+				}	
+				
+			}
+		}
+       
+        
+        for(int i = 0; i < amountOfOrders; i++){
+        	
+        	//variable dictionary for the for loop 
+        	int curLoopVal = i;
+        	Label order1L = new Label(orderLabelNums[i]);
+        	//Label order1L = new Label(orderNames[i]);
+        	Slider sliderO1 = new Slider();
+        	Label currentSliderVal = new Label("");
+        	Label burgerL = new Label("Burger");
+        	final Spinner<Integer> spinnerB = new Spinner<Integer>();
+        	Label burgerWeight = new Label(String.valueOf(burgerCountsB[i]  *6) + " oz");
+        	Label friesL = new Label("Fries");
+        	final Spinner<Integer> spinnerF = new Spinner<Integer>();
+        	Label friesWeight = new Label(String.valueOf(fryCountsB[i] * 4) + " oz");
+        	Label cokeL = new Label("Coke");
+        	final Spinner<Integer> spinnerC = new Spinner<Integer>();
+        	Label cokeWeight = new Label(String.valueOf(cokeCountsB[i] * 14) + " oz");
+        	Label totalWeightL = new Label("Total:");
+        	Label weightPerOrderL = new Label(String.valueOf(weightPerOrder[i]) + " oz");
+        	
+        	
+        	
+        	//Spinner val that doesn't go up to 16 burgers (to not go over 192 oz)	        	
+        	SpinnerValueFactory<Integer> valueFactoryB = //
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 132, burgerCountsB[i]);
+        	spinnerB.setValueFactory(valueFactoryB);
+        	spinnerB.setMaxWidth(50);
+        	spinnerB.setEditable(true);
+
+        	//Spinner val that doesn't go up to 24 fries (to not go over 192 oz)
+        	SpinnerValueFactory<Integer> valueFactoryF = //
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 48, fryCountsB[i]);
+        	spinnerF.setValueFactory(valueFactoryF);
+        	spinnerF.setMaxWidth(50);
+        	spinnerF.setEditable(true);
+
+        	//Spinner val that doesn't go up to 13 cokes (to not go over 192 oz)
+        	SpinnerValueFactory<Integer> valueFactoryC = //
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 13, cokeCountsB[i]);
+        	spinnerC.setValueFactory(valueFactoryC);
+        	spinnerC.setMaxWidth(50);
+        	spinnerC.setEditable(true);
+
+        	
+        	//slider for percentages
+        	sliderO1.setMin(0);
+        	sliderO1.setMax(100);
+        	sliderO1.setValue(perCountsB[i]);
+        	//sliderO1.setShowTickLabels(true);
+        	sliderO1.setShowTickMarks(true);
+        	sliderO1.setMajorTickUnit(50);
+        	sliderO1.setMaxWidth(300);
+        	
+        	//order probability percentages
+        	sliderO1.valueProperty().addListener((obs, oldVal, newVal)
+        			->{
+        				//difference we can add to the percentage label
+        				int difference = Math.round(newVal.intValue()) - Math.round(oldVal.intValue()) ;
+        				int  perLeftNum = 100 - sumPercent;
+        				
+        				//prints lables here
+        				sumPercent =  sumPercent + difference;
+        				perUsedL.textProperty().bind(Bindings.format("%s %d %s", "Percentage Used: ", sumPercent, "%"));
+        				perLeftL.textProperty().bind(Bindings.format("%s %d %s", "Percentage Used: ", perLeftNum , "%"));
+        				
+        			
+        				meals.get(curLoopVal).setProbability((double)Math.round(newVal.doubleValue()) / 100.0);
+        				
+        			});
+        	
+        	//sends label here
+        	totalWeightL.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
+        	
+        	//curent val of slider percentage
+        	currentSliderVal.textProperty().bind(Bindings.format("%.0f %s ", sliderO1.valueProperty(), "%"));
+        	
+        	
+        	//burger spinner per each order with a listener
+        	spinnerB.valueProperty().addListener((obs, oldVal, newVal) 
+        			->{
+        				FoodItem burger = new FoodItem("burger", 0.375);
+        				if(oldVal > newVal){ // so we can remove weight
+        					saveNewWValue(curLoopVal, -6);
+        					meals.get(curLoopVal).removeFoodItem(burger);
+        				}
+        				else { //standard add
+        					saveNewWValue(curLoopVal, 6);
+        					meals.get(curLoopVal).addFoodItem(burger);
+        				}
+        				
+        				//updates the burger label
+        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
+        				burgerWeight.textProperty().bind(Bindings.format("%d %s", newVal * 6, "oz"));
+        				
+        			
+        				
+        			});
+        	
+        	//fries spinner per each order with a listener
+        	spinnerF.valueProperty().addListener((obs, oldVal, newVal) 
+        			->{
+        				FoodItem fries = new FoodItem("fries", 0.25);
+        				if(oldVal > newVal) {//so we remove weight
+        					saveNewWValue(curLoopVal, -4);
+        					meals.get(curLoopVal).removeFoodItem(fries);
+        				}
+        				else { //standard add
+        					saveNewWValue(curLoopVal, 4);
+        					meals.get(curLoopVal).addFoodItem(fries);
+        				}
+        				
+        				//updates fries labels
+        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
+        				friesWeight.textProperty().bind(Bindings.format("%d %s", newVal * 4, "oz"));
+        				
+        			});
+        	
+        	//coke spinner per each order with a listener
+        	spinnerC.valueProperty().addListener((obs, oldVal, newVal) 
+        			-> {
+        				FoodItem coke = new FoodItem("coke", 0.875);
+        				if(oldVal > newVal) { //so we remove weight 
+        					saveNewWValue(curLoopVal, -14);
+        					meals.get(curLoopVal).removeFoodItem(coke);
+        				}
+        				else{ //standard add
+        					saveNewWValue(curLoopVal, 14);
+        					meals.get(curLoopVal).addFoodItem(coke);
+        				}
+        				
+        				
+        				//updates the coke labels
+        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
+        				cokeWeight.textProperty().bind(Bindings.format("%d %s", newVal * 14, "oz"));
+        				
+
+        			});
+        		        	
+			
+        	
+        	//adds all labels and spinners to the grid pane here
+        	GridPane.setConstraints(order1L, 0, 1 + (5*i));
+        	grid.getChildren().add(order1L);
+        	GridPane.setConstraints(currentSliderVal, 2, 1 + (5*i));
+        	grid.getChildren().add(currentSliderVal);
+        	GridPane.setConstraints(sliderO1, 1, 1 + (5*i));
+        	grid.getChildren().add(sliderO1);
+        	GridPane.setConstraints(burgerL, 0, 2 + (5*i));
+        	grid.getChildren().add(burgerL);
+        	GridPane.setConstraints(spinnerB, 1, 2 + (5*i));
+        	grid.getChildren().add(spinnerB);
+        	GridPane.setConstraints(burgerWeight, 2, 2 + (5*i));
+        	grid.getChildren().add(burgerWeight);
+        	GridPane.setConstraints(friesL, 0, 3 + (5*i));
+        	grid.getChildren().add(friesL);
+        	GridPane.setConstraints(spinnerF, 1, 3 + (5*i));
+        	grid.getChildren().add(spinnerF);
+        	GridPane.setConstraints(friesWeight, 2, 3 + (5*i));
+        	grid.getChildren().add(friesWeight);
+        	GridPane.setConstraints(cokeL, 0, 4 + (5*i));
+        	grid.getChildren().add(cokeL);
+        	GridPane.setConstraints(spinnerC, 1, 4 + (5*i));
+        	grid.getChildren().add(spinnerC);
+        	GridPane.setConstraints(cokeWeight, 2, 4 + (5*i));
+        	grid.getChildren().add(cokeWeight);
+        	GridPane.setConstraints(totalWeightL, 0, 5 + (5*i));
+        	grid.getChildren().add(totalWeightL);
+        	GridPane.setConstraints(weightPerOrderL, 1, 5 + (5*i));
+        	grid.getChildren().add(weightPerOrderL);
+        	
+        	
+        	
+	}
+        	        	        
+		//TODO: Use this to add things in column two
+		columnTwo.getChildren().addAll(grid);
+		scrollPaneOrders.setContent(grid);
+		columnTwo.getChildren().addAll(scrollPaneOrders);
+		
+		settingsScreenLayout.add(columnTwo,1,1);
+		
+		//VBox for things in column 3
+		VBox columnThree = new VBox();
+		
+		GridPane gridC3= new GridPane(); 
+		gridC3.setVgap(10);
+		
+		columnThree.setAlignment(Pos.TOP_LEFT);
+		gridC3.setAlignment(Pos.CENTER_LEFT);
+		
+		/*
+		 * Variable dictionary
+		 */
+		Label hoursLabel = new Label("Hours Per Shift:");
+		final Spinner<Integer> spinnerHours = new Spinner<Integer>();
+		Label orderPerHourL = new Label("Orders Per Hour");
+		
+		Label upperHoursL = new Label("Upper Bound:");
+		final Spinner<Integer> spinnerUpperHours = new Spinner<Integer>();
+    	Label lowerHoursL = new Label("Lower Bound:");
+    	
+    	final Spinner<Integer> spinnerLowerHours = new Spinner<Integer>();
+    	
+		//Hours Per Shift can't got lower than 1 or higher than 8
+    	SpinnerValueFactory<Integer> valueFactoryH = //
+    			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 8, hoursInShift);
+    	spinnerHours.setValueFactory(valueFactoryH);
+    	spinnerHours.setMaxWidth(70);
+    	spinnerHours.setEditable(true);
+    	
+    	//spinner for the hours per shift
+		spinnerHours.valueProperty().addListener((obs, oldVal, newVal)
+				-> {
+			
+					hoursInShift = newVal;
+					
+		});
+		
+
+
+		//adds everything to grid pane 3
+    	GridPane.setConstraints(hoursLabel, 0, 1);
+    	gridC3.getChildren().add(hoursLabel);
+    	GridPane.setConstraints(spinnerHours, 1, 1);
+    	gridC3.getChildren().add(spinnerHours);
+    	
+    	
+    	orderPerHourL.setAlignment(Pos.BASELINE_RIGHT);
+    	GridPane.setConstraints(orderPerHourL, 0, 5);
+    	gridC3.getChildren().add(orderPerHourL);
+
+    	
+    	
+    	
+    	//NOTE: spinner can't go higher than 30 orders but can change this 
+    	SpinnerValueFactory<Integer> valueFactoryUH = //
+    			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 61, upperOrdersPerHour);
+    	spinnerUpperHours.setValueFactory(valueFactoryUH);
+    	spinnerUpperHours.setMaxWidth(70);
+    	spinnerUpperHours.setEditable(true);
+    	
+    	//spinner for the upper limit of the orders per hour
+    	spinnerUpperHours.valueProperty().addListener((obs, oldVal, newVal)
+				-> {
+			
+					upperOrdersPerHour = newVal;
+					
+		});
+    
+
+    	//spinner for the lower limits of thr orders per hour
+    	//NOTE: spinner can't go higher than 30 orders but can change this         	
+    	SpinnerValueFactory<Integer> valueFactoryLH = //
+    			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 61, lowerOrdersPerHour);
+    	spinnerLowerHours.setValueFactory(valueFactoryLH);
+    	spinnerLowerHours.setMaxWidth(70);
+    	spinnerLowerHours.setEditable(true);
+    	
+    	spinnerLowerHours.valueProperty().addListener((obs, oldVal, newVal)
+				-> {
+			
+					lowerOrdersPerHour = newVal;
+					
+		});	
+
+
+    	//adds all this stuff to grid pane 3 
+    	GridPane.setConstraints(upperHoursL, 0, 8);
+    	gridC3.getChildren().add(upperHoursL);
+    	GridPane.setConstraints(spinnerUpperHours, 1, 8);
+    	gridC3.getChildren().add(spinnerUpperHours);
+    	
+    	GridPane.setConstraints(lowerHoursL, 0, 10);
+    	gridC3.getChildren().add(lowerHoursL);
+    	GridPane.setConstraints(spinnerLowerHours, 1, 10);
+    	gridC3.getChildren().add(spinnerLowerHours);
+    	
+    
+    	
+		
+		//TODO: Use this to add things in column three
+		columnThree.getChildren().addAll(gridC3);
+		
+		settingsScreenLayout.add(columnThree,2,1);
+		
+		//HBox for the save and Cancel Buttons
+		HBox saveAndCancelButtonsBox = new HBox();
+		saveAndCancelButtonsBox.setAlignment(Pos.CENTER);
+		saveAndCancelButtonsBox.setSpacing(100);
+		
+		//Save Simulation Settings button on Simulation settings screen
+		Button saveSimulationSetngsBtn = new Button("Save Settings");
+		//listener so we can go back to the simulation screen and write to the file
+		saveSimulationSetngsBtn.setOnAction(e  ->  {
+			//System.out.println("Added Meals: " + meals.get(2).toString());
+			SimulationSettings newSimulation = new SimulationSettings(simulationName, "1" , locations, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
+				try {
+					if(id == "1") {
+						simulationSettingToXML(findAvailableSimulationSettingID(), newSimulation);
+					}
+					else {
+						simulationSettingToXML(id, newSimulation);
+					}
+					
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				
+				//Rebuilds the radio button
+				//Scroll Pane for Radio Buttons Section
+				ScrollPane simulationSelectorPane = new ScrollPane();
+				//Sets which group of radio buttons this simulation is a part of
+				ToggleGroup simulationSelectorButtons = new ToggleGroup();
+				//Make and populate the radio buttons
+				VBox simulationSelectorVBox = new VBox();
+				simulationSettingsIDs = getSimulationSettingsIDs();
+				for(String idNumber : simulationSettingsIDs) {
+
+					//Make a radio button with the name of the SimulationSetting
+					RadioButton radioButton = new RadioButton(getSimulationNameFromID(idNumber));
+					//Upon clicking on a radio button the currentSimulationID is set to the current ID
+					radioButton.setOnAction(f ->{
+						currentSimulationSettingID = idNumber;
+					});
+					//Start the simulation with the default settings
+					if(idNumber.equals("1")) {
+						radioButton.setSelected(true);
+					}
+					//Add radio button to toggle group and add it to the screen
+					radioButton.setToggleGroup(simulationSelectorButtons);
+					simulationSelectorVBox.getChildren().add(radioButton);
+				}
+				//Add the content to the screen
+				simulationSelectorPane.setContent(simulationSelectorVBox);
+				
+				simulationScreenLayout.add(simulationSelectorPane, 0, 0);
+				
+				simulationScreen.setRoot(simulationScreenLayout);
+
+				primaryStage.setScene(simulationScreen); //saves the stage
+			});	//Adds function to the button TODO: Expand function to not save if the user has not inputed correct values, possibly able to be done with throwing exceptions in a constructor
+		
+		saveSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		saveAndCancelButtonsBox.getChildren().add(saveSimulationSetngsBtn);
+		
+		//Cancel Simulation Settings button on Simulation settings screen
+		Button cancelSimulationSetngsBtn = new Button("Cancel");
+		cancelSimulationSetngsBtn.setOnAction(e -> {
+			
+			//Rebuilds the radio button
+			//Scroll Pane for Radio Buttons Section
+			ScrollPane simulationSelectorPane = new ScrollPane();
+			//Sets which group of radio buttons this simulation is a part of
+			ToggleGroup simulationSelectorButtons = new ToggleGroup();
+			//Make and populate the radio buttons
+			VBox simulationSelectorVBox = new VBox();
+			simulationSettingsIDs = getSimulationSettingsIDs();
+			for(String idNumber : simulationSettingsIDs) {
+
+				//Make a radio button with the name of the SimulationSetting
+				RadioButton radioButton = new RadioButton(getSimulationNameFromID(idNumber));
+				//Upon clicking on a radio button the currentSimulationID is set to the current ID
+				radioButton.setOnAction(f ->{
+					currentSimulationSettingID = idNumber;
+				});
+				//Start the simulation with the default settings
+				if(idNumber.equals("1")) {
+					radioButton.setSelected(true);
+				}
+				//Add radio button to toggle group and add it to the screen
+				radioButton.setToggleGroup(simulationSelectorButtons);
+				simulationSelectorVBox.getChildren().add(radioButton);
+			}
+			//Add the content to the screen
+			simulationSelectorPane.setContent(simulationSelectorVBox);
+			
+			simulationScreenLayout.add(simulationSelectorPane, 0, 0);
+			
+			simulationScreen.setRoot(simulationScreenLayout);
+			
+			primaryStage.setScene(simulationScreen);
+		});	//Adds function to the button TODO: Idk if there's anything else were gonna have to do here cause as long as we dont save anything we should be good
+		cancelSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		saveAndCancelButtonsBox.getChildren().add(cancelSimulationSetngsBtn);
+		
+		
+		settingsScreenLayout.add(saveAndCancelButtonsBox,0,2,3,1);
+		
+		settingsScreen = new Scene(settingsScreenLayout,1000,600);
+		
+		primaryStage.setScene(simulationScreen);
+		//TODO: Decide if we want to be able to resize
+		primaryStage.setResizable(false);
+		primaryStage.setTitle("Dromedary Drones Simulation");
+		primaryStage.show();
+		
+		
+		
 	}
 	
 	/**
@@ -1274,7 +1272,7 @@ public class Main extends Application{
 	 * @param id The ID of the simulation in question
 	 * @return The Name of the simulation
 	 */
-	public String getSimulationNameFromID(String id) {
+	public static String getSimulationNameFromID(String id) {
 		return buildSimulationSettingsFromXML(id).getName();
 	}
 	

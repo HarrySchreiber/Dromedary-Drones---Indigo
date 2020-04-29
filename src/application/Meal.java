@@ -9,8 +9,8 @@ import java.util.ArrayList;
  *
  */
 public class Meal {
-	FoodItem burgers = new FoodItem("Burger", 0.375);
-	FoodItem fries = new FoodItem("Fries", 0.25);
+	FoodItem burgers = new FoodItem("burger", 0.375);
+	FoodItem fries = new FoodItem("fries", 0.25);
 	FoodItem coke = new FoodItem("coke", 0.875);
 	private ArrayList<FoodItem> foodItems;
 	private double totalWeight;
@@ -51,7 +51,17 @@ public class Meal {
 		foodItems.add(item);
 		totalWeight += item.getWeight();
 	}
-
+	
+	public void removeFoodItem(FoodItem item) {
+		for(int i = 0; i < foodItems.size(); i++) {
+			if(foodItems.get(i).getName() == item.getName()) {
+				foodItems.remove(i);
+				break;
+			}
+		}
+			totalWeight -= item.getWeight();
+	}
+	
 	public double getProbability() {
 		return probability;
 	}
