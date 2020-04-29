@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<drones>
+    <drone id="1">
+        <name>Default Drone</name>
+        <maxcargo>12</maxcargo>
+        <avgcruisingspeed>20</avgcruisingspeed>
+        <maxflighttime>20</maxflighttime>
+        <turnaroundtime>3</turnaroundtime>
+        <unloadtime>0.5</unloadtime>
+    </drone>
+</drones>

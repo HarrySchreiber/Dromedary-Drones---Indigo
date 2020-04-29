@@ -63,9 +63,10 @@ public class Main extends Application{
 	private static int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private static int sumPercent= 100; //a total 
 	private static Document simulationSettingsXML;
+	private static Document droneSettingsXML;
 	private static ArrayList<String> simulationSettingsIDs;
+	private static ArrayList<String> droneSettingsIDs;
 	private static String currentSimulationSettingID;
-	private static String currentDroneID;
 	private static ArrayList<Location> temporaryLocations;
 	private static ArrayList<Meal> temporaryMeals;
 	private static int hoursInShift;
@@ -384,7 +385,7 @@ public class Main extends Application{
 	 */
 	public static ArrayList<String> getSimulationSettingsIDs() {
 		ArrayList<String> ret = new ArrayList<String>();
-		//Grab all of the documents with the simulationsetting tag name
+		//Grab all of the elemets with the simulationsetting tag name
 		NodeList simulationSettingsList = simulationSettingsXML.getElementsByTagName("simulationsetting");
 		for(int i = 0; i < simulationSettingsList.getLength(); i++) {
 			//Grab each simulationsetting item
@@ -395,6 +396,22 @@ public class Main extends Application{
 		return ret;
 	}
 	
+	/**
+	 * Populates an ArrayList with the drone setting IDs from the droneSettings.xml
+	 * @return ArrayList of drone IDs
+	 */
+	public static ArrayList<String> getDroneSettingsIDs(){
+		ArrayList<String> ret = new ArrayList<String>();
+		//Grab all of the elements with the drone tag name
+		NodeList droneSettingsList = droneSettingsXML.getElementsByTagName("drone");
+		for(int i = 0; i < droneSettingsList.getLength(); i++) {
+			//Grab each drone item
+			Element currentSettings = (Element) droneSettingsList.item(i);
+			//Grab the id of that drone
+			ret.add(currentSettings.getAttribute("id"));
+		}
+		return ret;
+	}
 	
 	/**
 	 * a SimulationSettings builder from XML Document
@@ -1283,6 +1300,8 @@ public class Main extends Application{
 			simulationSettingsXML = documentBuilder.parse("simulationSettings.xml");
 			simulationSettingsIDs = getSimulationSettingsIDs();
 			currentSimulationSettingID = "1";
+			droneSettingsXML = documentBuilder.parse("droneSettings.xml");
+			droneSettingsIDs = getDroneSettingsIDs();
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1297,7 +1316,7 @@ public class Main extends Application{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		launch(args);
+		//launch(args);
 	}
 	
 }
