@@ -4,11 +4,14 @@ package application;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -217,12 +220,12 @@ public class Main extends Application{
 			//Add box to the main grid in the second column stretching three rows if need be			
 			simulationScreenLayout.add(resultsBox, 1, 0, 1, 3);
 			
-			
+			Simulation s = new Simulation();
 			//Edit Simulation Button on Simulation Screen
 			Button runSimulationBtn = new Button("Run Simulation");
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
-				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
+				//Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
 				s.runSimulation();
 				
 				//Reduce the data down to just the summary data in the graph
@@ -282,7 +285,24 @@ public class Main extends Application{
 			Button loadDataFileBtn = new Button("Load a Results File");
 			loadDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			loadDataFileBtn.setOnAction(e ->{
-				System.out.println("TODO: Load a Results File");	//TODO: Add the logic here
+				FileChooser fileSelect = new FileChooser();
+				fileSelect.setTitle("Load Data File");
+				fileSelect.getExtensionFilters().addAll(
+						new ExtensionFilter("CSV Files", "*.csv"));
+				File selectedFile = fileSelect.showOpenDialog(primaryStage);
+				if(selectedFile != null) {
+					System.out.println("Selected File: " + selectedFile.getAbsolutePath());
+				}
+				loadDataFileBtn.setText("CurrentFile: " + selectedFile.getName());
+				
+//				try {
+//					//locations = currentSettings.populateLocations(selectedFile.getAbsolutePath());
+//					System.out.print("Opened Explorer");
+//
+//				} catch (FileNotFoundException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
 			});
 			dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
 			
@@ -290,7 +310,46 @@ public class Main extends Application{
 			Button saveDataFileBtn = new Button("Save Data File");
 			saveDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			saveDataFileBtn.setOnAction(e ->{
-				System.out.println("TODO: Save a Results File");	//TODO: Add the logic here
+				ArrayList<Order> orders = new ArrayList<Order>();
+				FileChooser fileLocation = new FileChooser();
+				
+				//Set extension filter for text files
+				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
+				fileLocation.getExtensionFilters().add(extFilter);
+				
+				//Show save file dialog
+				File selectedLocation = fileLocation.showSaveDialog(primaryStage);
+				
+				if( selectedLocation != null) {
+					//File dataFile = new File("dataFile.txt");
+					try {
+						PrintWriter writer;
+						writer = new PrintWriter(selectedLocation);
+						writer.println("Fifo Data");
+
+						for(int key:fifoData.keySet()) {
+							writer.println(key +"," + fifoData.get(key));
+						}
+//						for(Order order : orders) {
+//							int minutesTaken = order.getTimeStampDelivered() - order.getTimeStampOrder();
+//							writer.println(minutesTaken);
+//						}
+						writer.println("Knapsack Data");
+						for(int key:knapsackData.keySet()) {
+							writer.println(key +"," + knapsackData.get(key));
+						}
+						//writer.println("FIFO Average Time: " + fifoAverage + " Worst Time: " + fifoWorst);
+						//writer.println("Knapsack Average Time: " + knapAverage + " Worst Time: " + knapWorst);
+						writer.close();
+						//TODO Delete this print statement
+						System.out.println("Successfully wrote to the file");
+
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						//e1.printStackTrace();
+						System.out.println("File could not be accessed");
+					}
+				}	//TODO: Add the logic here
 			});
 			dataButtonsBox.getChildren().add(saveDataFileBtn);	//Add button to screen
 			
