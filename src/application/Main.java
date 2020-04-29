@@ -4,6 +4,7 @@ package application;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -27,6 +28,7 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -183,12 +185,13 @@ public class Main extends Application{
 			//Add box to the main grid in the second column stretching three rows if need be			
 			simulationScreenLayout.add(resultsBox, 1, 0, 1, 3);
 			
+			Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
 			
 			//Edit Simulation Button on Simulation Screen
 			Button runSimulationBtn = new Button("Run Simulation");
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
-				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
+				//Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
 				s.runSimulation( buildSimulationSettingsFromXML(currentSimulationSettingID));
 				
 				//TODO: Do we want to truncate this?
@@ -270,7 +273,44 @@ public class Main extends Application{
 			Button saveDataFileBtn = new Button("Save Data File");
 			saveDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			saveDataFileBtn.setOnAction(e ->{
-				System.out.println("TODO: Save a Results File");	//TODO: Add the logic here
+				FileChooser fileLocation = new FileChooser();
+				
+				//Set extension filter for text files
+				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
+				fileLocation.getExtensionFilters().add(extFilter);
+				
+				//Show save file dialog
+				File selectedLocation = fileLocation.showSaveDialog(primaryStage);
+				
+				if( selectedLocation != null) {
+					//File dataFile = new File("dataFile.txt");
+					try {
+						PrintWriter writer;
+						writer = new PrintWriter(selectedLocation);
+						writer.println("Fifo Data");
+						for(int key:s.getFifoData().keySet()) {
+							writer.println(key +"," + s.getFifoData().get(key));
+						}
+//						for(Order order : orders) {
+//							int minutesTaken = order.getTimeStampDelivered() - order.getTimeStampOrder();
+//							writer.println(minutesTaken);
+//						}
+						writer.println("Knapsack Data");
+						for(int key:s.getKnapsackData().keySet()) {
+							writer.println(key +"," + s.getKnapsackData().get(key));
+						}
+//						writer.println("FIFO Average Time: " + fifoAverage + " Worst Time: " + fifoWorst);
+//						writer.println("Knapsack Average Time: " + knapAverage + " Worst Time: " + knapWorst);
+						writer.close();
+						//TODO Delete this print statement
+						System.out.println("Successfully wrote to the file");
+
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						//e1.printStackTrace();
+						System.out.println("File could not be accessed");
+					}
+				}
 			});
 			dataButtonsBox.getChildren().add(saveDataFileBtn);	//Add button to screen
 			
