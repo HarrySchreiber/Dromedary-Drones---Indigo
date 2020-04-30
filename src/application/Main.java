@@ -556,7 +556,7 @@ public class Main extends Application{
 			}
 		}
 		//Build and return the object from the set variables
-		return new SimulationSettings(simulationName, droneIDNumber, locations, meals, hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
+		return new SimulationSettings(simulationName, buildDroneFromXML(droneIDNumber), locations, meals, hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
 	}
 	
 	/**
@@ -1069,7 +1069,7 @@ public class Main extends Application{
 		//listener so we can go back to the simulation screen and write to the file
 		saveSimulationSetngsBtn.setOnAction(e  ->  {
 			//System.out.println("Added Meals: " + meals.get(2).toString());
-			SimulationSettings newSimulation = new SimulationSettings(simulationName, "1" , locations, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
+			SimulationSettings newSimulation = new SimulationSettings(simulationName, buildDroneFromXML("1") , locations, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
 				try {
 					if(id == "1") {
 						simulationSettingToXML(findAvailableSimulationSettingID(), newSimulation);
@@ -1223,6 +1223,36 @@ public class Main extends Application{
 	}
 	
 	/**
+	 * Method to remove a drone from the droneSettings XML file
+	 * @param id ID String of the drone we want to remove
+	 * @throws Exception If the default drone has an attempt on its life then we throw an exception
+	 */
+	public static void removeDroneSettingFromXML(String id) throws Exception {
+		//If someone tries to remove or edit the default settings
+		if(id.equals("1")) {
+			throw new Exception("Cannot remove default drone");
+		}
+		
+		//Remove the id from the list used to parse grab drone names
+		droneSettingsIDs.remove(id);
+		
+		//Loop through all of the drones to find the one to remove
+		NodeList droneSettingsList = droneSettingsXML.getElementsByTagName("drone");
+		for(int i = 0; i < droneSettingsList.getLength(); i++) {
+			Element droneSettingElement = (Element) droneSettingsList.item(i);
+			//If the id attribute exists
+			if(droneSettingElement.hasAttribute("id")) {
+				//If the id is the id that needs to be removed
+				if(droneSettingElement.getAttribute("id").equals(id)) {
+					droneSettingElement.getParentNode().removeChild(droneSettingElement);
+				}
+			}
+		}
+		//Run the updater to update and write the actual file
+		updateDroneSettingsXML();
+	}
+	
+	/**
 	 * Helper method to update and write out to the simulation settings xml
 	 */
 	public static void updateSimulationSettingsXML() {
@@ -1232,7 +1262,7 @@ public class Main extends Application{
 			DOMSource domSource = new DOMSource(simulationSettingsXML);
 			StreamResult streamResult = new StreamResult(new File("simulationSettings.xml"));
 			
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");	//Indents the XML file instead of just listing the nodes out
+			//transformer.setOutputProperty(OutputKeys.INDENT, "yes");	//Uncomment for tabs, Indents the XML file instead of just listing the nodes out
 			transformer.transform(domSource, streamResult);
 		} catch (TransformerConfigurationException e) {
 			// TODO Auto-generated catch block
@@ -1243,6 +1273,30 @@ public class Main extends Application{
 		}
 		
 	}
+	
+	
+	/**
+	 * Helper method to update and write out to the drone settings xml
+	 */
+	public static void updateDroneSettingsXML() {
+		TransformerFactory transformerFactory = TransformerFactory.newInstance();
+		try {
+			Transformer transformer = transformerFactory.newTransformer();
+			DOMSource domSource = new DOMSource(droneSettingsXML);
+			StreamResult streamResult = new StreamResult(new File("droneSettings.xml"));
+			
+			//transformer.setOutputProperty(OutputKeys.INDENT, "yes");	//Uncomment for tabs, Indents the XML file instead of just listing the nodes out
+			transformer.transform(domSource, streamResult);
+		} catch (TransformerConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
 	
 	/**
 	 * A method to write simulation settings to an xml
@@ -1340,6 +1394,50 @@ public class Main extends Application{
 		updateSimulationSettingsXML();
 	}
 	
+	public static void droneSettingToXML(String id, Drone droneSetting) throws Exception {
+		removeDroneSettingFromXML(id);
+		
+		//Get the root of the file
+		Element root = (Element) droneSettingsXML.getElementsByTagName("drones").item(0);
+		
+		//Make a new drone element and add its id to its attributes and add it to the root
+		Element currentDroneDocument = droneSettingsXML.createElement("drone");
+		currentDroneDocument.setAttribute("id", id);
+		root.appendChild(currentDroneDocument);
+		
+		//Add a name element to the current drone
+		Element currentDroneName = (Element) droneSettingsXML.createElement("name");
+		currentDroneName.setTextContent(droneSetting.getName());
+		currentDroneDocument.appendChild(currentDroneName);
+		
+		//Add a max cargo element to the current drone
+		Element currentDroneMaxCargo = (Element) droneSettingsXML.createElement("maxcargo");
+		currentDroneMaxCargo.setTextContent(String.valueOf(droneSetting.getMaxCargo()));
+		currentDroneDocument.appendChild(currentDroneMaxCargo);
+				
+		//Add a drone average cruising speed element to the current drone
+		Element currentDroneAverageCruisingSpeed = (Element) droneSettingsXML.createElement("avgcruisingspeed");
+		currentDroneAverageCruisingSpeed.setTextContent(String.valueOf(droneSetting.getAvgCruisingSpeed()));
+		currentDroneDocument.appendChild(currentDroneAverageCruisingSpeed);
+		
+		//Add a max flight time element to the current drone
+		Element currentDroneMaxFlightTime = (Element) droneSettingsXML.createElement("maxflighttime");
+		currentDroneMaxFlightTime.setTextContent(String.valueOf(droneSetting.getMaxFlightTime()));
+		currentDroneDocument.appendChild(currentDroneMaxFlightTime);
+		
+		//Add a turn around time element to the current drone
+		Element currentDroneTurnAroundTime = (Element) droneSettingsXML.createElement("turnaroundtime");
+		currentDroneTurnAroundTime.setTextContent(String.valueOf(droneSetting.getTurnAroundTime()));
+		currentDroneDocument.appendChild(currentDroneTurnAroundTime);
+		
+		//Add a turn around time element to the current drone
+		Element currentDroneUnloadTime = (Element) droneSettingsXML.createElement("unloadtime");
+		currentDroneUnloadTime.setTextContent(String.valueOf(droneSetting.getUnloadTime()));
+		currentDroneDocument.appendChild(currentDroneUnloadTime);
+		
+		updateDroneSettingsXML();
+	}
+	
 	/**
 	 * Find the next available ID for the SimulationSettings
 	 * @return The next available ID for a SimulationSettings
@@ -1354,6 +1452,22 @@ public class Main extends Application{
 		
 		return String.valueOf(counter);
 	}
+	
+	/**
+	 * Find the next available ID for the Drone settings
+	 * @return The next available ID for the drone settings
+	 */
+	public static String findAvailableDroneSettingID() {
+		int counter = 1;
+		
+		//Find a value that is not in the drone settings already
+		while(droneSettingsIDs.contains(String.valueOf(counter))) {
+			counter++;
+		}
+		
+		return String.valueOf(counter);
+	}
+	
 	
 	/**
 	 * @param id The ID of the simulation in question
@@ -1386,7 +1500,7 @@ public class Main extends Application{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//launch(args);
+		launch(args);
 	}
 	
 }

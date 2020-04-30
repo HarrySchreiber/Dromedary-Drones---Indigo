@@ -3,9 +3,9 @@
     <drone id="1">
         <name>Default Drone</name>
         <maxcargo>12</maxcargo>
-        <avgcruisingspeed>20</avgcruisingspeed>
+        <avgcruisingspeed>25</avgcruisingspeed>
         <maxflighttime>20</maxflighttime>
-        <turnaroundtime>3</turnaroundtime>
+        <turnaroundtime>2.5</turnaroundtime>
         <unloadtime>0.5</unloadtime>
     </drone>
 </drones>
