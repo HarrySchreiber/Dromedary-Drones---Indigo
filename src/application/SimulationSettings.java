@@ -20,12 +20,19 @@ public class SimulationSettings {
 	private int orderUpper;
 	private int orderLower;
 	
-	//TODO: IMPORTANT Lets discuss this class again to figure out what we have to actually have here and how we need to populate this stuff
-	//Like what are we going to pass it? An XML of all of the settings already filled out? Or are we giving it all of the variables?
-	public SimulationSettings(String name, String droneID, ArrayList<Location> locations, ArrayList<Meal> meals, int hoursPerShift, int orderUpper, int orderLower) {
+	/**
+	 * Constructor for a simulation setting
+	 * @param name The name of the simulation
+	 * @param drone The drone of the simulation
+	 * @param locations The locations that a simulation can deliver to
+	 * @param meals The meals that the simulation can pick from
+	 * @param hoursPerShift The hours in a shift
+	 * @param orderUpper The upper number of orders in an hour
+	 * @param orderLower The lower number of orders in an hour
+	 */
+	public SimulationSettings(String name, Drone drone, ArrayList<Location> locations, ArrayList<Meal> meals, int hoursPerShift, int orderUpper, int orderLower) {
 		this.name = name;
-		//TODO: Pass drone ID to drone object?
-		this.currentDrone = new Drone();	//TODO: This will have to be updated with whatever drone the user wants
+		this.currentDrone = drone;
 		this.locations = locations;
 		this.meals = meals;	//TODO: Question 1: I feel like we need to pull this in from it being built in the main frontend side Question 2: Do we need a deep copy constructor here?
 		this.hoursPerShift = hoursPerShift;
@@ -139,6 +146,7 @@ public class SimulationSettings {
 		this.orderLower = orderLower;
 	}
 
+	//TODO: We probably just need to pitch this jawn
 	public ArrayList<Location> populateLocations(String deliveryPoints) throws FileNotFoundException {
 		ArrayList<Location> deliveryLocations = new ArrayList<Location>();
 		
