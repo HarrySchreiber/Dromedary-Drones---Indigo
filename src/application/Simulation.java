@@ -41,7 +41,7 @@ public class Simulation {
 		for(int simulationNum = 0; simulationNum < 50; simulationNum++) {
 			ArrayList<Order> orders = new ArrayList<Order>();
 			//TODO: Set these up to dynamically populate: ie take out 4 and 15 and populate from settings
-			for(int i = 0; i< sim.getOrderLower(); i++) {
+			for(int i = 0; i< sim.getHoursPerShift(); i++) {
 				for(int j = 0; j< sim.getOrderUpper(); j++) {
 					Order o = new Order(mealPicker(sim.getMeals()), rnd.nextInt(60)+1 + (i*60), sim.getLocations().get(rnd.nextInt(sim.getLocations().size())));
 					orders.add(o);
