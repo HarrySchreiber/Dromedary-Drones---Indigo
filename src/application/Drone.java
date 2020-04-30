@@ -39,6 +39,7 @@ public class Drone {
 	 * @param unloadTime the amount of time the drone takes to deliver an order in minutes
 	 */
 	public Drone(String droneID, String name, double maxCargo, double avgCruisingSpeed, double maxFlightTime, double turnAroundTime, double unloadTime) {
+		this.droneID = droneID;
 		this.name = name;
 		this.maxCargo = maxCargo;
 		this.avgCruisingSpeed = avgCruisingSpeed;
