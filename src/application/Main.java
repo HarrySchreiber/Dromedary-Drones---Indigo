@@ -428,7 +428,7 @@ public class Main extends Application{
 			Element otherSimulationSettingElement = (Element) simulationsettingList.item(i);
 			if(otherSimulationSettingElement.hasAttribute("id")) {
 				//Find the simulationsetting by id and then update the current simulation setting
-				if(otherSimulationSettingElement.getAttribute("id").contentEquals(id)) {
+				if(otherSimulationSettingElement.getAttribute("id").equals(id)) {
 					currentSimulationSettingElement = otherSimulationSettingElement;
 				}
 			}	
@@ -557,6 +557,76 @@ public class Main extends Application{
 		}
 		//Build and return the object from the set variables
 		return new SimulationSettings(simulationName, droneIDNumber, locations, meals, hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
+	}
+	
+	/**
+	 * Build a drone object from an XML document
+	 * @param id The id of the drone that is needed
+	 * @return a Drone object with data from the XML
+	 */
+	public static Drone buildDroneFromXML(String id) {
+		//Gets a list of all of the drone elements in the XML
+		NodeList droneSettingList = droneSettingsXML.getElementsByTagName("drone");
+		
+		//Find which drone matches the ID and update it
+		Element currentDroneElement = (Element) droneSettingList.item(0);
+		for(int i = 0; i < droneSettingList.getLength(); i++) {
+			Element otherDroneSettingElement = (Element) droneSettingList.item(i);
+			if(otherDroneSettingElement.hasAttribute("id")) {
+				//Find the drone settings by id and then update the current drone element
+				if(otherDroneSettingElement.getAttribute("id").equals(id)) {
+					currentDroneElement = otherDroneSettingElement;
+				}
+			}	
+		}
+		
+		//Variables to store the xml data in
+		String droneID = "";
+		String name = "";
+		double maxCargo = 0;
+		double avgCruisingSpeed = 0;
+		double maxFlightTime = 0;
+		double turnAroundTime = 0;
+		double unloadTime = 0;
+		
+		//Get the ID of the drone that we actually got
+		droneID = currentDroneElement.getAttribute("id");
+		//Flip through all of the drone fields
+		NodeList currentDroneFields = currentDroneElement.getChildNodes();
+		for(int i = 0; i < currentDroneFields.getLength(); i++) {
+			//We need a node to check the type before turning into an element
+			Node droneNodeField = currentDroneFields.item(i);
+			if(droneNodeField.getNodeType()==Node.ELEMENT_NODE) {
+				//Cast the node to Element
+				Element droneElementField = (Element) droneNodeField;
+				//If the tag is the name then set the name field for the drone
+				if(droneElementField.getTagName().equals("name")) {
+					name = droneElementField.getTextContent();
+				}
+				//If the tag is the maxcargo then set the maxCargo field for the drone
+				if(droneElementField.getTagName().equals("maxcargo")) {
+					maxCargo = Double.valueOf(droneElementField.getTextContent());
+				}
+				//If the tag is the avgcruisingspeed then set the avgCruisingSpeed field for the drone
+				if(droneElementField.getTagName().equals("avgcruisingspeed")) {
+					avgCruisingSpeed = Double.valueOf(droneElementField.getTextContent());
+				}
+				//If the tag is the maxflighttime then set the maxFlightTime field for the drone
+				if(droneElementField.getTagName().equals("maxflighttime")) {
+					maxFlightTime = Double.valueOf(droneElementField.getTextContent());
+				}
+				//If the tag is the turnaroundtime then set the turnAroundTime field for the drone
+				if(droneElementField.getTagName().equals("turnaroundtime")) {
+					turnAroundTime = Double.valueOf(droneElementField.getTextContent());
+				}
+				//If the tag is the unloadtime then set the unloadtime field for the drone
+				if(droneElementField.getTagName().equals("unloadtime")) {
+					unloadTime = Double.valueOf(droneElementField.getTextContent());
+				}
+			}
+		}
+		//Build and return the Drone object
+		return new Drone(droneID,name,maxCargo,avgCruisingSpeed,maxFlightTime,turnAroundTime,unloadTime);
 	}
 	
 	/*
