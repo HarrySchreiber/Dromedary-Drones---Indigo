@@ -22,9 +22,9 @@ public class Drone {
 	public Drone() {
 		this.name = "Default Grove City Drone";
 		this.maxCargo = 12;
-		this.avgCruisingSpeed = 20;
+		this.avgCruisingSpeed = 25;
 		this.maxFlightTime = 20;
-		this.turnAroundTime = 3;
+		this.turnAroundTime = 2.5;
 		this.unloadTime = 0.5;
 	}
 	

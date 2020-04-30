@@ -66,6 +66,17 @@ public class Location {
 		this.y = y;
 	}
 	
+	/**
+	 * Overrides method to compare two locations
+	 * @param other The location to compare to the other location
+	 * @return true if the locations are equal
+	 */
+	public boolean equals(Location other) {
+		return (this.name.equals(other.name) && this.x == other.x && this.y == other.y);
+	}
 	
+	public String toString() {
+		return name;
+	}
 	
 }
