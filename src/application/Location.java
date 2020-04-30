@@ -75,6 +75,9 @@ public class Location {
 		return (this.name.equals(other.name) && this.x == other.x && this.y == other.y);
 	}
 	
+	/**
+	 * Overides the to string method
+	 */
 	public String toString() {
 		return name;
 	}
