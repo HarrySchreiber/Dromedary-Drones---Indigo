@@ -571,17 +571,7 @@ public class Main extends Application{
 		simNameBox.getChildren().addAll(simNameLabel,simNameField);
 		//Add HBox to the grid and stretch it over 3 columns
 		settingsScreenLayout.add(simNameBox, 0, 0, 3, 1);
-		simulationName = sim.getName();
-		
-		//Event for changing the values to the new Settings Name
-		EventHandler<ActionEvent> event = new EventHandler<ActionEvent>()  { 
-            public void handle(ActionEvent e)   { 
-            	simulationName =  simNameField.getText();     
-            	
-		}}; 
-
-        simNameField.setOnAction(event); //sets up the Event
-                		
+		simulationName = simNameField.getText();
 		
 		//VBox for things in column 1
 		VBox columnOne = new VBox(20);
@@ -983,7 +973,8 @@ public class Main extends Application{
 		Button saveSimulationSetngsBtn = new Button("Save Settings");
 		//listener so we can go back to the simulation screen and write to the file
 		saveSimulationSetngsBtn.setOnAction(e  ->  {
-			//System.out.println("Added Meals: " + meals.get(2).toString());
+
+			simulationName = simNameField.getText();
 			SimulationSettings newSimulation = new SimulationSettings(simulationName, "1" , locations, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
 				try {
 					if(id == "1") {
