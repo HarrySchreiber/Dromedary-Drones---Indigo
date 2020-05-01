@@ -41,6 +41,11 @@ public class Meal {
 		return totalWeight;
 	}
 	
+	public String foodItemstoString() {
+		return foodItems.toString();
+		
+	}
+	
 	/**
 	 * TODO: If we decide to update the weight member variable just remember to do that here and add the member variable
 	 * @param item The food item to be passed to the list

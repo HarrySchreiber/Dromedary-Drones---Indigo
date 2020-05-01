@@ -312,6 +312,7 @@ public class Main extends Application{
 			saveDataFileBtn.setOnAction(e ->{
 				ArrayList<Order> orders = new ArrayList<Order>();
 				FileChooser fileLocation = new FileChooser();
+				int counter = 0;
 				
 				//Set extension filter for text files
 				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
@@ -330,17 +331,30 @@ public class Main extends Application{
 						for(int key:fifoData.keySet()) {
 							writer.println(key +"," + fifoData.get(key));
 						}
-//						for(Order order : orders) {
-//							int minutesTaken = order.getTimeStampDelivered() - order.getTimeStampOrder();
+						writer.println("Simulation Number ,, Items in a meal ,, Chance ,, Minute Ordered ,, minute delivered");
+						for(Order order : s.getFifoData()) {
+							writer.print(counter + ",");
+							writer.print(order.getMeal().foodItemstoString());
+							writer.print(", 0 ,");
+							writer.print(order.getTimeStampOrder() + ",");
+							writer.print(order.getTimeStampDelivered() + ",");
+							
+							writer.println();
+							counter++;
+							
+						}
+//						for(Order knapsackData : orders) {
+//							int minutesTaken = ((Order) knapsackData).getTimeStampDelivered() - ((Order) knapsackData).getTimeStampOrder();
 //							writer.println(minutesTaken);
 //						}
-						writer.println("Knapsack Data");
-						for(int key:knapsackData.keySet()) {
-							writer.println(key +"," + knapsackData.get(key));
-						}
+//						writer.println("Knapsack Data");
+//						s.getFifoData().get(lowerOrdersB);
+//						for(int key:knapsackData.keySet()) {
+//							writer.println(key +"," + knapsackData.get(key));
+//						}
 						writer.println("Food: ");
-						reduceFifoToMapFromArrayListOrders(s.getFifoData());
-						writer.println("Data" + s.getFifoData());
+//						reduceFifoToMapFromArrayListOrders(s.getFifoData());
+//						writer.println("Data" + s.getFifoData());
 //						writer.println("FIFO Average Time: " + s.findAverage(fifoData) + " Worst Time: " + s.findWorst(fifoData));
 //						writer.println("Knapsack Average Time: " + s.findAverage(knapsackData) + " Worst Time: " + s.findWorst(knapsackData));
 						writer.close();
