@@ -6,10 +6,8 @@ package application;
  *
  */
 public class Order implements Comparable<Order> {
-	private int simulationNumber;
 	private Meal meal;
-	private int timeStampOrder;
-	private int timeStampDelivered;
+	private int timeStamp;
 	private Location deliveryPoint;
 	private boolean skipped;
 	
@@ -20,13 +18,12 @@ public class Order implements Comparable<Order> {
 	 * @param timeStamp The minute they ordered the meal
 	 * @param deliveryPoint Where the meal order is going
 	 */
-	public Order(int simulationNumber, Meal meal, int timeStamp, Location deliveryPoint) {
-		this.simulationNumber = simulationNumber;
+	public Order(Meal meal, int timeStamp, Location deliveryPoint) {
+		//TODO: Do we need deep copy constructors for meal and delivery points?
 		this.meal = meal;
-		this.timeStampOrder = timeStamp;
+		this.timeStamp = timeStamp;
 		this.deliveryPoint = deliveryPoint;
 		this.skipped = false;
-		this.timeStampDelivered = 0;
 	}
 	
 	/**
@@ -35,12 +32,10 @@ public class Order implements Comparable<Order> {
 	 * @param other The Original Order to be Copied
 	 */
 	public Order(Order other) {
-		this.simulationNumber = other.simulationNumber;
 		this.meal = new Meal(other.meal);
-		this.timeStampOrder = other.timeStampOrder;
+		this.timeStamp = other.timeStamp;
 		this.deliveryPoint = other.deliveryPoint;
 		this.skipped = false;
-		this.timeStampDelivered = other.timeStampDelivered;
 	}
 
 	/**
@@ -75,16 +70,16 @@ public class Order implements Comparable<Order> {
 	/**
 	 * @return The minute the order came in
 	 */
-	public int getTimeStampOrder() {
-		return timeStampOrder;
+	public int getTimeStamp() {
+		return timeStamp;
 	}
 
 	/**
 	 * @param timeStamp The minute the order came in
 	 */
-	public void setTimeStampOrder(int timeStamp) {
+	public void setTimeStamp(int timeStamp) {
 		//TODO: Do we even need setters and if so do we need to do deep copys?
-		this.timeStampOrder = timeStamp;
+		this.timeStamp = timeStamp;
 	}
 
 	/**
@@ -108,41 +103,13 @@ public class Order implements Comparable<Order> {
 	@Override
 	public int compareTo(Order o) {
 		// TODO Auto-generated method stub
-		return Integer.valueOf(this.getTimeStampOrder()).compareTo(o.getTimeStampOrder());
+		return Integer.valueOf(this.getTimeStamp()).compareTo(o.getTimeStamp());
 	}
 	
 	//TODO: Remove after testing
 	@Override
 	public String toString() {
-		return String.valueOf(this.getTimeStampOrder());
-	}
-
-	/**
-	 * @return The simulation that the order was apart of
-	 */
-	public int getSimulationNumber() {
-		return simulationNumber;
-	}
-
-	/**
-	 * @param simulationNumber The simulation that the order was apart of
-	 */
-	public void setSimulationNumber(int simulationNumber) {
-		this.simulationNumber = simulationNumber;
-	}
-
-	/**
-	 * @return The time when the order was delivered
-	 */
-	public int getTimeStampDelivered() {
-		return timeStampDelivered;
-	}
-
-	/**
-	 * @param timeStampDelivered The time when the order was delivered
-	 */
-	public void setTimeStampDelivered(int timeStampDelivered) {
-		this.timeStampDelivered = timeStampDelivered;
+		return String.valueOf(this.getTimeStamp());
 	}
 	
 }

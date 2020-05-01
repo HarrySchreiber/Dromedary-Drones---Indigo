@@ -43,6 +43,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -54,14 +55,13 @@ import javafx.beans.binding.Bindings;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Main extends Application{
 	
 	//global variables
 	private static Scene simulationScreen; //scenes 
 	private static Scene settingsScreen;
+	private static Scene addDroneScreen;
 	private static int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private static int sumPercent= 100; //a total 
 	private static Document simulationSettingsXML;
@@ -69,6 +69,7 @@ public class Main extends Application{
 	private static ArrayList<String> simulationSettingsIDs;
 	private static ArrayList<String> droneSettingsIDs;
 	private static String currentSimulationSettingID;
+	private static String currentDroneSettingID;
 	private static ArrayList<Location> temporaryLocations;
 	private static ArrayList<Meal> temporaryMeals;
 	private static int hoursInShift;
@@ -76,8 +77,7 @@ public class Main extends Application{
 	private static int lowerOrdersPerHour;
 	private static String simulationName;
 	private static GridPane simulationScreenLayout;
-	private Map<Integer,Integer> fifoData;
-	private Map<Integer,Integer> knapsackData;
+	private static GridPane settingsScreenLayout;
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -102,8 +102,8 @@ public class Main extends Application{
 				radioButton.setOnAction(e->{
 					currentSimulationSettingID = idNumber;
 				});
-				//Show the button as selected of which ever simulation is supposed to be selected
-				if(idNumber.equals(currentSimulationSettingID)) {
+				//Start the simulation with the default settings
+				if(idNumber.equals("1")) {
 					radioButton.setSelected(true);
 				}
 				//Add radio button to toggle group and add it to the screen
@@ -194,25 +194,21 @@ public class Main extends Application{
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
 				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
-				s.runSimulation( buildSimulationSettingsFromXML(currentSimulationSettingID));
-				
-				//Reduce the data down to just the summary data in the graph
-				reduceKnapsackToMapFromArrayListOrders(s.getKnapsackData());
-				reduceFifoToMapFromArrayListOrders(s.getFifoData());
+				s.runSimulation( buildSimulationSettingsFromXML(currentSimulationSettingID), buildDroneFromXML(currentDroneSettingID));
 				
 				//TODO: Do we want to truncate this?
-				knapsackAvgLabel.setText("Average Time: " + s.findAverage(knapsackData));
-				fifoAvgLabel.setText("Average Time: " + s.findAverage(fifoData));
+				knapsackAvgLabel.setText("Average Time: " + s.findAverage(s.getKnapsackData()));
+				fifoAvgLabel.setText("Average Time: " + s.findAverage(s.getFifoData()));
 				
-				knapsackWrstLabel.setText("Worst Time: " + s.findWorst(knapsackData));
-				fifoWrstLabel.setText("Worst Time: " + s.findWorst(fifoData));
+				knapsackWrstLabel.setText("Worst Time: " + s.findWorst(s.getKnapsackData()));
+				fifoWrstLabel.setText("Worst Time: " + s.findWorst(s.getFifoData()));
 				
 				//Clear the chart
 				knapLineChart.getData().clear();
 				XYChart.Series<Number, Number> knapSeries = new XYChart.Series<Number, Number>();
 				//Fill the series with data
-				for(Integer minute : knapsackData.keySet()) {
-					knapSeries.getData().add(new XYChart.Data<Number, Number>(minute,knapsackData.get(minute)));
+				for(Integer minute : s.getKnapsackData().keySet()) {
+					knapSeries.getData().add(new XYChart.Data<Number, Number>(minute,s.getKnapsackData().get(minute)));
 				}
 				knapLineChart.getData().add(knapSeries);
 				
@@ -220,14 +216,14 @@ public class Main extends Application{
 				fifoLineChart.getData().clear();
 				XYChart.Series<Number, Number> fifoSeries = new XYChart.Series<Number, Number>();
 				//Fill the series with data
-				for(Integer minute : fifoData.keySet()) {
-					fifoSeries.getData().add(new XYChart.Data<Number, Number>(minute,fifoData.get(minute)));
+				for(Integer minute : s.getFifoData().keySet()) {
+					fifoSeries.getData().add(new XYChart.Data<Number, Number>(minute,s.getFifoData().get(minute)));
 				}
 				fifoLineChart.getData().add(fifoSeries);
 				
 				//TODO:Remove from testing
-				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(fifoData) + " Worst Time: " + s.findWorst(fifoData));
-				System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(knapsackData) + " Worst Time: " + s.findWorst(knapsackData));
+				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
+				System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(s.getKnapsackData()) + " Worst Time: " + s.findWorst(s.getKnapsackData()));
 				
 			}); //TODO: Add some logic to run the simulation
 			simulationScreenLayout.add(runSimulationBtn, 0, 1);	//Add the button to the screen
@@ -648,7 +644,7 @@ public class Main extends Application{
 		
 		
 		//Settings Screen Layout
-		GridPane settingsScreenLayout = buildSettingsScreen();
+		settingsScreenLayout = buildSettingsScreen();
 		
 		//HBox for the naming components of the simulation settings
 		HBox simNameBox = new HBox();
@@ -664,7 +660,8 @@ public class Main extends Application{
 		simNameBox.getChildren().addAll(simNameLabel,simNameField);
 		//Add HBox to the grid and stretch it over 3 columns
 		settingsScreenLayout.add(simNameBox, 0, 0, 3, 1);
-		simulationName = simNameField.getText();
+		simulationName = sim.getName();
+                		
 		
 		//VBox for things in column 1
 		VBox columnOne = new VBox(20);
@@ -672,9 +669,9 @@ public class Main extends Application{
 		
 		//TODO: Use this to add things in column one
 		//DRONE STUFF
+	
 		
-		/*Label dronesL = new Label ("Drones: ");
-		
+		Label dronesL = new Label ("Drones: ");
 		
 		ScrollPane droneSelectorPane = new ScrollPane();
 		
@@ -682,13 +679,14 @@ public class Main extends Application{
 		ToggleGroup droneSelectorButtons = new ToggleGroup();
 		//Make and populate the radio buttons
 		VBox droneSelectorVBox = new VBox();
-		
-		for(String idNumber : simulationSettingsIDs) {
+
+		for(String idNumber : droneSettingsIDs) {
 			//Make a radio button with the name of the SimulationSetting
-			RadioButton radioButton = new RadioButton("Default Grove City Drone");
+			RadioButton radioButton = new RadioButton(buildDroneFromXML(idNumber).getName());
 			//Upon clicking on a radio button the currentSimulationID is set to the current ID
 			radioButton.setOnAction(e->{
-				currentDroneID = idNumber;
+				currentDroneSettingID = idNumber;
+				
 			});
 			//Start the simulation with the default settings
 			if(idNumber.equals("1")) {
@@ -698,14 +696,52 @@ public class Main extends Application{
 			radioButton.setToggleGroup(droneSelectorButtons);
 			droneSelectorVBox.getChildren().add(radioButton);
 		}
+		droneSelectorVBox.setSpacing(10);
 		//Add the content to the screen
+		HBox addAndEditButtonsBox = new HBox();
+		addAndEditButtonsBox.setAlignment(Pos.CENTER);
+		addAndEditButtonsBox.setSpacing(50);
+		
+		Button addNewDroneButton = new Button("Add New Drone");
+		Button editDroneButton = new Button("Edit Drone");
+		
+		addAndEditButtonsBox.getChildren().add(addNewDroneButton);
+		addAndEditButtonsBox.getChildren().add(editDroneButton);
+		
 		droneSelectorPane.setContent(droneSelectorVBox);
+		
+		//adds to the layout
+		settingsScreenLayout.setVgap(0);
 		settingsScreenLayout.add(droneSelectorPane, 0, 0);
-		
+		//settingsScreenLayout.add(addAndEditButtonsBox, 0, 1);
 		//add everything to column one
-		columnOne.getChildren().addAll(dronesL, droneSelectorPane);
+		columnOne.getChildren().addAll(dronesL,  addAndEditButtonsBox, droneSelectorPane);
 		
-		settingsScreenLayout.add(columnOne,0,1);*/
+		settingsScreenLayout.add(columnOne,0,1);
+		
+		//Add new drone button action
+		addNewDroneButton.setOnAction(e -> {
+			settingsScreenLayout.getChildren().remove(columnOne);
+			columnOne.getChildren().remove(2);
+			columnOne.getChildren().add(buildAddDroneScreen("1", primaryStage));
+			settingsScreenLayout.add(columnOne,0,1);
+			primaryStage.setScene(addDroneScreen);
+
+		});
+		
+		//Add new drone button action
+		editDroneButton.setOnAction(e -> {
+				
+			settingsScreenLayout.getChildren().remove(columnOne);
+			columnOne.getChildren().remove(2 );
+			columnOne.getChildren().add(buildAddDroneScreen(currentDroneSettingID, primaryStage));
+			settingsScreenLayout.add(columnOne,0,1);
+			primaryStage.setScene(addDroneScreen);
+
+		});
+		
+		
+		
 		
 		//TODO: Add method for upload new campus map
 		
@@ -976,21 +1012,12 @@ public class Main extends Application{
     	final Spinner<Integer> spinnerLowerHours = new Spinner<Integer>();
     	
 		//Hours Per Shift can't got lower than 1 or higher than 8
-    	SpinnerValueFactory<Integer> valueFactoryH = //
+    	SpinnerValueFactory<Integer> valueFactoryHours = //
     			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 8, hoursInShift);
-    	spinnerHours.setValueFactory(valueFactoryH);
+    	spinnerHours.setValueFactory(valueFactoryHours);
     	spinnerHours.setMaxWidth(70);
     	spinnerHours.setEditable(true);
     	
-    	//spinner for the hours per shift
-		spinnerHours.valueProperty().addListener((obs, oldVal, newVal)
-				-> {
-			
-					hoursInShift = newVal;
-					
-		});
-		
-
 
 		//adds everything to grid pane 3
     	GridPane.setConstraints(hoursLabel, 0, 1);
@@ -1007,37 +1034,23 @@ public class Main extends Application{
     	
     	
     	//NOTE: spinner can't go higher than 30 orders but can change this 
-    	SpinnerValueFactory<Integer> valueFactoryUH = //
+    	SpinnerValueFactory<Integer> valueFactoryUpperHours = //
     			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 61, upperOrdersPerHour);
-    	spinnerUpperHours.setValueFactory(valueFactoryUH);
+    	spinnerUpperHours.setValueFactory(valueFactoryUpperHours);
     	spinnerUpperHours.setMaxWidth(70);
     	spinnerUpperHours.setEditable(true);
     	
-    	//spinner for the upper limit of the orders per hour
-    	spinnerUpperHours.valueProperty().addListener((obs, oldVal, newVal)
-				-> {
-			
-					upperOrdersPerHour = newVal;
-					
-		});
-    
 
     	//spinner for the lower limits of thr orders per hour
     	//NOTE: spinner can't go higher than 30 orders but can change this         	
-    	SpinnerValueFactory<Integer> valueFactoryLH = //
+    	SpinnerValueFactory<Integer> valueFactoryLowerHours = //
     			new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 61, lowerOrdersPerHour);
-    	spinnerLowerHours.setValueFactory(valueFactoryLH);
+    	spinnerLowerHours.setValueFactory(valueFactoryLowerHours);
     	spinnerLowerHours.setMaxWidth(70);
     	spinnerLowerHours.setEditable(true);
+
     	
-    	spinnerLowerHours.valueProperty().addListener((obs, oldVal, newVal)
-				-> {
-			
-					lowerOrdersPerHour = newVal;
-					
-		});	
-
-
+    	
     	//adds all this stuff to grid pane 3 
     	GridPane.setConstraints(upperHoursL, 0, 8);
     	gridC3.getChildren().add(upperHoursL);
@@ -1066,8 +1079,12 @@ public class Main extends Application{
 		Button saveSimulationSetngsBtn = new Button("Save Settings");
 		//listener so we can go back to the simulation screen and write to the file
 		saveSimulationSetngsBtn.setOnAction(e  ->  {
-
+			//getting the most current variables 
 			simulationName = simNameField.getText();
+			lowerOrdersPerHour = valueFactoryLowerHours.getValue();
+			upperOrdersPerHour = valueFactoryUpperHours.getValue();
+			hoursInShift = valueFactoryHours.getValue();
+			
 			SimulationSettings newSimulation = new SimulationSettings(simulationName, buildDroneFromXML("1") , locations, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
 				try {
 					if(id == "1") {
@@ -1099,8 +1116,8 @@ public class Main extends Application{
 					radioButton.setOnAction(f ->{
 						currentSimulationSettingID = idNumber;
 					});
-					//Show the button as selected of the simulation that is currently selected
-					if(idNumber.equals(currentSimulationSettingID)) {
+					//Start the simulation with the default settings
+					if(idNumber.equals("1")) {
 						radioButton.setSelected(true);
 					}
 					//Add radio button to toggle group and add it to the screen
@@ -1140,8 +1157,8 @@ public class Main extends Application{
 				radioButton.setOnAction(f ->{
 					currentSimulationSettingID = idNumber;
 				});
-				//Show the button as selected of which ever simulation is supposed to be selected
-				if(idNumber.equals(currentSimulationSettingID)) {
+				//Start the simulation with the default settings
+				if(idNumber.equals("1")) {
 					radioButton.setSelected(true);
 				}
 				//Add radio button to toggle group and add it to the screen
@@ -1476,6 +1493,155 @@ public class Main extends Application{
 		return buildSimulationSettingsFromXML(id).getName();
 	}
 	
+	public static ScrollPane buildAddDroneScreen (String id ,Stage primaryStage) {
+		
+		ScrollPane droneSelectorPane = new ScrollPane(); //what we return
+		GridPane addDroneLayout = new GridPane();
+
+		Drone drone = buildDroneFromXML(id);
+		
+		Label droneName = new Label("Drone Name: ");
+		TextField droneNameTextField = new TextField(drone.getName());
+		Label maxCargo = new Label("Max Cargo: ");
+		TextField maxCargoTextField = new TextField(String.valueOf(drone.getMaxCargo()));
+		Label poundsLabel = new Label(" lbs");
+		Label avgCruisingSpeed = new Label("Average Cruising Speed: ");
+		TextField avgCruisingSpeedTextField = new TextField(String.valueOf(drone.getAvgCruisingSpeed()));
+		Label mphLabel = new Label(" mph");
+		Label maxFlighTime = new Label("Max Flight Time: ");
+		TextField maxFlightTimeTextField = new TextField(String.valueOf(drone.getMaxFlightTime()));
+		Label minutesLabel = new Label(" minutes");
+		Label minutesLabel1 = new Label(" minutes");
+		Label minutesLabel2 = new Label(" minutes");
+		Label turnAroundTime = new Label("Turn-Around Time: ");
+		TextField turnAroundTimeTextField = new TextField(String.valueOf(drone.getTurnAroundTime()));
+		Label unloadTime = new Label("Unload Time: ");
+		TextField unloadTimeTextField = new TextField(String.valueOf(drone.getUnloadTime()));
+		Button saveDrone = new Button("Save Drone");
+		saveDrone.setMaxWidth(100);
+		Button cancelButton = new Button ("Cancel");
+		cancelButton.setMaxWidth(100);
+		
+		addDroneLayout.setAlignment(Pos.CENTER);
+		addDroneLayout.add(droneName, 0, 0);
+		addDroneLayout.add(droneNameTextField, 1, 0);
+		addDroneLayout.add(maxCargo, 0, 1);
+		addDroneLayout.add(maxCargoTextField, 1, 1);
+		addDroneLayout.add(poundsLabel, 2, 1);
+		addDroneLayout.add(avgCruisingSpeed, 0, 2);
+		addDroneLayout.add(avgCruisingSpeedTextField, 1, 2);
+		addDroneLayout.add(mphLabel, 2, 2);
+		addDroneLayout.add(maxFlighTime, 0, 3);
+		addDroneLayout.add(maxFlightTimeTextField, 1, 3);
+		addDroneLayout.add(minutesLabel, 2, 3);
+		addDroneLayout.add(turnAroundTime, 0, 4);
+		addDroneLayout.add(turnAroundTimeTextField, 1, 4);
+		addDroneLayout.add(minutesLabel1, 2, 4);
+		
+		addDroneLayout.add(unloadTime, 0, 5);
+		addDroneLayout.add(unloadTimeTextField, 1, 5);
+		addDroneLayout.add(minutesLabel2, 2, 5);
+		
+
+		addDroneLayout.add(saveDrone, 0, 7);
+		addDroneLayout.add(cancelButton, 1, 7);
+		
+		saveDrone.setOnAction(e ->{
+			//gets all variables that we need to write to xml
+			String name = droneNameTextField.getText();
+			String droneID = drone.getDroneID();		
+			if(droneID.equals("1")) {
+				droneID = findAvailableDroneSettingID();
+				System.out.println(findAvailableDroneSettingID());
+			}
+			
+			double maxCargoVal = Double.valueOf(maxCargoTextField.getText());
+			double avgCruise = Double.valueOf(avgCruisingSpeedTextField.getText());
+			double maxFlight = Double.valueOf(maxFlightTimeTextField.getText());
+			double turnAround = Double.valueOf(turnAroundTimeTextField.getText());
+			double unload =  Double.valueOf(unloadTimeTextField.getText());
+			
+			//builds the data here
+			Drone returnDrone = new Drone(droneID, name, maxCargoVal, avgCruise, maxFlight, turnAround, unload);    
+					
+			//try catch to write to the xml
+			try {
+				droneSettingToXML(droneID, returnDrone);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			droneSettingsIDs = getDroneSettingsIDs();
+
+			
+			//Sets which group of radio buttons this simulation is a part of
+			ToggleGroup droneSelectorButtons = new ToggleGroup();
+			//Make and populate the radio buttons
+			VBox droneSelectorVBox = new VBox();
+			
+			for(String idNumber : droneSettingsIDs) {
+				//Make a radio button with the name of the SimulationSetting
+				RadioButton radioButton = new RadioButton(buildDroneFromXML(idNumber).getName());
+				//Upon clicking on a radio button the currentSimulationID is set to the current ID
+				radioButton.setOnAction(f->{
+					currentDroneSettingID = idNumber;
+				});
+				//Start the simulation with the default settings
+				if(idNumber.equals("1")) {
+					radioButton.setSelected(true);
+				}
+				//Add radio button to toggle group and add it to the screen
+				radioButton.setToggleGroup(droneSelectorButtons);
+				droneSelectorVBox.getChildren().add(radioButton);
+			}
+			droneSelectorVBox.setSpacing(10);
+			//Add the content to the screen
+			droneSelectorPane.setContent(droneSelectorVBox);
+			
+
+			primaryStage.setScene(settingsScreen);
+			
+		});
+		
+		cancelButton.setOnAction(e -> {
+			droneSettingsIDs = getDroneSettingsIDs();
+			
+			
+			//Sets which group of radio buttons this simulation is a part of
+			ToggleGroup droneSelectorButtons = new ToggleGroup();
+			//Make and populate the radio buttons
+			VBox droneSelectorVBox = new VBox();
+			
+			for(String idNumber : droneSettingsIDs) {
+				//Make a radio button with the name of the SimulationSetting
+				RadioButton radioButton = new RadioButton(buildDroneFromXML(idNumber).getName());
+				//Upon clicking on a radio button the currentSimulationID is set to the current ID
+				radioButton.setOnAction(f->{
+					currentDroneSettingID = idNumber;
+				});
+				//Start the simulation with the default settings
+				if(idNumber.equals("1")) {
+					radioButton.setSelected(true);
+				}
+				//Add radio button to toggle group and add it to the screen
+				radioButton.setToggleGroup(droneSelectorButtons);
+				droneSelectorVBox.getChildren().add(radioButton);
+			}
+			droneSelectorVBox.setSpacing(10);
+			//Add the content to the screen
+			droneSelectorPane.setContent(droneSelectorVBox);
+
+			primaryStage.setScene(settingsScreen);
+			
+		});
+		addDroneScreen = new Scene (addDroneLayout, 400, 400);
+		return droneSelectorPane;
+		
+		
+		
+	}
+	
 	public static void main(String[] args) throws FileNotFoundException {
 		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 		try {
@@ -1502,44 +1668,4 @@ public class Main extends Application{
 		launch(args);
 	}
 	
-	/** 
-	 * @param orders Array of order data from the simulation run
-	 */
-	public void reduceKnapsackToMapFromArrayListOrders(ArrayList<Order> orders) {
-		knapsackData = new HashMap<Integer,Integer>();
-		
-		//Find the difference in time and add it to the map data
-		for(Order order : orders) {
-			int minutesTaken = order.getTimeStampDelivered() - order.getTimeStampOrder();
-			if(knapsackData.containsKey(minutesTaken)) {
-				knapsackData.put(minutesTaken, knapsackData.get(minutesTaken) + 1);
-			}else {
-				knapsackData.put(minutesTaken, 1);
-			}
-		}
-	}
-	/**
-	 * @param orders Array of order data from the simulation run
-	 */
-	public void reduceFifoToMapFromArrayListOrders(ArrayList<Order> orders) {
-		fifoData = new HashMap<Integer,Integer>();
-		
-		//Find the difference in time and add it to the map data
-		for(Order order : orders) {
-			int minutesTaken = order.getTimeStampDelivered() - order.getTimeStampOrder();
-			if(fifoData.containsKey(minutesTaken)) {
-				fifoData.put(minutesTaken, fifoData.get(minutesTaken) + 1);
-			}else {
-				fifoData.put(minutesTaken, 1);
-			}
-		}
-	}
-	
-	public void reduceKnapsackToMapFromDataFile() {
-		
-	}
-	
-	public void reduceFifoToMapFromDataFile() {
-		
-	}
 }
