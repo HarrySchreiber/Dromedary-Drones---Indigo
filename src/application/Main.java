@@ -338,8 +338,11 @@ public class Main extends Application{
 						for(int key:knapsackData.keySet()) {
 							writer.println(key +"," + knapsackData.get(key));
 						}
-						//writer.println("FIFO Average Time: " + fifoAverage + " Worst Time: " + fifoWorst);
-						//writer.println("Knapsack Average Time: " + knapAverage + " Worst Time: " + knapWorst);
+						writer.println("Food: ");
+						reduceFifoToMapFromArrayListOrders(s.getFifoData());
+						writer.println("Data" + s.getFifoData());
+//						writer.println("FIFO Average Time: " + s.findAverage(fifoData) + " Worst Time: " + s.findWorst(fifoData));
+//						writer.println("Knapsack Average Time: " + s.findAverage(knapsackData) + " Worst Time: " + s.findWorst(knapsackData));
 						writer.close();
 						//TODO Delete this print statement
 						System.out.println("Successfully wrote to the file");
