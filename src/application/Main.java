@@ -33,6 +33,8 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -63,7 +65,7 @@ public class Main extends Application{
 	private static Scene settingsScreen;
 	private static Scene addDroneScreen;
 	private static int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
-	private static int sumPercent= 100; //a total 
+	private static int percentageSum= 100; //a total 
 	private static Document simulationSettingsXML;
 	private static Document droneSettingsXML;
 	private static ArrayList<String> simulationSettingsIDs;
@@ -640,6 +642,7 @@ public class Main extends Application{
 	 */
 	public static void populatedSettingsScreen(String id, Stage primaryStage) {
 		
+		
 		SimulationSettings sim =  buildSimulationSettingsFromXML(id);
 		
 		
@@ -751,7 +754,7 @@ public class Main extends Application{
 		VBox columnTwo = new VBox();
 		columnTwo.setAlignment(Pos.TOP_LEFT);
 		
-    	//Slider sliderO1 = new Slider();
+    	//Slider orderSlider = new Slider();
 		Label perUsedL = new Label("Percentage Used: "  + String.valueOf(100));		
 	    columnTwo.getChildren().add(perUsedL);
 	    Label perLeftL = new Label("Percentage Left: " + String.valueOf(0));
@@ -769,9 +772,9 @@ public class Main extends Application{
         int amountOfOrders = sim.getMeals().size();
 		//int amountOfOrders =  mealList.getLength();
 		String orderLabelNums [] = new String [amountOfOrders];
-		int burgerCountsB[] = new int[amountOfOrders];
-		int fryCountsB[] = new int[amountOfOrders];
-		int cokeCountsB[] = new int[amountOfOrders];
+		int burgerCounts[] = new int[amountOfOrders];
+		int fryCounts[] = new int[amountOfOrders];
+		int cokeCounts[] = new int[amountOfOrders];
 		double perCountsB[] = new double [amountOfOrders];
 		hoursInShift = sim.getHoursPerShift();
 		upperOrdersPerHour = sim.getOrderUpper();
@@ -792,15 +795,15 @@ public class Main extends Application{
 			for(FoodItem foodItem: meals.get(i).getFoodItems()) {
 				
 				if(foodItem.toString().equals("burger")) {
-					burgerCountsB[i] += 1 ;
+					burgerCounts[i] += 1 ;
 					weightPerOrder[i] += 6;
 				}
 				else if(foodItem.toString().equals("fries")) {
-					fryCountsB[i] += 1;
+					fryCounts[i] += 1;
 					weightPerOrder[i] += 4;
 				}
 				else if(foodItem.toString().equals("coke")) {
-					cokeCountsB[i] += 1 ;
+					cokeCounts[i] += 1 ;
 					weightPerOrder[i] += 14;
 				}	
 				
@@ -812,65 +815,65 @@ public class Main extends Application{
         	
         	//variable dictionary for the for loop 
         	int curLoopVal = i;
-        	Label order1L = new Label(orderLabelNums[i]);
-        	//Label order1L = new Label(orderNames[i]);
-        	Slider sliderO1 = new Slider();
+        	Label orderLabel = new Label(orderLabelNums[i]);
+        	//Label orderLabel = new Label(orderNames[i]);
+        	Slider orderSlider = new Slider();
         	Label currentSliderVal = new Label("");
-        	Label burgerL = new Label("Burger");
-        	final Spinner<Integer> spinnerB = new Spinner<Integer>();
-        	Label burgerWeight = new Label(String.valueOf(burgerCountsB[i]  *6) + " oz");
-        	Label friesL = new Label("Fries");
-        	final Spinner<Integer> spinnerF = new Spinner<Integer>();
-        	Label friesWeight = new Label(String.valueOf(fryCountsB[i] * 4) + " oz");
-        	Label cokeL = new Label("Coke");
-        	final Spinner<Integer> spinnerC = new Spinner<Integer>();
-        	Label cokeWeight = new Label(String.valueOf(cokeCountsB[i] * 14) + " oz");
-        	Label totalWeightL = new Label("Total:");
-        	Label weightPerOrderL = new Label(String.valueOf(weightPerOrder[i]) + " oz");
+        	Label burgerLabel = new Label("Burger");
+        	final Spinner<Integer> spinnerBurger = new Spinner<Integer>();
+        	Label burgerWeight = new Label(String.valueOf(burgerCounts[i]  *6) + " oz");
+        	Label friesLabel = new Label("Fries");
+        	final Spinner<Integer> spinnerFries = new Spinner<Integer>();
+        	Label friesWeight = new Label(String.valueOf(fryCounts[i] * 4) + " oz");
+        	Label cokeLabel = new Label("Coke");
+        	final Spinner<Integer> spinnerCoke = new Spinner<Integer>();
+        	Label cokeWeight = new Label(String.valueOf(cokeCounts[i] * 14) + " oz");
+        	Label totalWeightLabel = new Label("Total:");
+        	Label weightPerOrderLabel = new Label(String.valueOf(weightPerOrder[i]) + " oz");
         	
         	
         	
         	//Spinner val that doesn't go up to 16 burgers (to not go over 192 oz)	        	
         	SpinnerValueFactory<Integer> valueFactoryB = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 132, burgerCountsB[i]);
-        	spinnerB.setValueFactory(valueFactoryB);
-        	spinnerB.setMaxWidth(50);
-        	spinnerB.setEditable(true);
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 132, burgerCounts[i]);
+        	spinnerBurger.setValueFactory(valueFactoryB);
+        	spinnerBurger.setMaxWidth(50);
+        	spinnerBurger.setEditable(true);
 
         	//Spinner val that doesn't go up to 24 fries (to not go over 192 oz)
         	SpinnerValueFactory<Integer> valueFactoryF = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 48, fryCountsB[i]);
-        	spinnerF.setValueFactory(valueFactoryF);
-        	spinnerF.setMaxWidth(50);
-        	spinnerF.setEditable(true);
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 48, fryCounts[i]);
+        	spinnerFries.setValueFactory(valueFactoryF);
+        	spinnerFries.setMaxWidth(50);
+        	spinnerFries.setEditable(true);
 
         	//Spinner val that doesn't go up to 13 cokes (to not go over 192 oz)
         	SpinnerValueFactory<Integer> valueFactoryC = //
-        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 13, cokeCountsB[i]);
-        	spinnerC.setValueFactory(valueFactoryC);
-        	spinnerC.setMaxWidth(50);
-        	spinnerC.setEditable(true);
+        			new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 13, cokeCounts[i]);
+        	spinnerCoke.setValueFactory(valueFactoryC);
+        	spinnerCoke.setMaxWidth(50);
+        	spinnerCoke.setEditable(true);
 
         	
         	//slider for percentages
-        	sliderO1.setMin(0);
-        	sliderO1.setMax(100);
-        	sliderO1.setValue(perCountsB[i]);
-        	//sliderO1.setShowTickLabels(true);
-        	sliderO1.setShowTickMarks(true);
-        	sliderO1.setMajorTickUnit(50);
-        	sliderO1.setMaxWidth(300);
+        	orderSlider.setMin(0);
+        	orderSlider.setMax(100);
+        	orderSlider.setValue(perCountsB[i]);
+        	//orderSlider.setShowTickLabels(true);
+        	orderSlider.setShowTickMarks(true);
+        	orderSlider.setMajorTickUnit(50);
+        	orderSlider.setMaxWidth(300);
         	
         	//order probability percentages
-        	sliderO1.valueProperty().addListener((obs, oldVal, newVal)
+        	orderSlider.valueProperty().addListener((obs, oldVal, newVal)
         			->{
         				//difference we can add to the percentage label
         				int difference = Math.round(newVal.intValue()) - Math.round(oldVal.intValue()) ;
-        				int  perLeftNum = 100 - sumPercent;
+        				int  perLeftNum = 100 - percentageSum;
         				
         				//prints lables here
-        				sumPercent =  sumPercent + difference;
-        				perUsedL.textProperty().bind(Bindings.format("%s %d %s", "Percentage Used: ", sumPercent, "%"));
+        				percentageSum =  percentageSum + difference;
+        				perUsedL.textProperty().bind(Bindings.format("%s %d %s", "Percentage Used: ", percentageSum, "%"));
         				perLeftL.textProperty().bind(Bindings.format("%s %d %s", "Percentage Used: ", perLeftNum , "%"));
         				
         			
@@ -879,14 +882,14 @@ public class Main extends Application{
         			});
         	
         	//sends label here
-        	totalWeightL.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
+        	totalWeightLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
         	
         	//curent val of slider percentage
-        	currentSliderVal.textProperty().bind(Bindings.format("%.0f %s ", sliderO1.valueProperty(), "%"));
+        	currentSliderVal.textProperty().bind(Bindings.format("%.0f %s ", orderSlider.valueProperty(), "%"));
         	
         	
         	//burger spinner per each order with a listener
-        	spinnerB.valueProperty().addListener((obs, oldVal, newVal) 
+        	spinnerBurger.valueProperty().addListener((obs, oldVal, newVal) 
         			->{
         				FoodItem burger = new FoodItem("burger", 0.375);
         				if(oldVal > newVal){ // so we can remove weight
@@ -899,7 +902,7 @@ public class Main extends Application{
         				}
         				
         				//updates the burger label
-        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
+        				weightPerOrderLabel.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
         				burgerWeight.textProperty().bind(Bindings.format("%d %s", newVal * 6, "oz"));
         				
         			
@@ -907,7 +910,7 @@ public class Main extends Application{
         			});
         	
         	//fries spinner per each order with a listener
-        	spinnerF.valueProperty().addListener((obs, oldVal, newVal) 
+        	spinnerFries.valueProperty().addListener((obs, oldVal, newVal) 
         			->{
         				FoodItem fries = new FoodItem("fries", 0.25);
         				if(oldVal > newVal) {//so we remove weight
@@ -920,13 +923,13 @@ public class Main extends Application{
         				}
         				
         				//updates fries labels
-        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
+        				weightPerOrderLabel.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
         				friesWeight.textProperty().bind(Bindings.format("%d %s", newVal * 4, "oz"));
         				
         			});
         	
         	//coke spinner per each order with a listener
-        	spinnerC.valueProperty().addListener((obs, oldVal, newVal) 
+        	spinnerCoke.valueProperty().addListener((obs, oldVal, newVal) 
         			-> {
         				FoodItem coke = new FoodItem("coke", 0.875);
         				if(oldVal > newVal) { //so we remove weight 
@@ -940,7 +943,7 @@ public class Main extends Application{
         				
         				
         				//updates the coke labels
-        				weightPerOrderL.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
+        				weightPerOrderLabel.textProperty().bind(Bindings.format("%d %s", weightPerOrder[curLoopVal], "oz"));
         				cokeWeight.textProperty().bind(Bindings.format("%d %s", newVal * 14, "oz"));
         				
 
@@ -949,34 +952,34 @@ public class Main extends Application{
 			
         	
         	//adds all labels and spinners to the grid pane here
-        	GridPane.setConstraints(order1L, 0, 1 + (5*i));
-        	grid.getChildren().add(order1L);
+        	GridPane.setConstraints(orderLabel, 0, 1 + (5*i));
+        	grid.getChildren().add(orderLabel);
         	GridPane.setConstraints(currentSliderVal, 2, 1 + (5*i));
         	grid.getChildren().add(currentSliderVal);
-        	GridPane.setConstraints(sliderO1, 1, 1 + (5*i));
-        	grid.getChildren().add(sliderO1);
-        	GridPane.setConstraints(burgerL, 0, 2 + (5*i));
-        	grid.getChildren().add(burgerL);
-        	GridPane.setConstraints(spinnerB, 1, 2 + (5*i));
-        	grid.getChildren().add(spinnerB);
+        	GridPane.setConstraints(orderSlider, 1, 1 + (5*i));
+        	grid.getChildren().add(orderSlider);
+        	GridPane.setConstraints(burgerLabel, 0, 2 + (5*i));
+        	grid.getChildren().add(burgerLabel);
+        	GridPane.setConstraints(spinnerBurger, 1, 2 + (5*i));
+        	grid.getChildren().add(spinnerBurger);
         	GridPane.setConstraints(burgerWeight, 2, 2 + (5*i));
         	grid.getChildren().add(burgerWeight);
-        	GridPane.setConstraints(friesL, 0, 3 + (5*i));
-        	grid.getChildren().add(friesL);
-        	GridPane.setConstraints(spinnerF, 1, 3 + (5*i));
-        	grid.getChildren().add(spinnerF);
+        	GridPane.setConstraints(friesLabel, 0, 3 + (5*i));
+        	grid.getChildren().add(friesLabel);
+        	GridPane.setConstraints(spinnerFries, 1, 3 + (5*i));
+        	grid.getChildren().add(spinnerFries);
         	GridPane.setConstraints(friesWeight, 2, 3 + (5*i));
         	grid.getChildren().add(friesWeight);
-        	GridPane.setConstraints(cokeL, 0, 4 + (5*i));
-        	grid.getChildren().add(cokeL);
-        	GridPane.setConstraints(spinnerC, 1, 4 + (5*i));
-        	grid.getChildren().add(spinnerC);
+        	GridPane.setConstraints(cokeLabel, 0, 4 + (5*i));
+        	grid.getChildren().add(cokeLabel);
+        	GridPane.setConstraints(spinnerCoke, 1, 4 + (5*i));
+        	grid.getChildren().add(spinnerCoke);
         	GridPane.setConstraints(cokeWeight, 2, 4 + (5*i));
         	grid.getChildren().add(cokeWeight);
-        	GridPane.setConstraints(totalWeightL, 0, 5 + (5*i));
-        	grid.getChildren().add(totalWeightL);
-        	GridPane.setConstraints(weightPerOrderL, 1, 5 + (5*i));
-        	grid.getChildren().add(weightPerOrderL);
+        	GridPane.setConstraints(totalWeightLabel, 0, 5 + (5*i));
+        	grid.getChildren().add(totalWeightLabel);
+        	GridPane.setConstraints(weightPerOrderLabel, 1, 5 + (5*i));
+        	grid.getChildren().add(weightPerOrderLabel);
         	
         	
         	
@@ -1005,9 +1008,9 @@ public class Main extends Application{
 		final Spinner<Integer> spinnerHours = new Spinner<Integer>();
 		Label orderPerHourL = new Label("Orders Per Hour");
 		
-		Label upperHoursL = new Label("Upper Bound:");
+		Label upperHoursLabel = new Label("Upper Bound:");
 		final Spinner<Integer> spinnerUpperHours = new Spinner<Integer>();
-    	Label lowerHoursL = new Label("Lower Bound:");
+    	Label lowerHoursLabel = new Label("Lower Bound:");
     	
     	final Spinner<Integer> spinnerLowerHours = new Spinner<Integer>();
     	
@@ -1052,13 +1055,13 @@ public class Main extends Application{
     	
     	
     	//adds all this stuff to grid pane 3 
-    	GridPane.setConstraints(upperHoursL, 0, 8);
-    	gridC3.getChildren().add(upperHoursL);
+    	GridPane.setConstraints(upperHoursLabel, 0, 8);
+    	gridC3.getChildren().add(upperHoursLabel);
     	GridPane.setConstraints(spinnerUpperHours, 1, 8);
     	gridC3.getChildren().add(spinnerUpperHours);
     	
-    	GridPane.setConstraints(lowerHoursL, 0, 10);
-    	gridC3.getChildren().add(lowerHoursL);
+    	GridPane.setConstraints(lowerHoursLabel, 0, 10);
+    	gridC3.getChildren().add(lowerHoursLabel);
     	GridPane.setConstraints(spinnerLowerHours, 1, 10);
     	gridC3.getChildren().add(spinnerLowerHours);
     	
@@ -1079,13 +1082,31 @@ public class Main extends Application{
 		Button saveSimulationSetngsBtn = new Button("Save Settings");
 		//listener so we can go back to the simulation screen and write to the file
 		saveSimulationSetngsBtn.setOnAction(e  ->  {
-			//getting the most current variables 
-			simulationName = simNameField.getText();
-			lowerOrdersPerHour = valueFactoryLowerHours.getValue();
-			upperOrdersPerHour = valueFactoryUpperHours.getValue();
-			hoursInShift = valueFactoryHours.getValue();
+			Boolean canSaveSettings = true;
+			for(int i = 0; i < weightPerOrder.length; i++) {
+				if(weightPerOrder[i] > 192)
+					canSaveSettings = false;
+			}
 			
-			SimulationSettings newSimulation = new SimulationSettings(simulationName, buildDroneFromXML("1") , locations, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
+			if(percentageSum != 100)
+				canSaveSettings = false;
+			if(canSaveSettings == false) {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("Error Dialog");
+				alert.setHeaderText("Look, an Error Dialog");
+				alert.setContentText("Please make sure that your percentage added up to 100 % and you do not have"
+						+ "any orders heavier than 12lbs (192 oz)! Thanks!");
+
+				alert.showAndWait();
+			}
+			else {
+				//getting the most current variables 
+				simulationName = simNameField.getText();
+				lowerOrdersPerHour = valueFactoryLowerHours.getValue();
+				upperOrdersPerHour = valueFactoryUpperHours.getValue();
+				hoursInShift = valueFactoryHours.getValue();
+
+				SimulationSettings newSimulation = new SimulationSettings(simulationName, buildDroneFromXML("1") , locations, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
 				try {
 					if(id == "1") {
 						simulationSettingToXML(findAvailableSimulationSettingID(), newSimulation);
@@ -1093,13 +1114,13 @@ public class Main extends Application{
 					else {
 						simulationSettingToXML(id, newSimulation);
 					}
-					
+
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				
-				
+
+
 				//Rebuilds the radio button
 				//Scroll Pane for Radio Buttons Section
 				ScrollPane simulationSelectorPane = new ScrollPane();
@@ -1126,71 +1147,73 @@ public class Main extends Application{
 				}
 				//Add the content to the screen
 				simulationSelectorPane.setContent(simulationSelectorVBox);
-				
+
 				simulationScreenLayout.add(simulationSelectorPane, 0, 0);
-				
+
 				simulationScreen.setRoot(simulationScreenLayout);
 
 				primaryStage.setScene(simulationScreen); //saves the stage
+			}
 			});	//Adds function to the button TODO: Expand function to not save if the user has not inputed correct values, possibly able to be done with throwing exceptions in a constructor
 		
-		saveSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		saveAndCancelButtonsBox.getChildren().add(saveSimulationSetngsBtn);
-		
-		//Cancel Simulation Settings button on Simulation settings screen
-		Button cancelSimulationSetngsBtn = new Button("Cancel");
-		cancelSimulationSetngsBtn.setOnAction(e -> {
-			
-			//Rebuilds the radio button
-			//Scroll Pane for Radio Buttons Section
-			ScrollPane simulationSelectorPane = new ScrollPane();
-			//Sets which group of radio buttons this simulation is a part of
-			ToggleGroup simulationSelectorButtons = new ToggleGroup();
-			//Make and populate the radio buttons
-			VBox simulationSelectorVBox = new VBox();
-			simulationSettingsIDs = getSimulationSettingsIDs();
-			for(String idNumber : simulationSettingsIDs) {
+			saveSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+			saveAndCancelButtonsBox.getChildren().add(saveSimulationSetngsBtn);
+
+			//Cancel Simulation Settings button on Simulation settings screen	
+			Button cancelSimulationSetngsBtn = new Button("Cancel");
+			cancelSimulationSetngsBtn.setOnAction(e -> {
+
+				//Rebuilds the radio button
+				//Scroll Pane for Radio Buttons Section
+				ScrollPane simulationSelectorPane = new ScrollPane();
+				//Sets which group of radio buttons this simulation is a part of
+				ToggleGroup simulationSelectorButtons = new ToggleGroup();
+				//Make and populate the radio buttons
+				VBox simulationSelectorVBox = new VBox();
+				simulationSettingsIDs = getSimulationSettingsIDs();
+				for(String idNumber : simulationSettingsIDs) {
 
 				//Make a radio button with the name of the SimulationSetting
-				RadioButton radioButton = new RadioButton(getSimulationNameFromID(idNumber));
-				//Upon clicking on a radio button the currentSimulationID is set to the current ID
-				radioButton.setOnAction(f ->{
-					currentSimulationSettingID = idNumber;
-				});
-				//Start the simulation with the default settings
-				if(idNumber.equals("1")) {
-					radioButton.setSelected(true);
+					RadioButton radioButton = new RadioButton(getSimulationNameFromID(idNumber));
+					//Upon clicking on a radio button the currentSimulationID is set to the current ID
+					radioButton.setOnAction(f ->{
+						currentSimulationSettingID = idNumber;
+					});
+					//Start the simulation with the default settings
+					if(idNumber.equals("1")) {
+						radioButton.setSelected(true);
+					}
+					//Add radio button to toggle group and add it to the screen
+					radioButton.setToggleGroup(simulationSelectorButtons);
+					simulationSelectorVBox.getChildren().add(radioButton);
 				}
-				//Add radio button to toggle group and add it to the screen
-				radioButton.setToggleGroup(simulationSelectorButtons);
-				simulationSelectorVBox.getChildren().add(radioButton);
-			}
 			//Add the content to the screen
-			simulationSelectorPane.setContent(simulationSelectorVBox);
-			
-			simulationScreenLayout.add(simulationSelectorPane, 0, 0);
-			
-			simulationScreen.setRoot(simulationScreenLayout);
-			
+				simulationSelectorPane.setContent(simulationSelectorVBox);
+
+				simulationScreenLayout.add(simulationSelectorPane, 0, 0);
+
+				simulationScreen.setRoot(simulationScreenLayout);
+
+				primaryStage.setScene(simulationScreen);
+			});	//Adds function to the button TODO: Idk if there's anything else were gonna have to do here cause as long as we dont save anything we should be good
+			cancelSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+			saveAndCancelButtonsBox.getChildren().add(cancelSimulationSetngsBtn);
+
+
+			settingsScreenLayout.add(saveAndCancelButtonsBox,0,2,3,1);
+
+			settingsScreen = new Scene(settingsScreenLayout,1000,600);
+
 			primaryStage.setScene(simulationScreen);
-		});	//Adds function to the button TODO: Idk if there's anything else were gonna have to do here cause as long as we dont save anything we should be good
-		cancelSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		saveAndCancelButtonsBox.getChildren().add(cancelSimulationSetngsBtn);
-		
-		
-		settingsScreenLayout.add(saveAndCancelButtonsBox,0,2,3,1);
-		
-		settingsScreen = new Scene(settingsScreenLayout,1000,600);
-		
-		primaryStage.setScene(simulationScreen);
-		//TODO: Decide if we want to be able to resize
-		primaryStage.setResizable(false);
-		primaryStage.setTitle("Dromedary Drones Simulation");
-		primaryStage.show();
+			//TODO: Decide if we want to be able to resize
+			primaryStage.setResizable(false);
+			primaryStage.setTitle("Dromedary Drones Simulation");
+			primaryStage.show();
+		}
 		
 		
 		
-	}
+
 	
 	/**
 	 * Helper method that populates the temporaryMeals ArrayList with the simulation that is given to it
