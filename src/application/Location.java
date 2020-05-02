@@ -65,6 +65,18 @@ public class Location {
 	public void setY(int y) {
 		this.y = y;
 	}
+
+	    /**
+     * 
+     * @param start
+     * @param end
+     * @return distance between two locations
+     */
+    public double distanceTo(Location end) {
+        //Uses good ole distance formula... (Thanks Pythagoras)
+        return (Math.sqrt(Math.pow(this.getX() - end.getX(), 2) 
+            + Math.pow(this.getY() - end.getY(), 2)));
+    }
 	
 	
 	

@@ -19,19 +19,10 @@ public class TravelingSalesmanProblem {
             locations.add(orders.get(i).getDeliveryPoint());
         }
         locSize = locations.size();
+        TspTourManager.clearLocations();
+        TspTourManager.addAll(locations);
     }
 
-    /**
-     * 
-     * @param start
-     * @param end
-     * @return distance between two locations
-     */
-    private double distanceBetween(Location start, Location end) {
-        //Uses good ole distance formula... (Thanks Pythagoras)
-        return (Math.sqrt(Math.pow(start.getX() - end.getX(), 2) 
-            + Math.pow(start.getY() - end.getY(), 2)));
-    }
 
     /**
      * 
@@ -47,7 +38,7 @@ public class TravelingSalesmanProblem {
         for (row = 0; row < locSize; row++) {
             for (col = 0; col < locSize; col++) {
                 locationGraph[row][col] = 
-                    distanceBetween(locations.get(row), locations.get(col));
+                locations.get(row).distanceTo( locations.get(col));
             }
         }
         
@@ -111,28 +102,21 @@ public class TravelingSalesmanProblem {
 
     }
 
+    public ArrayList<Order> GeneticAlgorithmTSP() {
+        if (TspTourManager.numLocations() > 0) {
+            TspPopulation pop = new TspPopulation(50, true);
 
-
-/**
-    public Location[] BacktrackingTSP() {
-        return BacktrackingTSPRecursiveCall(generateLocationGraph(), 
-            new boolean[locSize], 0, 1, 0, Integer.MAX_VALUE);
-        
-    }
-
-    private Location[] BacktrackingTSPRecursiveCall(double[][] graph, 
-        boolean[] visited, int currPos, int count, int cost, int ans) {
-
-            if (count == locSize && graph[currPos][0] > 0) {
-                return Math.min(ans, cost + graph[currPos][0]);
+            for (int i = 0; i < 100; i++) {
+                pop = TspGeneticAlgorithm.evolvePopulation(pop);
             }
 
-            for (int index = 0; index < locSize; index++) {
-                if (visited[index] == false && graph[currPos][index] > 0) {
+            return locationToOrder(pop.getFittest().getAllLocations());
+        }
+        else {
+            return locationToOrder((Location[]) locations.toArray());
+        }
 
-                }
-            }
+
     }
-*/
 
 }
