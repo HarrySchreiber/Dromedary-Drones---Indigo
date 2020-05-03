@@ -26,7 +26,9 @@ import org.xml.sax.SAXException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.geometry.Pos;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -64,6 +66,7 @@ public class Main extends Application{
 	private static Scene simulationScreen; //scenes 
 	private static Scene settingsScreen;
 	private static Scene addDroneScreen;
+	private static Scene addLocationScreen;
 	private static int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private static int percentageSum= 100; //a total 
 	private static Document simulationSettingsXML;
@@ -80,6 +83,8 @@ public class Main extends Application{
 	private static String simulationName;
 	private static GridPane simulationScreenLayout;
 	private static GridPane settingsScreenLayout;
+	private static ArrayList<Location> tempLocations = new ArrayList<Location>(); //edit as it goes and clear when finished
+	private static ArrayList<Location> finalLocations = new ArrayList<Location>(); //final set of locations to use in sim
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -717,8 +722,153 @@ public class Main extends Application{
 		settingsScreenLayout.setVgap(0);
 		settingsScreenLayout.add(droneSelectorPane, 0, 0);
 		//settingsScreenLayout.add(addAndEditButtonsBox, 0, 1);
+		
+		
+		
+		//TODO: Add method for upload new campus map
+		
+		//TODO: Add method for add new drone
+		
+		//TODO: Add method for upload new campus map
+		//Add Locations Buttons
+		Label locationPointsLabel = new Label("Add Delivery Points");
+		
+		HBox addAndClearButtonsBox = new HBox();
+		addAndEditButtonsBox.setAlignment(Pos.CENTER);
+		//addAndEditButtonsBox.setSpacing(50);
+		
+		Button addDeliveryPointsBtn = new Button("Add Delivery Point(s)");
+		Button clearDeliveryPointsBtn = new Button("Clear Delivery Points");
+		
+		addAndClearButtonsBox.getChildren().add(addDeliveryPointsBtn);
+		addAndClearButtonsBox.getChildren().add(clearDeliveryPointsBtn);
+
+    	//LOCATIONS STUFF
+    	
+    	//Logic for setting up the add a location screen
+		GridPane addLocationScreenLayout = new GridPane();
+		addLocationScreenLayout.setAlignment(Pos.CENTER);
+		addLocationScreenLayout.setHgap(10);	//Set some spacing for horizontal
+		addLocationScreenLayout.setVgap(10);	//Set some spacing for vertical
+		
+		//Add Delivery point name
+		Label addNameLabel = new Label("Add Delivery Point Name:");
+		TextField addNameTextField = new TextField();
+		addLocationScreenLayout.add(addNameLabel, 0, 0);
+		addLocationScreenLayout.add(addNameTextField, 1, 0);
+		
+		//Add Delivery point X value
+		Label addXLabel = new Label("Value for X:");
+		TextField addXTextField = new TextField();
+		addLocationScreenLayout.add(addXLabel, 0, 1);
+		addLocationScreenLayout.add(addXTextField, 1, 1);
+
+		
+		//Add Delivery point Y value
+		Label addYLabel = new Label("Value for Y:");
+		TextField addYTextField = new TextField();
+		addLocationScreenLayout.add(addYLabel, 0, 2);
+		addLocationScreenLayout.add(addYTextField, 1, 2);
+
+		//Just a label to give the person the option
+		Label orLabel = new Label("or");
+		GridPane.setHalignment(orLabel, HPos.CENTER);
+		addLocationScreenLayout.add(orLabel, 0, 3, 2, 1);
+		
+		//Add delivery points via file upload
+		Label uploadLocationFileLabel = new Label("Upload Delivery Points:");
+		Button uploadLocationFileBtn = new Button("Browse");
+		GridPane.setHalignment(uploadLocationFileBtn, HPos.RIGHT);
+		
+		//TODO: Add logic for file upload/selection, probably throw exceptions here if something is wrong
+		uploadLocationFileBtn.setOnAction(e->{
+			FileChooser fileChooser = new FileChooser();
+			File selectedFile = fileChooser.showOpenDialog(primaryStage);
+			uploadLocationFileLabel.setText("CurrentFile: " + selectedFile.getName());
+			try {
+				tempLocations.clear();
+				tempLocations = sim.populateLocations(selectedFile.getAbsolutePath());
+				
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
+		
+		addLocationScreenLayout.add(uploadLocationFileLabel,0,4);
+		addLocationScreenLayout.add(uploadLocationFileBtn,1,4);
+		
+		//Button for saving points
+		Button saveLocationFileBtn = new Button("Save");
+		saveLocationFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		
+		saveLocationFileBtn.setOnAction(e->{
+			//TODO: Add logic for saving points
+			if (!addNameTextField.getText().isEmpty() && !addXTextField.getText().isEmpty() && !addYTextField.getText().isEmpty()) {
+				Location newLocation = new Location(addNameTextField.getText(), Integer.parseInt(addXTextField.getText()), Integer.parseInt(addYTextField.getText()));
+				tempLocations.add(newLocation);
+				
+			}
+			else {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setContentText("Please make sure you do not leave any fields blank. Thanks!");
+				alert.setTitle("Error Dialog");
+				alert.setHeaderText("Look, an Error Dialog");
+				alert.showAndWait();
+			}
+			
+			
+			for(int i = 0; i > tempLocations.size(); i++)
+				finalLocations.add(tempLocations.get(i));
+			
+			
+			//locations.clear();
+			//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
+			primaryStage.setScene(settingsScreen); 	
+		});
+		
+		//Button for canceling the points
+		Button cancelLocationFileBtn = new Button("Cancel");
+		cancelLocationFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		
+		cancelLocationFileBtn.setOnAction(e->{
+			//DO NOTHING
+			tempLocations.clear();
+			//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
+			primaryStage.setScene(settingsScreen);
+		});
+		
+		addLocationScreenLayout.add(saveLocationFileBtn, 0, 5);
+		addLocationScreenLayout.add(cancelLocationFileBtn, 1, 5);
+		addLocationScreen = new Scene(addLocationScreenLayout, 1000, 650);
+		
+		
+		//-----------------------------------------------------------------------------------
+		
+		
+		addDeliveryPointsBtn.setOnAction(e->{
+			 
+			//resets text field just in add.
+			 addNameTextField.setText("");
+			 addXTextField.setText("");
+			 addYTextField.setText("");
+			 primaryStage.setScene(addLocationScreen);
+		});
+		
+		//TODO: Clear the delivery points
+		
+		clearDeliveryPointsBtn.setOnAction(e->{
+			tempLocations.clear();
+						
+		});
+		
+		//More Locations Stuff
+		
+		
+		
+		
 		//add everything to column one
-		columnOne.getChildren().addAll(dronesL,  addAndEditButtonsBox, droneSelectorPane);
+		columnOne.getChildren().addAll(dronesL, addAndEditButtonsBox, droneSelectorPane, locationPointsLabel, addAndClearButtonsBox);
 		
 		settingsScreenLayout.add(columnOne,0,1);
 		
@@ -745,10 +895,7 @@ public class Main extends Application{
 		
 		
 		
-		
-		//TODO: Add method for upload new campus map
-		
-		//TODO: Add method for add new drone
+	
 		
 		//VBox for things in column 2
 		VBox columnTwo = new VBox();
@@ -783,6 +930,7 @@ public class Main extends Application{
 		ArrayList<Meal> meals = sim.getMeals();
 		//resets total weight
 		weightPerOrder = new int [amountOfOrders];
+		finalLocations = sim.getLocations();
 		//System.out.println("Read Meals: " + meals.get(2).toString());
 		
 		
@@ -1065,6 +1213,10 @@ public class Main extends Application{
     	GridPane.setConstraints(spinnerLowerHours, 1, 10);
     	gridC3.getChildren().add(spinnerLowerHours);
     	
+		
+		
+		
+    	
     
     	
 		
@@ -1082,31 +1234,45 @@ public class Main extends Application{
 		Button saveSimulationSetngsBtn = new Button("Save Settings");
 		//listener so we can go back to the simulation screen and write to the file
 		saveSimulationSetngsBtn.setOnAction(e  ->  {
+			Alert alert = new Alert(AlertType.ERROR);
+			lowerOrdersPerHour = valueFactoryLowerHours.getValue();
+			upperOrdersPerHour = valueFactoryUpperHours.getValue();
+			
 			Boolean canSaveSettings = true;
 			for(int i = 0; i < weightPerOrder.length; i++) {
-				if(weightPerOrder[i] > 192)
+				if(weightPerOrder[i] > 192) {
 					canSaveSettings = false;
+					alert.setContentText("Please make sure your food orders are not heavier than 12lbs (192 oz)! Thanks!");
+					
+				}
 			}
 			
-			if(percentageSum != 100)
+			if(percentageSum != 100) {
 				canSaveSettings = false;
+				alert.setContentText("Please make sure that your percentage add up to 100. Thanks!");
+			}
+			
+			if(lowerOrdersPerHour > upperOrdersPerHour) {
+				canSaveSettings = false;
+				alert.setContentText("Please make sure the Lower Bound of Orders Per Hour is not higher than the Higher Bound. Thanks!");
+			}
+			
 			if(canSaveSettings == false) {
-				Alert alert = new Alert(AlertType.ERROR);
+				
 				alert.setTitle("Error Dialog");
 				alert.setHeaderText("Look, an Error Dialog");
-				alert.setContentText("Please make sure that your percentage added up to 100 % and you do not have"
-						+ "any orders heavier than 12lbs (192 oz)! Thanks!");
-
 				alert.showAndWait();
 			}
 			else {
 				//getting the most current variables 
 				simulationName = simNameField.getText();
-				lowerOrdersPerHour = valueFactoryLowerHours.getValue();
-				upperOrdersPerHour = valueFactoryUpperHours.getValue();
 				hoursInShift = valueFactoryHours.getValue();
+				
+				for(int i = 0; i < tempLocations.size(); i++)
+					finalLocations.add(tempLocations.get(i));
+				tempLocations.clear();
 
-				SimulationSettings newSimulation = new SimulationSettings(simulationName, buildDroneFromXML("1") , locations, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
+				SimulationSettings newSimulation = new SimulationSettings(simulationName, buildDroneFromXML("1") , finalLocations, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
 				try {
 					if(id == "1") {
 						simulationSettingToXML(findAvailableSimulationSettingID(), newSimulation);
@@ -1203,6 +1369,7 @@ public class Main extends Application{
 			settingsScreenLayout.add(saveAndCancelButtonsBox,0,2,3,1);
 
 			settingsScreen = new Scene(settingsScreenLayout,1000,600);
+			
 
 			primaryStage.setScene(simulationScreen);
 			//TODO: Decide if we want to be able to resize
@@ -1570,6 +1737,8 @@ public class Main extends Application{
 		addDroneLayout.add(cancelButton, 1, 7);
 		
 		saveDrone.setOnAction(e ->{
+			
+			
 			//gets all variables that we need to write to xml
 			String name = droneNameTextField.getText();
 			String droneID = drone.getDroneID();		
@@ -1584,46 +1753,47 @@ public class Main extends Application{
 			double turnAround = Double.valueOf(turnAroundTimeTextField.getText());
 			double unload =  Double.valueOf(unloadTimeTextField.getText());
 			
-			//builds the data here
-			Drone returnDrone = new Drone(droneID, name, maxCargoVal, avgCruise, maxFlight, turnAround, unload);    
-					
-			//try catch to write to the xml
-			try {
-				droneSettingToXML(droneID, returnDrone);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-			droneSettingsIDs = getDroneSettingsIDs();
 
-			
-			//Sets which group of radio buttons this simulation is a part of
-			ToggleGroup droneSelectorButtons = new ToggleGroup();
-			//Make and populate the radio buttons
-			VBox droneSelectorVBox = new VBox();
-			
-			for(String idNumber : droneSettingsIDs) {
-				//Make a radio button with the name of the SimulationSetting
-				RadioButton radioButton = new RadioButton(buildDroneFromXML(idNumber).getName());
-				//Upon clicking on a radio button the currentSimulationID is set to the current ID
-				radioButton.setOnAction(f->{
-					currentDroneSettingID = idNumber;
-				});
-				//Start the simulation with the default settings
-				if(idNumber.equals("1")) {
-					radioButton.setSelected(true);
+				//builds the data here
+				Drone returnDrone = new Drone(droneID, name, maxCargoVal, avgCruise, maxFlight, turnAround, unload);    
+						
+				//try catch to write to the xml
+				try {
+					droneSettingToXML(droneID, returnDrone);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-				//Add radio button to toggle group and add it to the screen
-				radioButton.setToggleGroup(droneSelectorButtons);
-				droneSelectorVBox.getChildren().add(radioButton);
-			}
-			droneSelectorVBox.setSpacing(10);
-			//Add the content to the screen
-			droneSelectorPane.setContent(droneSelectorVBox);
-			
-
-			primaryStage.setScene(settingsScreen);
+				
+				droneSettingsIDs = getDroneSettingsIDs();
+	
+				
+				//Sets which group of radio buttons this simulation is a part of
+				ToggleGroup droneSelectorButtons = new ToggleGroup();
+				//Make and populate the radio buttons
+				VBox droneSelectorVBox = new VBox();
+				
+				for(String idNumber : droneSettingsIDs) {
+					//Make a radio button with the name of the SimulationSetting
+					RadioButton radioButton = new RadioButton(buildDroneFromXML(idNumber).getName());
+					//Upon clicking on a radio button the currentSimulationID is set to the current ID
+					radioButton.setOnAction(f->{
+						currentDroneSettingID = idNumber;
+					});
+					//Start the simulation with the default settings
+					if(idNumber.equals("1")) {
+						radioButton.setSelected(true);
+					}
+					//Add radio button to toggle group and add it to the screen
+					radioButton.setToggleGroup(droneSelectorButtons);
+					droneSelectorVBox.getChildren().add(radioButton);
+				}
+				droneSelectorVBox.setSpacing(10);
+				//Add the content to the screen
+				droneSelectorPane.setContent(droneSelectorVBox);
+				
+	
+				primaryStage.setScene(settingsScreen);
 			
 		});
 		
