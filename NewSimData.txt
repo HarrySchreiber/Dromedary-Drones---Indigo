@@ -17,8 +17,8 @@ Order 3 Burgers: 0
 Order 3 Fries: 0
 Order 3 Cokes: 1
 Order 4 Percentage: 25
-Order 4 Burgers: 2
-Order 4 Fries: 0
+Order 4 Burgers: 0
+Order 4 Fries: 2
 Order 4 Cokes: 0
 Hours Per Shift: 4
 Upper Bound of Orders per Hour: 22

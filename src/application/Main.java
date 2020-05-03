@@ -48,6 +48,7 @@ public class Main extends Application{
 	private String realFileContents = ""; //what we want to print to the file
 	private Map<Integer,Integer> fifoData;
 	private Map<Integer,Integer> knapsackData;
+	private Scanner scn =  new Scanner(System.in);
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -285,6 +286,8 @@ public class Main extends Application{
 			Button loadDataFileBtn = new Button("Load a Results File");
 			loadDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			loadDataFileBtn.setOnAction(e ->{
+				ArrayList<Integer> fifoTime = new ArrayList<Integer>();
+
 				FileChooser fileSelect = new FileChooser();
 				fileSelect.setTitle("Load Data File");
 				fileSelect.getExtensionFilters().addAll(
@@ -292,6 +295,9 @@ public class Main extends Application{
 				File selectedFile = fileSelect.showOpenDialog(primaryStage);
 				if(selectedFile != null) {
 					System.out.println("Selected File: " + selectedFile.getAbsolutePath());
+//					try(Scanner sc = new Scanner((selectedFile.getAbsolutePath()));){
+//						
+//					}
 				}
 				loadDataFileBtn.setText("CurrentFile: " + selectedFile.getName());
 				
@@ -326,18 +332,31 @@ public class Main extends Application{
 					try {
 						PrintWriter writer;
 						writer = new PrintWriter(selectedLocation);
-						writer.println("Fifo Data");
-
-						for(int key:fifoData.keySet()) {
-							writer.println(key +"," + fifoData.get(key));
-						}
-						writer.println("Simulation Number ,, Items in a meal ,, Chance ,, Minute Ordered ,, minute delivered");
+//						writer.println("Fifo Data");
+//
+	//					for(int key:fifoData.keySet()) {
+		//					writer.println(key +"," + fifoData.get(key));
+			//			}
+						writer.println("Method , Simulation Number ,, Chance ,, Minute Ordered ,, minute delivered ,, Items in a meal");
 						for(Order order : s.getFifoData()) {
+							writer.print("FIFO ,");
 							writer.print(counter + ",");
-							writer.print(order.getMeal().foodItemstoString());
-							writer.print(", 0 ,");
-							writer.print(order.getTimeStampOrder() + ",");
-							writer.print(order.getTimeStampDelivered() + ",");
+							writer.print(","+ order.getMeal().getProbability() +",");
+							writer.print("," + order.getTimeStampOrder() + ",");
+							writer.print("," + order.getTimeStampDelivered() + ",");
+							writer.print("," + order.getMeal());
+							
+							writer.println();
+							counter++;
+							
+						}
+						for(Order knap : s.getKnapsackData()) {
+							writer.print("Knapsack ,");
+							writer.print(counter + ",");
+							writer.print(","+ knap.getMeal().getProbability() +",");
+							writer.print("," + knap.getTimeStampOrder() + ",");
+							writer.print("," + knap.getTimeStampDelivered() + ",");
+							writer.print("," + knap.getMeal());
 							
 							writer.println();
 							counter++;

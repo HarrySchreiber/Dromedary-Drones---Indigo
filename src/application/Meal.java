@@ -40,8 +40,8 @@ public class Meal {
 		//TODO: Actually Populate the method
 		return totalWeight;
 	}
-	
-	public String foodItemstoString() {
+	@Override
+	public String toString() {
 		return foodItems.toString();
 		
 	}
