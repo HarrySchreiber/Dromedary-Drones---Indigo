@@ -158,17 +158,25 @@ public class Main extends Application{
 			
 			//TODO: Add FIFO results graph here
 			
-		     final NumberAxis xAxis = new NumberAxis(); // we are gonna plot against time
-		     final NumberAxis yAxis = new NumberAxis();
-		     xAxis.setLabel("Time Between Order and Delivery (min)");
-		     xAxis.setAnimated(false); // axis animations are removed
-	         yAxis.setLabel("Number of Orders Delivered");
-		     yAxis.setAnimated(false); // axis animations are removed
+		     final NumberAxis xAxisFifo = new NumberAxis(); // we are gonna plot against time
+		     final NumberAxis yAxisFifo = new NumberAxis();
+		     xAxisFifo.setLabel("Time Between Order and Delivery (min)");
+		     xAxisFifo.setAnimated(false); // axis animations are removed
+	         yAxisFifo.setLabel("Number of Orders Delivered");
+		     yAxisFifo.setAnimated(false); // axis animations are removed
 
 		     //creating the line chart with two axis created above
-		     final LineChart<Number, Number> fifoLineChart = new LineChart<>(xAxis, yAxis);
+		     final LineChart<Number, Number> fifoLineChart = new LineChart<>(xAxisFifo, yAxisFifo);
 		     fifoLineChart.setTitle("FIFO Results");
 		     fifoLineChart.setAnimated(false); // disable animations
+		     
+		     final NumberAxis xAxisKnapsack = new NumberAxis(); // we are gonna plot against time
+		     final NumberAxis yAxisKnapsack = new NumberAxis();
+		     xAxisKnapsack.setLabel("Time Between Order and Delivery (min)");
+		     xAxisKnapsack.setAnimated(false); // axis animations are removed
+		     yAxisKnapsack.setLabel("Number of Orders Delivered");
+		     yAxisKnapsack.setAnimated(false); // axis animations are removed
+
 			
 			fifoResultsBox.getChildren().addAll(fifoLabel, fifoAvgLabel,fifoWrstLabel, fifoLineChart);
 			
@@ -181,7 +189,7 @@ public class Main extends Application{
 			Label knapsackWrstLabel = new Label("Worst Delivery Time: ");	//TODO: Add variable here
 			
 			//TODO: Add Knapsack results graph here
-			final LineChart<Number, Number> knapLineChart = new LineChart<>(xAxis, yAxis);
+			final LineChart<Number, Number> knapLineChart = new LineChart<>(xAxisKnapsack, yAxisKnapsack);
 		     knapLineChart.setTitle("Knapsack Results");
 		     knapLineChart.setAnimated(false); // disable animations
 			
