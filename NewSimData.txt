@@ -9,8 +9,8 @@ Order 1 Burgers: 1
 Order 1 Fries: 0
 Order 1 Cokes: 0
 Order 2 Percentage: 25
-Order 2 Burgers: 0
-Order 2 Fries: 1
+Order 2 Burgers: 1
+Order 2 Fries: 0
 Order 2 Cokes: 0
 Order 3 Percentage: 25
 Order 3 Burgers: 0
