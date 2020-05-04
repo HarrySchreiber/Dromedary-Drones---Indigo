@@ -21,6 +21,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
@@ -76,15 +77,20 @@ public class Main extends Application{
 	String knapText;
 	ArrayList<Integer> CSV = new ArrayList<Integer>();
 
+	ArrayList<Location> groveCityLocations = new ArrayList<Location>();
+
 	Image mapImage = null;
 	double realHeight, realWidth, imageHeight, imageWidth;
 	ArrayList<Location> clickedLocations = new ArrayList<Location>();
 	double homeX, homeY, currentX, currentY;
+
+	String readLocationsFrom;
 	
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			
+			SimulationSettings baseToCallFunctions = new SimulationSettings();
+			groveCityLocations = baseToCallFunctions.populateLocations("src/application/gccLocationPoints.csv");
 			//opens the file with the default values
 			Scanner sc = new Scanner(new File("NewSimData.txt")); 
 			StringBuffer buffer = new StringBuffer();
@@ -269,12 +275,22 @@ public class Main extends Application{
 			
 			//Edit Simulation Button on Simulation Screen
 			Button runSimulationBtn = new Button("Run Simulation");
+			runSimulationBtn.setId("allbuttons");
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
 
 				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
 				try {
-					s.runSimulation(finalLocations);
+					if (readLocationsFrom.contains("Map")) {
+						s.runSimulation(clickedLocations);
+					}
+					else if (readLocationsFrom.contains("File")) {
+						s.runSimulation(finalLocations);
+					}
+					else {
+						s.runSimulation(groveCityLocations);
+					}
+					
 				} catch (FileNotFoundException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -517,9 +533,10 @@ public class Main extends Application{
 
 			Button viewMapButton = new Button("View Delivery Map");
 
-			CheckBox useMapDeliveryPoints = new CheckBox("Use map for delivery points.");
-			CheckBox useRegularDeliveryPoints = new CheckBox("Use file for delivery points.");
-			CheckBox useGroveCityPoints = new CheckBox("Use default Grove City points.");
+			ChoiceBox deliveryPointsChoices = new ChoiceBox();
+			deliveryPointsChoices.getItems().add("Default Grove City Points");
+			deliveryPointsChoices.getItems().add("Points from file");
+			deliveryPointsChoices.getItems().add("Points from map");
 
 			
 			addDeliveryPointsBtn.setOnAction(e->{
@@ -539,7 +556,7 @@ public class Main extends Application{
 			
 			//add everything to column one
 			//columnOne.getChildren().addAll(schemeL, schemeKCB, schemeFCB, dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn);
-			columnOne.getChildren().addAll( dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn, viewMapButton, useMapDeliveryPoints, useGroveCityPoints, useRegularDeliveryPoints );
+			columnOne.getChildren().addAll( dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn, viewMapButton, deliveryPointsChoices);
 			settingsScreenLayout.add(columnOne,0,1);
 			
 			//TODO: Add method for add new drone
@@ -875,7 +892,7 @@ public class Main extends Application{
 
 			//listener so we can go back to the simulation screen and write to the file
 			saveSimulationSetngsBtn.setOnAction(e  ->  {
-
+						readLocationsFrom = (String) deliveryPointsChoices.getValue();
 						//try catch to the write to the file
 						try(FileWriter writer = new FileWriter("NewSimData.txt" ,false)) {
 							writer.write(realFileContents);
@@ -1144,7 +1161,7 @@ public class Main extends Application{
 			//TODO: Decide on default
 			simulationScreen = new Scene(simulationScreenLayout,1000,650);
 			//TODO: Are we going to use this ever?
-			//simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+			simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			
 			//TODO: Decide on default 
 			settingsScreen = new Scene(settingsScreenLayout,1000,650);
@@ -1156,7 +1173,7 @@ public class Main extends Application{
 			mapScreen = new Scene(mapScreenLayout, 1000, 650);
 
 			uploadMapScreen = new Scene(uploadMapScreenLayout, 1000, 650);
-			
+
 			primaryStage.setScene(simulationScreen);
 			//TODO: Decide if we want to be able to resize
 			primaryStage.setResizable(false);
