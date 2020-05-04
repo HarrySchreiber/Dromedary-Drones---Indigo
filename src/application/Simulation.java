@@ -18,6 +18,7 @@ public class Simulation {
 	private static final int FEET_IN_A_MILE = 5280;
 	private ArrayList<Order> fifoData;
 	private ArrayList<Order> knapsackData;
+	private int maxLocations;
 
 	/**
 	 * Creates a simulation object
@@ -33,6 +34,8 @@ public class Simulation {
 	 * @throws FileNotFoundException 
 	 */
 	public void runSimulation(SimulationSettings sim, Drone d) {
+		
+		maxLocations = maxNumberOfLocationsToDeliverTo(sim.getCurrentDrone(), sim.getLocations());
 		
 		Random rnd = new Random();
 		for(int simulationNum = 0; simulationNum < 50; simulationNum++) {
@@ -85,7 +88,7 @@ public class Simulation {
 				
 				//Loop through skipped orders to add to the drone
 				for(Order ordr : skipped) {
-					if(ordr.getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo()) {
+					if(ordr.getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo() && checkDroneCargoAgainstMaxDeliveryPoints(onDrone, ordr)) {
 						onDrone.add(ordr);
 						foodListDeepCopy.remove(ordr);
 					}
@@ -103,7 +106,7 @@ public class Simulation {
 				}
 				
 				//Make sure we have a valid index, make sure that the food can actually fit on the drone
-				if(max_index >= 0 && foodListDeepCopy.get(max_index).getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo()) {
+				if(max_index >= 0 && foodListDeepCopy.get(max_index).getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo() && checkDroneCargoAgainstMaxDeliveryPoints(onDrone, foodListDeepCopy.get(max_index))) {
 					//Add delivery to drone 
 					onDrone.add(foodListDeepCopy.remove(max_index));
 					//Mark anything as skipped if it was skipped
@@ -178,7 +181,7 @@ public class Simulation {
 			//If the drone is not at capacity already, if the food list has items still, and if the item were looking at came in before or at the current time
 			while(!full && !foodListDeepCopy.isEmpty() && foodListDeepCopy.get(0).getTimeStampOrder() <= time) {
 				//If the weight of the next item to be added to the drone comes under the drones weight capacity when added to the drone
-				if(foodListDeepCopy.get(0).getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo()) {
+				if(foodListDeepCopy.get(0).getMeal().calculateWeight() + calculateWeightOnDrone(onDrone) <= d.getMaxCargo()  && checkDroneCargoAgainstMaxDeliveryPoints(onDrone, foodListDeepCopy.get(0))) {
 					onDrone.add(foodListDeepCopy.remove(0));
 				}else {
 					full = true;
@@ -300,4 +303,75 @@ public class Simulation {
 		return retMeal;
 	}
 	
+	/**
+	 * Method for finding the max distance between any 2 points on our map
+	 * @param locations The array of locations to be assessed
+	 * @return The max distance between to points on the map
+	 */
+	public double getMaxDistanceOnMap(ArrayList<Location> locations) {
+		//Standard distance formula mixed with standard max finding, the nested loop run n(n+1)/2 times rather than n*n, thanks Gauss
+		double max = 0;
+		for(int i = 0; i < locations.size(); i++) {
+			for(int j = i; j < locations.size(); j++) {
+				if((Math.sqrt(Math.pow((locations.get(i).getX()-locations.get(j).getX()), 2)+Math.pow((locations.get(i).getY()-locations.get(j).getY()), 2))) > max) {
+					max = (Math.sqrt(Math.pow((locations.get(i).getX()-locations.get(j).getX()), 2)+Math.pow((locations.get(i).getY()-locations.get(j).getY()), 2)));
+				}
+			}
+		}
+		return max;
+	}
+	
+	/**
+	 * Will return the max locations a drone can deliver to on a single trip
+	 * @param drone The drone in this simulation
+	 * @param locations Array of all possible Locations
+	 * @return the max locations a drone can deliver to on a single trip
+	 */
+	public int maxNumberOfLocationsToDeliverTo(Drone drone, ArrayList<Location> locations) {
+		int ret = 0;
+		double maxDistance = getMaxDistanceOnMap(locations) / FEET_IN_A_MILE;
+		double timeToGoMaxDistance = maxDistance/drone.getAvgCruisingSpeed() * MINUTES_IN_AN_HOUR;
+		ret = (int) (drone.getMaxFlightTime()/timeToGoMaxDistance);
+		return ret;
+	}
+	
+	/**
+	 * Checks to see if a drone can make it to all of the locations in the alloted max flight time
+	 * @param ordersOnDrone The items currently on the drone
+	 * @param prospectiveOrder The item were trying to pack on the drone
+	 * @return true if we can fit the order on the drone, false if we cannot fit the item on the drone
+	 */
+	public boolean checkDroneCargoAgainstMaxDeliveryPoints(ArrayList<Order> ordersOnDrone, Order prospectiveOrder) {
+		//Add all of the current items on the drone to a list of locations
+		ArrayList<Location> locations = new ArrayList<Location>();
+		for(Order order : ordersOnDrone) {
+			boolean locationNotPresent = true;
+			
+			for(Location location : locations) {
+				if(location.equals(order.getDeliveryPoint())) {
+					locationNotPresent = false;
+				}
+			}
+			
+			if(locationNotPresent) {
+				locations.add(order.getDeliveryPoint());
+			}
+		}
+		
+		//If the prospective order had a location outside of the locations already present then we add that to the locations array
+		boolean locationNotPresent = true;
+		
+		for(Location location : locations) {
+			if(location.equals(prospectiveOrder.getDeliveryPoint())) {
+				locationNotPresent = false;
+			}
+		}
+		
+		if(locationNotPresent) {
+			locations.add(prospectiveOrder.getDeliveryPoint());
+		}
+		
+		//If the number of locations exceeds the max number of locations we can have return false
+		return locations.size() <= maxLocations;
+	}
 }
