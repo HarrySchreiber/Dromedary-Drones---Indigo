@@ -14,13 +14,14 @@ public class TravelingSalesmanProblem {
     public TravelingSalesmanProblem(ArrayList<Order> orders) {
         orderList = orders;
         locations.add(new Location("Home",0,0));
-
+        TspTourManager.clearLocations();
         for (int i = 0; i < orders.size(); i++) {
+            TspTourManager.addLocation(orders.get(i).getDeliveryPoint());
             locations.add(orders.get(i).getDeliveryPoint());
         }
         locSize = locations.size();
-        TspTourManager.clearLocations();
-        TspTourManager.addAll(locations);
+        
+        //TspTourManager.addAll(locations);
     }
 
 

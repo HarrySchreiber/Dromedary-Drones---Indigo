@@ -223,10 +223,12 @@ public class Simulation {
 				}
 			}
 			
-			
-			//TODO: Traveling Salesman Problem goes here probably
-			TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
-			onDrone = tsp.GeneticAlgorithmTSP();
+			if (onDrone.size() > 1) {
+							//TODO: Traveling Salesman Problem goes here probably
+				TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
+				onDrone = tsp.GeneticAlgorithmTSP();
+			}
+
 
 			
 
@@ -298,9 +300,12 @@ public class Simulation {
 				}
 			}
 			
-			//TODO: Traveling Salesman Problem goes here probably
-			TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
-			onDrone = tsp.GeneticAlgorithmTSP();
+			if (onDrone.size() > 1) {
+				//TODO: Traveling Salesman Problem goes here probably
+				TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
+				onDrone = tsp.GeneticAlgorithmTSP();
+			}
+
 			
 			//Run calculations on the time of the simulation
 			Location homeBase = new Location("Sac",0,0);	//Set the drones initial location

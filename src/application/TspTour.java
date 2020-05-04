@@ -46,6 +46,8 @@ public class TspTour {
         }
         // Randomly reorder the tour
         Collections.shuffle(tour);
+
+        //setLocation(0, TspTourManager.getLocation(0));
     }
 
     // Gets a city from the tour
@@ -73,21 +75,25 @@ public class TspTour {
     public double getDistance(){
         if (distance == 0) {
             int tourDistance = 0;
+            Location home = new Location("HOME", 0, 0);
             // Loop through our tour's cities
             for (int locIndex = 0; locIndex < tourSize(); locIndex++) {
+                if (locIndex == 0) {
+                    tourDistance += home.distanceTo(getLocation(locIndex));
+                }
 
                 Location current = getLocation(locIndex);
+
                 Location destination;
 
                 // Check we're not on our tour's last city, if we are set our
                 // tour's final destination city to our starting city
                 if(locIndex < tourSize() - 1){
-                    destination = getLocation(locIndex+1);
+                    destination = getLocation(locIndex + 1);
                 }
                 else{
-                    destination = getLocation(0);
+                    destination = home;
                 }
-
                 // Get the distance between the two cities
                 tourDistance += current.distanceTo(destination);
             }
@@ -102,7 +108,7 @@ public class TspTour {
     }
     
     // Check if the tour contains a location
-    public boolean containsCity(Location loc){
+    public boolean containsLocation(Location loc){
         return tour.contains(loc);
     }
 

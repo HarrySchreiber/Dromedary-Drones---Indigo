@@ -63,11 +63,11 @@ public class TspGeneticAlgorithm {
          // Loop and add the sub tour from parent1 to our child
          for (int i = 0; i < child.tourSize(); i++) {
              // If our start position is less than the end position
-             if (startPos < endPos && i > startPos && i < endPos) {
+             if (startPos < endPos && i >= startPos && i <= endPos) {
                  child.setLocation(i, parent1.getLocation(i));
              } // If our start position is larger
              else if (startPos > endPos) {
-                 if (!(i < startPos && i > endPos)) {
+                 if (!(i <= startPos && i >= endPos)) {
                      child.setLocation(i, parent1.getLocation(i));
                  }
              }
@@ -76,7 +76,7 @@ public class TspGeneticAlgorithm {
          // Loop through parent2's city tour
          for (int i = 0; i < parent2.tourSize(); i++) {
              // If child doesn't have the city add it
-             if (!child.containsCity(parent2.getLocation(i))) {
+             if (!child.containsLocation(parent2.getLocation(i))) {
                  // Loop to find a spare position in the child's tour
                  for (int ii = 0; ii < child.tourSize(); ii++) {
                      // Spare position found, add city
@@ -87,6 +87,8 @@ public class TspGeneticAlgorithm {
                  }
              }
          }
+
+         
          return child;
      }
  

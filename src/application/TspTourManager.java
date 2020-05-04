@@ -2,6 +2,7 @@ package application;
 
 import java.util.ArrayList;
 
+
 /**The code was adapted from the following url:
  * http://www.theprojectspot.com/tutorial-post/applying-a-genetic-algorithm-to-the-travelling-salesman-problem/5
  * 
@@ -24,8 +25,9 @@ public class TspTourManager {
         }
     }
     // Adds a destination city
-    public static void addCity(Location location) {
+    public static void addLocation(Location location) {
         locations.add(location);
+        locations = removeDuplicates(locations); 
     }
     
     // Get a city
@@ -41,5 +43,19 @@ public class TspTourManager {
     public static void clearLocations() {
         locations = new ArrayList<Location>();
     }
+
+    public static ArrayList<Location> removeDuplicates(ArrayList<Location> locs) { 
+  
+        ArrayList<Location> newList = new ArrayList<Location>(); 
+
+        for (Location loc : locs) { 
+            if (!newList.contains(loc)) { 
+                newList.add(loc); 
+            } 
+        } 
+  
+        // return the new list 
+        return newList; 
+    } 
 
 }

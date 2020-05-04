@@ -25,7 +25,7 @@ public class TspPopulation {
             for (int i = 0; i < populationSize(); i++) {
                 TspTour newTour = new TspTour();
                 newTour.generateIndividual();
-                 
+                tours[i] = newTour;
             }
         }
     }
@@ -42,10 +42,10 @@ public class TspPopulation {
 
     // Gets the best tour in the population
     public TspTour getFittest() {
-        TspTour fittest = tours[0];
+        TspTour fittest = getTour(0);
         // Loop through individuals to find fittest
         for (int i = 1; i < populationSize(); i++) {
-            if (fittest.getFitness() <= getTour(i).getFitness()) {
+            if (getTour(i).getFitness() <= fittest.getFitness()) {
                 fittest = this.getTour(i);
             }
         }
