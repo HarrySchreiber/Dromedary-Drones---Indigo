@@ -85,6 +85,7 @@ public class Main extends Application{
 	double homeX, homeY, currentX, currentY;
 
 	String readLocationsFrom = "UNCHANGED";
+	String chosenAlgorithm = "UNCHANGED";
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -281,6 +282,8 @@ public class Main extends Application{
 
 				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
 				try {
+					s.setAlgorithm(chosenAlgorithm);
+					
 					if (readLocationsFrom.contains("Map")) {
 						s.runSimulation(clickedLocations);
 					}
@@ -538,7 +541,10 @@ public class Main extends Application{
 			deliveryPointsChoices.getItems().add("Points from file");
 			deliveryPointsChoices.getItems().add("Points from map");
 
-			
+			ChoiceBox algoChoice = new ChoiceBox();
+			algoChoice.getItems().add("Greedy Algorithm");
+			algoChoice.getItems().add("Genetic Algorithm");
+
 			addDeliveryPointsBtn.setOnAction(e->{
 				 primaryStage.setScene(addLocationScreen);
 			});
@@ -556,7 +562,7 @@ public class Main extends Application{
 			
 			//add everything to column one
 			//columnOne.getChildren().addAll(schemeL, schemeKCB, schemeFCB, dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn);
-			columnOne.getChildren().addAll( dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn, viewMapButton, deliveryPointsChoices);
+			columnOne.getChildren().addAll( dronesL, defaultDroneCB, locationPointsLabel, algoChoice, addDeliveryPointsBtn, clearDeliveryPointsBtn, viewMapButton, deliveryPointsChoices);
 			settingsScreenLayout.add(columnOne,0,1);
 			
 			//TODO: Add method for add new drone
@@ -893,6 +899,7 @@ public class Main extends Application{
 			//listener so we can go back to the simulation screen and write to the file
 			saveSimulationSetngsBtn.setOnAction(e  ->  {
 						readLocationsFrom = (String) deliveryPointsChoices.getValue();
+						chosenAlgorithm = (String) algoChoice.getValue();
 						//try catch to the write to the file
 						try(FileWriter writer = new FileWriter("NewSimData.txt" ,false)) {
 							writer.write(realFileContents);

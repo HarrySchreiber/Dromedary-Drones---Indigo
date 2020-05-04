@@ -104,10 +104,11 @@ public class TravelingSalesmanProblem {
     }
 
     public ArrayList<Order> GeneticAlgorithmTSP() {
+        int factor = TspTourManager.numLocations();
         if (TspTourManager.numLocations() > 0) {
-            TspPopulation pop = new TspPopulation(50, true);
+            TspPopulation pop = new TspPopulation(3*factor, true);
 
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 5*factor; i++) {
                 pop = TspGeneticAlgorithm.evolvePopulation(pop);
             }
 

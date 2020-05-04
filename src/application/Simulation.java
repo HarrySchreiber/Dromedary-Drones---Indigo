@@ -22,6 +22,8 @@ public class Simulation {
 	private Map<Integer, Integer> fifoData;
 	private Map<Integer, Integer> knapsackData;
 
+	private String chosenAlgorithm = "Greedy";
+
 	/**
 	 * Creates a simulation object
 	 * TODO: Possibly send in a SimulationSettings Object to be used in the simulation
@@ -31,6 +33,9 @@ public class Simulation {
 		knapsackData = new HashMap<Integer,Integer>();
 	}
 	
+	public void setAlgorithm(String algo) {
+		chosenAlgorithm = algo;
+	}
 	/**
 	 * Contains the logic required to run the full simulation
 	 * @throws FileNotFoundException 
@@ -223,14 +228,16 @@ public class Simulation {
 				}
 			}
 			
-			if (onDrone.size() > 1) {
-							//TODO: Traveling Salesman Problem goes here probably
+			if (onDrone.size() > 1 ) {
+				//TODO: Traveling Salesman Problem goes here probably
 				TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
-				onDrone = tsp.GeneticAlgorithmTSP();
-			}
-
-
-			
+				if (chosenAlgorithm.contains("Genetic")) {
+					onDrone = tsp.GeneticAlgorithmTSP();
+				}
+				else {
+					onDrone = tsp.GreedyTSP();
+				}		
+			}			
 
 			
 			//Run calculations on the time of the simulation
@@ -300,10 +307,15 @@ public class Simulation {
 				}
 			}
 			
-			if (onDrone.size() > 1) {
+			if (onDrone.size() > 1 ) {
 				//TODO: Traveling Salesman Problem goes here probably
 				TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
-				onDrone = tsp.GeneticAlgorithmTSP();
+				if (chosenAlgorithm.contains("Genetic")) {
+					onDrone = tsp.GeneticAlgorithmTSP();
+				}
+				else {
+					onDrone = tsp.GreedyTSP();
+				}		
 			}
 
 			
