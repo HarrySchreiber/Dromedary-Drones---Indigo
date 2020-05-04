@@ -5,10 +5,13 @@ package application;
  * @author Harry Schreiber, Matthew Lew, Jacob Ramseyer, Nicholas Grube
  *
  */
-public class Order {
+public class Order implements Comparable<Order> {
+	private int simulationNumber;
 	private Meal meal;
-	private int timeStamp;
+	private int timeStampOrder;
+	private int timeStampDelivered;
 	private Location deliveryPoint;
+	private boolean skipped;
 	
 	/**
 	 * Order Constructor
@@ -17,11 +20,41 @@ public class Order {
 	 * @param timeStamp The minute they ordered the meal
 	 * @param deliveryPoint Where the meal order is going
 	 */
-	public Order(Meal meal, int timeStamp, Location deliveryPoint) {
-		//TODO: Do we need deep copy constructors for meal and delivery points?
+	public Order(int simulationNumber, Meal meal, int timeStamp, Location deliveryPoint) {
+		this.simulationNumber = simulationNumber;
 		this.meal = meal;
-		this.timeStamp = timeStamp;
+		this.timeStampOrder = timeStamp;
 		this.deliveryPoint = deliveryPoint;
+		this.skipped = false;
+		this.timeStampDelivered = 0;
+	}
+	
+	/**
+	 * Copy Constructor
+	 * 
+	 * @param other The Original Order to be Copied
+	 */
+	public Order(Order other) {
+		this.simulationNumber = other.simulationNumber;
+		this.meal = new Meal(other.meal);
+		this.timeStampOrder = other.timeStampOrder;
+		this.deliveryPoint = other.deliveryPoint;
+		this.skipped = false;
+		this.timeStampDelivered = other.timeStampDelivered;
+	}
+
+	/**
+	 * @return If the order has been skipped
+	 */
+	public boolean isSkipped() {
+		return skipped;
+	}
+
+	/**
+	 * @param skipped If the order has been skipped
+	 */
+	public void setSkipped(boolean skipped) {
+		this.skipped = skipped;
 	}
 
 	/**
@@ -42,16 +75,16 @@ public class Order {
 	/**
 	 * @return The minute the order came in
 	 */
-	public int getTimeStamp() {
-		return timeStamp;
+	public int getTimeStampOrder() {
+		return timeStampOrder;
 	}
 
 	/**
 	 * @param timeStamp The minute the order came in
 	 */
-	public void setTimeStamp(int timeStamp) {
+	public void setTimeStampOrder(int timeStamp) {
 		//TODO: Do we even need setters and if so do we need to do deep copys?
-		this.timeStamp = timeStamp;
+		this.timeStampOrder = timeStamp;
 	}
 
 	/**
@@ -68,6 +101,48 @@ public class Order {
 		//TODO: Do we even need setters and if so do we need to do deep copys?
 		this.deliveryPoint = deliveryPoint;
 	}
+
+	/**
+	 * Logic to compare numbers so we can sort by time
+	 */
+	@Override
+	public int compareTo(Order o) {
+		// TODO Auto-generated method stub
+		return Integer.valueOf(this.getTimeStampOrder()).compareTo(o.getTimeStampOrder());
+	}
 	
+	//TODO: Remove after testing
+	@Override
+	public String toString() {
+		return String.valueOf(this.getTimeStampOrder());
+	}
+
+	/**
+	 * @return The simulation that the order was apart of
+	 */
+	public int getSimulationNumber() {
+		return simulationNumber;
+	}
+
+	/**
+	 * @param simulationNumber The simulation that the order was apart of
+	 */
+	public void setSimulationNumber(int simulationNumber) {
+		this.simulationNumber = simulationNumber;
+	}
+
+	/**
+	 * @return The time when the order was delivered
+	 */
+	public int getTimeStampDelivered() {
+		return timeStampDelivered;
+	}
+
+	/**
+	 * @param timeStampDelivered The time when the order was delivered
+	 */
+	public void setTimeStampDelivered(int timeStampDelivered) {
+		this.timeStampDelivered = timeStampDelivered;
+	}
 	
 }

@@ -9,17 +9,26 @@ import java.util.ArrayList;
  *
  */
 public class Meal {
-	FoodItem burgers = new FoodItem("Burger", 6);
-	FoodItem fries = new FoodItem("Fries", 4);
-	FoodItem coke = new FoodItem("coke", 14);
-	ArrayList<FoodItem> foodItems;
-	int totalWeight;
+	FoodItem burgers = new FoodItem("burger", 0.375);
+	FoodItem fries = new FoodItem("fries", 0.25);
+	FoodItem coke = new FoodItem("coke", 0.875);
+	private ArrayList<FoodItem> foodItems;
+	private double totalWeight;
+	private double probability;
 	
 	/**
 	 * Meal Constructor
 	 */
-	public Meal() {
+	public Meal(double probability) {
 		this.foodItems = new ArrayList<FoodItem>();
+		this.totalWeight = 0;
+		this.probability = probability;
+	}
+	
+	public Meal(Meal other) {
+		this.foodItems = other.foodItems;
+		this.totalWeight = other.totalWeight;
+		this.probability = other.probability;
 	}
 	
 	/**
@@ -31,6 +40,11 @@ public class Meal {
 		//TODO: Actually Populate the method
 		return totalWeight;
 	}
+	@Override
+	public String toString() {
+		return foodItems.toString();
+		
+	}
 	
 	/**
 	 * TODO: If we decide to update the weight member variable just remember to do that here and add the member variable
@@ -41,5 +55,31 @@ public class Meal {
 	public void addFoodItem(FoodItem item) {
 		foodItems.add(item);
 		totalWeight += item.getWeight();
+	}
+	
+	public void removeFoodItem(FoodItem item) {
+		for(int i = 0; i < foodItems.size(); i++) {
+			if(foodItems.get(i).getName() == item.getName()) {
+				foodItems.remove(i);
+				break;
+			}
+		}
+			totalWeight -= item.getWeight();
+	}
+	
+	public double getProbability() {
+		return probability;
+	}
+
+	public void setProbability(double probability) {
+		this.probability = probability;
+	}
+	
+	public ArrayList<FoodItem> getFoodItems() {
+		return foodItems;
+	}
+
+	public void setFoodItems(ArrayList<FoodItem> foodItems) {
+		this.foodItems = foodItems;
 	}
 }

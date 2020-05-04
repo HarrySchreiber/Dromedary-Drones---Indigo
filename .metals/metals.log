@@ -1227,3 +1227,5 @@ Caused by: java.nio.file.FileSystemNotFoundException: Provider "jdt" not install
 
 May 04, 2020 4:16:06 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
 INFO: Unsupported notification method: $/setTraceNotification
+May 04, 2020 4:18:25 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTraceNotification

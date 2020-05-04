@@ -7,6 +7,7 @@ package application;
  *
  */
 public class Drone {
+	private String droneID;
 	private String name;
 	private double maxCargo;
 	private double avgCruisingSpeed;
@@ -17,9 +18,10 @@ public class Drone {
 	/**
 	 * No argument constructor for all default values as specified in the instructions
 	 * will be option to select from the drones list as "Default Drone"
-	 * So we can call this argument easier when its seleted from drone list..
+	 * So we can call this argument easier when its selected from drone list..
 	 */
 	public Drone() {
+		this.setDroneID("1");
 		this.name = "Default Grove City Drone";
 		this.maxCargo = 12;
 		this.avgCruisingSpeed = 20;
@@ -36,7 +38,8 @@ public class Drone {
 	 * @param turnAroundTime the amount of time the drone takes to be packaged in minutes
 	 * @param unloadTime the amount of time the drone takes to deliver an order in minutes
 	 */
-	public Drone(String name, double maxCargo, double avgCruisingSpeed, double maxFlightTime, double turnAroundTime, double unloadTime) {
+	public Drone(String droneID, String name, double maxCargo, double avgCruisingSpeed, double maxFlightTime, double turnAroundTime, double unloadTime) {
+		this.droneID = droneID;
 		this.name = name;
 		this.maxCargo = maxCargo;
 		this.avgCruisingSpeed = avgCruisingSpeed;
@@ -126,6 +129,20 @@ public class Drone {
 	 */
 	public void setUnloadTime(double unloadTime) {
 		this.unloadTime = unloadTime;
+	}
+
+	/**
+	 * @return The id of the Drone
+	 */
+	public String getDroneID() {
+		return droneID;
+	}
+
+	/**
+	 * @param droneID The id of the Drone
+	 */
+	public void setDroneID(String droneID) {
+		this.droneID = droneID;
 	}
 	
 	

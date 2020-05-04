@@ -20,6 +20,11 @@ public class FoodItem {
 		this.name = name;
 		this.weight = weight;
 	}
+	
+	public FoodItem(FoodItem other) {
+		this.name = other.name;
+		this.weight = other.weight;
+	}
 
 	/**
 	 * @return Name of food item
@@ -48,6 +53,8 @@ public class FoodItem {
 	public void setWeight(double weight) {
 		this.weight = weight;
 	}
-	
-	
+	@Override
+	public String toString() {
+		return name;
+	}
 }
