@@ -300,8 +300,6 @@ public class Main extends Application{
 					
 					try {
 						Scanner lineScanner = new Scanner(new File(csvFile));
-						//BufferedReader reader = new BufferedReader(new FileReader("C:\\test34.csv"));
-						//BufferedReader reader = new BufferedReader(new FileReader("test34.csv"));
 						//read file line by line
 						int timeDelivered = 0;
 						int timeOrdered = 0;
@@ -321,7 +319,7 @@ public class Main extends Application{
 								String data = scanner.next();
 								if(index == 0) {
 									simType = data;
-									System.out.println(simType);
+									//System.out.println(simType);
 								}
 								else if(index == 5) {
 									//timeOrdered = Integer.parseInt(data);
@@ -337,16 +335,24 @@ public class Main extends Application{
 
 							
 							if(simType.equals("FIFO")){
-								fifoData.put((timeDelivered-timeOrdered), fifoData.get(timeDelivered-timeOrdered));
+								if(fifoData.containsKey(timeDelivered-timeOrdered)) {
+									fifoData.put((timeDelivered-timeOrdered), fifoData.get(timeDelivered-timeOrdered)+1);
+								}else {
+									fifoData.put((timeDelivered-timeOrdered), 1);
+								}
+								
 							}
 							else if(simType.equals("Knapsack")) {
-								knapsackData.put((timeDelivered-timeOrdered), knapsackData.get(timeDelivered-timeOrdered));
+								if(knapsackData.containsKey(timeDelivered-timeOrdered)) {
+									knapsackData.put((timeDelivered-timeOrdered), knapsackData.get(timeDelivered-timeOrdered)+1);
+								}else {
+									knapsackData.put((timeDelivered-timeOrdered), 1);
+								}
 							}
 							else {
 								System.out.println("Simulation Type not valid");
 							}
-						}	
-						
+						}
 						//close reader
 						scanner.close();
 						lineScanner.close();
@@ -359,9 +365,10 @@ public class Main extends Application{
 						e1.printStackTrace();
 					}
 				}
-				loadDataFileBtn.setText("CurrentFile: " + selectedFile.getName());
+				//loadDataFileBtn.setText("CurrentFile: " + selectedFile.getName());
 				
 				//TODO: Do we want to truncate this?
+				//System.out.println(knapsackData);
 				knapsackAvgLabel.setText("Average Time: " + s.findAverage(knapsackData));
 				fifoAvgLabel.setText("Average Time: " + s.findAverage(fifoData));
 				
@@ -402,7 +409,7 @@ public class Main extends Application{
 				File selectedLocation = fileLocation.showSaveDialog(primaryStage);
 				
 				if( selectedLocation != null) {
-					//File dataFile = new File("dataFile.txt");
+
 					try {
 						PrintWriter writer;
 						writer = new PrintWriter(selectedLocation);
@@ -410,7 +417,7 @@ public class Main extends Application{
 						for(Order order : s.getFifoData()) {
 							writer.print("FIFO,");
 							writer.print(order.getSimulationNumber()+ ",");
-							writer.print(","+ order.getMeal().getProbability() +",");
+							writer.print("," + order.getMeal().getProbability() +",");
 							writer.print("," + order.getTimeStampOrder() + ",");
 							writer.print("," + order.getTimeStampDelivered() + ",");
 							writer.print("," + order.getDeliveryPoint() + ",");
@@ -422,7 +429,7 @@ public class Main extends Application{
 						for(Order knap : s.getKnapsackData()) {
 							writer.print("Knapsack,");
 							writer.print(knap.getSimulationNumber() + ",");
-							writer.print(","+ knap.getMeal().getProbability() +",");
+							writer.print("," + knap.getMeal().getProbability() +",");
 							writer.print("," + knap.getTimeStampOrder() + ",");
 							writer.print("," + knap.getTimeStampDelivered() + ",");
 							writer.print("," + knap.getDeliveryPoint() + ",");
