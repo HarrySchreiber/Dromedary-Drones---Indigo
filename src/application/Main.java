@@ -4,6 +4,7 @@ package application;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -29,6 +30,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -56,9 +58,13 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.beans.binding.Bindings;
+import java.io.BufferedReader;
 
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main extends Application{
 	
@@ -85,6 +91,8 @@ public class Main extends Application{
 	private static GridPane settingsScreenLayout;
 	private static ArrayList<Location> tempLocations = new ArrayList<Location>(); //edit as it goes and clear when finished
 	private static ArrayList<Location> finalLocations = new ArrayList<Location>(); //final set of locations to use in sim
+	private Map<Integer,Integer> fifoData;
+	private Map<Integer,Integer> knapsackData;
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -203,27 +211,30 @@ public class Main extends Application{
 			//Add box to the main grid in the second column stretching three rows if need be			
 			simulationScreenLayout.add(resultsBox, 1, 0, 1, 3);
 			
-			
+			Simulation s = new Simulation();
 			//Edit Simulation Button on Simulation Screen
 			Button runSimulationBtn = new Button("Run Simulation");
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
-				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
 				s.runSimulation( buildSimulationSettingsFromXML(currentSimulationSettingID), buildDroneFromXML(currentDroneSettingID));
 				
-				//TODO: Do we want to truncate this?
-				knapsackAvgLabel.setText("Average Time: " + s.findAverage(s.getKnapsackData()));
-				fifoAvgLabel.setText("Average Time: " + s.findAverage(s.getFifoData()));
+				//Reduce the data down to just the summary data in the graph
+				reduceKnapsackToMapFromArrayListOrders(s.getKnapsackData());
+				reduceFifoToMapFromArrayListOrders(s.getFifoData());
 				
-				knapsackWrstLabel.setText("Worst Time: " + s.findWorst(s.getKnapsackData()));
-				fifoWrstLabel.setText("Worst Time: " + s.findWorst(s.getFifoData()));
+				//TODO: Do we want to truncate this?
+				knapsackAvgLabel.setText("Average Time: " + s.findAverage(knapsackData));
+				fifoAvgLabel.setText("Average Time: " + s.findAverage(fifoData));
+				
+				knapsackWrstLabel.setText("Worst Time: " + s.findWorst(knapsackData));
+				fifoWrstLabel.setText("Worst Time: " + s.findWorst(fifoData));
 				
 				//Clear the chart
 				knapLineChart.getData().clear();
 				XYChart.Series<Number, Number> knapSeries = new XYChart.Series<Number, Number>();
 				//Fill the series with data
-				for(Integer minute : s.getKnapsackData().keySet()) {
-					knapSeries.getData().add(new XYChart.Data<Number, Number>(minute,s.getKnapsackData().get(minute)));
+				for(Integer minute : knapsackData.keySet()) {
+					knapSeries.getData().add(new XYChart.Data<Number, Number>(minute,knapsackData.get(minute)));
 				}
 				knapLineChart.getData().add(knapSeries);
 				
@@ -231,15 +242,14 @@ public class Main extends Application{
 				fifoLineChart.getData().clear();
 				XYChart.Series<Number, Number> fifoSeries = new XYChart.Series<Number, Number>();
 				//Fill the series with data
-				for(Integer minute : s.getFifoData().keySet()) {
-					fifoSeries.getData().add(new XYChart.Data<Number, Number>(minute,s.getFifoData().get(minute)));
+				for(Integer minute : fifoData.keySet()) {
+					fifoSeries.getData().add(new XYChart.Data<Number, Number>(minute,fifoData.get(minute)));
 				}
 				fifoLineChart.getData().add(fifoSeries);
 				
 				//TODO:Remove from testing
-				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(s.getFifoData()) + " Worst Time: " + s.findWorst(s.getFifoData()));
-				System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(s.getKnapsackData()) + " Worst Time: " + s.findWorst(s.getKnapsackData()));
-				
+				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(fifoData) + " Worst Time: " + s.findWorst(fifoData));
+				System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(knapsackData) + " Worst Time: " + s.findWorst(knapsackData));
 			}); //TODO: Add some logic to run the simulation
 			simulationScreenLayout.add(runSimulationBtn, 0, 1);	//Add the button to the screen
 			
@@ -280,8 +290,111 @@ public class Main extends Application{
 			Button loadDataFileBtn = new Button("Load a Results File");
 			loadDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			loadDataFileBtn.setOnAction(e ->{
-			
-				System.out.println("TODO: Load a Results File");	//TODO: Add the logic here
+				knapsackData = new HashMap<Integer, Integer>();
+				fifoData = new HashMap<Integer,Integer>();
+				FileChooser fileSelect = new FileChooser();
+				fileSelect.setTitle("Load Data File");
+				fileSelect.getExtensionFilters().addAll(
+						new ExtensionFilter("CSV Files", "*.csv"));
+				File selectedFile = fileSelect.showOpenDialog(primaryStage);
+				if(selectedFile != null) {
+					System.out.println("Selected File: " + selectedFile.getAbsolutePath());
+					String csvFile = selectedFile.getAbsolutePath();
+					
+					try {
+						Scanner lineScanner = new Scanner(new File(csvFile));
+						//read file line by line
+						int timeDelivered = 0;
+						int timeOrdered = 0;
+						int minutesTaken = 0;
+						String simType = "";
+						String line = "";
+						Scanner scanner = null;
+						int index = 0;
+						if(lineScanner.hasNextLine()) {
+							lineScanner.nextLine();	//will read and skip the first line
+						}
+						while(lineScanner.hasNextLine()) {
+
+							scanner = new Scanner(lineScanner.nextLine());	
+							scanner.useDelimiter(",");
+							while(scanner.hasNext()) {
+								String data = scanner.next();
+								if(index == 0) {
+									simType = data;
+									//System.out.println(simType);
+								}
+								else if(index == 5) {
+									//timeOrdered = Integer.parseInt(data);
+									timeOrdered = Integer.parseInt(data);
+								}
+								else if(index == 7) {
+									//timeDelivered = Integer.parseInt(data);
+									timeDelivered = Integer.parseInt(data);
+								}
+								//System.out.println("Data " + data);
+								index++;
+							}index = 0;
+
+							
+							if(simType.equals("FIFO")){
+								if(fifoData.containsKey(timeDelivered-timeOrdered)) {
+									fifoData.put((timeDelivered-timeOrdered), fifoData.get(timeDelivered-timeOrdered)+1);
+								}else {
+									fifoData.put((timeDelivered-timeOrdered), 1);
+								}
+								
+							}
+							else if(simType.equals("Knapsack")) {
+								if(knapsackData.containsKey(timeDelivered-timeOrdered)) {
+									knapsackData.put((timeDelivered-timeOrdered), knapsackData.get(timeDelivered-timeOrdered)+1);
+								}else {
+									knapsackData.put((timeDelivered-timeOrdered), 1);
+								}
+							}
+							else {
+								System.out.println("Simulation Type not valid");
+							}
+						}
+						//close reader
+						scanner.close();
+						lineScanner.close();
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						System.out.println("File Not Found");
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				//loadDataFileBtn.setText("CurrentFile: " + selectedFile.getName());
+				
+				//TODO: Do we want to truncate this?
+				//System.out.println(knapsackData);
+				knapsackAvgLabel.setText("Average Time: " + s.findAverage(knapsackData));
+				fifoAvgLabel.setText("Average Time: " + s.findAverage(fifoData));
+				
+				knapsackWrstLabel.setText("Worst Time: " + s.findWorst(knapsackData));
+				fifoWrstLabel.setText("Worst Time: " + s.findWorst(fifoData));
+				
+				//Clear the chart
+				knapLineChart.getData().clear();
+				XYChart.Series<Number, Number> knapSeries = new XYChart.Series<Number, Number>();
+				//Fill the series with data
+				for(Integer minute : knapsackData.keySet()) {
+					knapSeries.getData().add(new XYChart.Data<Number, Number>(minute,knapsackData.get(minute)));
+				}
+				knapLineChart.getData().add(knapSeries);
+				
+				//Clear the chart
+				fifoLineChart.getData().clear();
+				XYChart.Series<Number, Number> fifoSeries = new XYChart.Series<Number, Number>();
+				//Fill the series with data
+				for(Integer minute : fifoData.keySet()) {
+					fifoSeries.getData().add(new XYChart.Data<Number, Number>(minute,fifoData.get(minute)));
+				}
+				fifoLineChart.getData().add(fifoSeries);
 			});
 			dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
 			
@@ -289,7 +402,55 @@ public class Main extends Application{
 			Button saveDataFileBtn = new Button("Save Data File");
 			saveDataFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			saveDataFileBtn.setOnAction(e ->{
-				System.out.println("TODO: Save a Results File");	//TODO: Add the logic here
+				FileChooser fileLocation = new FileChooser();
+				
+				//Set extension filter for text files
+				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
+				fileLocation.getExtensionFilters().add(extFilter);
+				
+				//Show save file dialog
+				File selectedLocation = fileLocation.showSaveDialog(primaryStage);
+				
+				if( selectedLocation != null) {
+
+					try {
+						PrintWriter writer;
+						writer = new PrintWriter(selectedLocation);
+						writer.println("Method , Simulation Number ,, Chance ,, Minute Ordered ,, Minute Delivered ,, Location ,, Items in a meal");
+						for(Order order : s.getFifoData()) {
+							writer.print("FIFO,");
+							writer.print(order.getSimulationNumber()+ ",");
+							writer.print("," + order.getMeal().getProbability() +",");
+							writer.print("," + order.getTimeStampOrder() + ",");
+							writer.print("," + order.getTimeStampDelivered() + ",");
+							writer.print("," + order.getDeliveryPoint() + ",");
+							writer.print("," + order.getMeal() + ",");
+							
+							writer.println();
+							
+						}
+						for(Order knap : s.getKnapsackData()) {
+							writer.print("Knapsack,");
+							writer.print(knap.getSimulationNumber() + ",");
+							writer.print("," + knap.getMeal().getProbability() +",");
+							writer.print("," + knap.getTimeStampOrder() + ",");
+							writer.print("," + knap.getTimeStampDelivered() + ",");
+							writer.print("," + knap.getDeliveryPoint() + ",");
+							writer.print("," + knap.getMeal() + ",");
+							
+							writer.println();
+							
+						}
+						writer.close();
+						//TODO Delete this print statement
+						System.out.println("Successfully wrote to the file");
+
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						//e1.printStackTrace();
+						System.out.println("File could not be accessed");
+					}
+				}	//TODO: Add the logic here
 			});
 			dataButtonsBox.getChildren().add(saveDataFileBtn);	//Add button to screen
 			
@@ -395,6 +556,40 @@ public class Main extends Application{
 		else {//adds the parameter onto the int value 
 			int temp = weightPerOrder[elem];
 			weightPerOrder[elem] =  temp + plus;
+		}
+	}
+	
+	/**
+	 * @param orders Array of order data from the simulation run
+	 */
+	public void reduceKnapsackToMapFromArrayListOrders(ArrayList<Order> orders) {
+		knapsackData = new HashMap<Integer,Integer>();
+		
+		//Find the difference in time and add it to the map data
+		for(Order order : orders) {
+			int minutesTaken = order.getTimeStampDelivered() - order.getTimeStampOrder();
+			if(knapsackData.containsKey(minutesTaken)) {
+				knapsackData.put(minutesTaken, knapsackData.get(minutesTaken) + 1);
+			}else {
+				knapsackData.put(minutesTaken, 1);
+			}
+		}
+	}
+	
+	/**
+	 * @param orders Array of order data from the simulation run
+	 */
+	public void reduceFifoToMapFromArrayListOrders(ArrayList<Order> orders) {
+		fifoData = new HashMap<Integer,Integer>();
+		
+		//Find the difference in time and add it to the map data
+		for(Order order : orders) {
+			int minutesTaken = order.getTimeStampDelivered() - order.getTimeStampOrder();
+			if(fifoData.containsKey(minutesTaken)) {
+				fifoData.put(minutesTaken, fifoData.get(minutesTaken) + 1);
+			}else {
+				fifoData.put(minutesTaken, 1);
+			}
 		}
 	}
 

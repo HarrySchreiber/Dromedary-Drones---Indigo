@@ -40,6 +40,11 @@ public class Meal {
 		//TODO: Actually Populate the method
 		return totalWeight;
 	}
+	@Override
+	public String toString() {
+		return foodItems.toString();
+		
+	}
 	
 	/**
 	 * TODO: If we decide to update the weight member variable just remember to do that here and add the member variable
@@ -68,10 +73,6 @@ public class Meal {
 
 	public void setProbability(double probability) {
 		this.probability = probability;
-	}
-	
-	public String toString() {
-		return "Prob: " + probability + " Items: " + foodItems;
 	}
 	
 	public ArrayList<FoodItem> getFoodItems() {
