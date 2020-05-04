@@ -84,7 +84,7 @@ public class Main extends Application{
 	ArrayList<Location> clickedLocations = new ArrayList<Location>();
 	double homeX, homeY, currentX, currentY;
 
-	String readLocationsFrom;
+	String readLocationsFrom = "UNCHANGED";
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -1021,8 +1021,8 @@ public class Main extends Application{
 					image.setY(0);
 	
 					//setting the fit height and width of the image view 
-					image.setFitHeight(700); 
-					image.setFitWidth(700); 
+					image.setFitHeight(500); 
+					image.setFitWidth(500); 
 					
 					//Setting the preserve ratio of the image view 
 					image.setPreserveRatio(true);  
