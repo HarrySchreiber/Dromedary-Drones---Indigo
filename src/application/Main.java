@@ -1,6 +1,5 @@
 package application;
 
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,6 +26,7 @@ import org.xml.sax.SAXException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.stage.FileChooser;
@@ -41,6 +41,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
@@ -65,6 +66,19 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import java.io.FileInputStream; 
+import java.io.FileNotFoundException; 
+import javafx.application.Application; 
+import javafx.scene.Group; 
+import javafx.scene.Scene; 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;  
+import javafx.stage.Stage; 
+
+import javafx.scene.shape.Circle; 
+
+import javafx.scene.layout.StackPane;
 
 public class Main extends Application{
 	
@@ -94,9 +108,128 @@ public class Main extends Application{
 	private Map<Integer,Integer> fifoData;
 	private Map<Integer,Integer> knapsackData;
 	
+	//global variables
+	private Scene  mapScreen, uploadMapScreen; //scenes 
+
+	private double sumPercent= 100; //a total 
+	private String realFileContents = ""; //what we want to print to the file
+	private ArrayList<Location> locations = new ArrayList<Location>(); //edit as it goes and clear when finished
+	private SimulationSettings currentSettings = new SimulationSettings();
+	Map<Integer, Integer> knapData;
+	double fifoAverage;
+	double knapAverage;
+	double fifoWorst;
+	double knapWorst;
+	String fifoText;
+	String knapText;
+	ArrayList<Integer> CSV = new ArrayList<Integer>();
+
+	ArrayList<Location> groveCityLocations = new ArrayList<Location>();
+
+	Image mapImage = null;
+	double realHeight, realWidth, imageHeight, imageWidth;
+	ArrayList<Location> clickedLocations = new ArrayList<Location>();
+	double homeX, homeY, currentX, currentY;
+
+	private static String readLocationsFrom = "UNCHANGED";
+	private static String chosenAlgorithm = "UNCHANGED";
+	
 	@Override
 	public void start(Stage primaryStage) {
 		try {
+			SimulationSettings baseToCallFunctions = new SimulationSettings();
+			groveCityLocations = baseToCallFunctions.populateLocations("src/application/gccLocationPoints.csv");
+			//opens the file with the default values
+			Scanner sc = new Scanner(new File("NewSimData.txt")); 
+			StringBuffer buffer = new StringBuffer();
+			
+			//reads all the lines of the file to buffer
+			while (sc.hasNextLine()) {
+		         buffer.append(sc.nextLine()+System.lineSeparator());
+		      }
+		     
+			 //saves all the old file into the global variables
+		     realFileContents = buffer.toString();
+		     String defaultFileContents = buffer.toString();
+		     
+		     //Not quite done yet
+		     String[] defaultFileLines = defaultFileContents.split(System.getProperty("line.separator"));
+		     
+		     boolean knapB = false, fifoB = false, defDroneB = false;
+		     double perUsedB = 0, perLeftB = 0;
+		     int perCountsB [] = new int [50];
+		     int burgerCountsB [] = new int [50];
+		     int fryCountsB [] = new int [50];
+		     int cokeCountsB [] = new int [50];
+		     int hoursPerShiftB = 0, upperOrdersB = 0, lowerOrdersB = 0;
+		     
+		    for(int i = 0; i < defaultFileLines.length; i++) {
+		    	String curLine = defaultFileLines[i];
+		    	String [] splitVal = curLine.split(": ");
+		    	for(int j = 1; j <= 4; j++) {
+		    		
+		    		if(curLine.contains("Order " + String.valueOf(j) + " Percentage:" )){
+		    			perCountsB[j-1] = Integer.valueOf(splitVal[1]);
+		    			//System.out.println(perCountsB[j-1]);
+		    		}
+		    		else if (curLine.contains("Order " + String.valueOf(j) + " Burgers:" )){
+		    			burgerCountsB[j-1] = Integer.valueOf(splitVal[1]);
+		    			//System.out.println(burgerCountsB[j-1]);
+		    			
+		    		}
+		    		else if (curLine.contains("Order " + String.valueOf(j) + " Fries:") ){
+		    			fryCountsB[j-1] = Integer.valueOf(splitVal[1]);
+		    			//System.out.println(fryCountsB[j-1]);
+		    		}
+		    		else if (curLine.contains("Order " + String.valueOf(j) + " Cokes:")){
+		    			cokeCountsB[j-1] = Integer.valueOf(splitVal[1]);
+		    			//System.out.println(cokeCountsB[j-1]);
+		    		}
+		    		
+		    	}
+		    	
+		    	if(curLine.contains("Percentage Used:")) {
+		    		perUsedB = Double.valueOf(splitVal[1]);
+		    		//System.out.println(perUsedB);
+		    	}
+		    	else if (curLine.contains("Percentage Left:")) {
+		    		perLeftB = Double.valueOf(splitVal[1]);
+		    		//System.out.println(perLeftB);
+		    	}
+		    	else if (curLine.contains("Hours Per Shift:")) {
+		    		hoursPerShiftB = Integer.valueOf(splitVal[1]);
+		    		//System.out.println(hoursPerShiftB);
+		    	}
+		    	else if (curLine.contains("Upper Bound")) {
+		    		upperOrdersB = Integer.valueOf(splitVal[1]);
+		    		//System.out.println(upperOrdersB);
+		    	}
+		    	else if (curLine.contains("Lower Bound")) {
+		    		lowerOrdersB = Integer.valueOf(splitVal[1]);
+		    		//System.out.println(lowerOrdersB);
+		    	}
+		    	else if(curLine.contains("Knapsack Packing")){
+		    		knapB = Boolean.valueOf(splitVal[1]);
+		    		//System.out.println(knapB);
+		    	}
+		    	else if(curLine.contains("Fifo")) {
+		    		fifoB = Boolean.valueOf(splitVal[1]);
+		    		//System.out.println(fifoB);
+		    	}
+		    	else if(curLine.contains("Default Grove City Drone")){
+		    		defDroneB = Boolean.valueOf(splitVal[1]);
+		    		//System.out.println(defDroneB);
+		    	}
+		    	
+		    }
+		     
+			//change the 4 later
+		    //But gets the weight so we can use at the beginning...
+		   for(int i  = 0; i < 4; i++) {
+			   weightPerOrder[i] += (burgerCountsB[i] * 6);
+			   weightPerOrder[i] += (fryCountsB[i] * 4);
+			   weightPerOrder[i] += (cokeCountsB[i] * 14);
+		   }
 
 					
 			//Simulation Screen Layout
@@ -214,9 +347,25 @@ public class Main extends Application{
 			Simulation s = new Simulation();
 			//Edit Simulation Button on Simulation Screen
 			Button runSimulationBtn = new Button("Run Simulation");
+			runSimulationBtn.setId("allbuttons");
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
-				s.runSimulation( buildSimulationSettingsFromXML(currentSimulationSettingID), buildDroneFromXML(currentDroneSettingID));
+				s.setAlgorithm(chosenAlgorithm);
+				SimulationSettings newSimulation = buildSimulationSettingsFromXML(currentSimulationSettingID);
+				if (readLocationsFrom.contains("Map")) {
+					newSimulation.setLocations(clickedLocations);
+					//s.runSimulation(clickedLocations);
+				}
+				else if (readLocationsFrom.contains("File")) {
+					newSimulation.setLocations(finalLocations);
+					//s.runSimulation(finalLocations);
+				}
+				else {
+					newSimulation.setLocations(groveCityLocations);
+					//s.runSimulation(groveCityLocations);
+				}
+
+				s.runSimulation(newSimulation , buildDroneFromXML(currentDroneSettingID));
 				
 				//Reduce the data down to just the summary data in the graph
 				reduceKnapsackToMapFromArrayListOrders(s.getKnapsackData());
@@ -457,9 +606,175 @@ public class Main extends Application{
 			//Add the box to the grid layout
 			simulationScreenLayout.add(dataButtonsBox, 1, 3);
 			
+			
+			
+			//-----------------------------------------------------------------------------------
+			
+			
+
+
+
+			
+			//TODO: Clear the delivery points
+
+			
+			//TODO: Add method for add new drone
+			
+			
+		
+
+			
+			//------------------------------------------------------------------------------------------------
 
 			
 			
+			GridPane mapScreenLayout = new GridPane();
+			Group deliveryPointsGroup = new Group();
+			//StackPane mapScreenLayoutTotal = new StackPane();
+			mapScreenLayout.setAlignment(Pos.CENTER);
+			mapScreenLayout.setHgap(10);
+			mapScreenLayout.setVgap(10);
+
+			Label uploadMapPrompt = new Label("If you are not able to view a map, upload one.");
+			Button uploadMapButton = new Button("Upload Map");
+
+			Button cancelButton = new Button("Cancel");
+
+			cancelButton.setOnAction(e -> {
+				primaryStage.setScene(settingsScreen);
+			});
+
+			uploadMapButton.setOnAction(e -> {
+				primaryStage.setScene(uploadMapScreen);
+			});
+
+			if (mapImage == null) {
+				mapScreenLayout.add(uploadMapPrompt,0,4);
+				mapScreenLayout.add(uploadMapButton,1,4);
+				mapScreenLayout.add(cancelButton, 0, 5);
+
+			}
+			else {
+				ImageView image = new ImageView(mapImage);
+				image.setX(50);
+				image.setY(25);
+
+				//setting the fit height and width of the image view 
+				image.setFitHeight(500); 
+				image.setFitWidth(300); 
+				
+				//Setting the preserve ratio of the image view 
+				image.setPreserveRatio(true);  
+
+				mapScreenLayout.add(image, 0, 0);
+			}
+
+
+
+			GridPane uploadMapScreenLayout = new GridPane();
+			uploadMapScreenLayout.setAlignment(Pos.CENTER);
+			uploadMapScreenLayout.setHgap(10);
+			uploadMapScreenLayout.setVgap(10);
+
+			Label fileChosenLabel = new Label("No File Chosen");
+			Button chooseMapButton = new Button("Choose file");
+
+			Button saveMapButton = new Button("Save Map");
+
+			Label realImageWidthPrompt = new Label("Please enter the real width of the image in feet: ");
+			Label realImageHeightPrompt = new Label("Please enter the real height of the image in feet: ");
+			TextField realImageWidth = new TextField();
+			TextField realImageHeight = new TextField();
+
+			TextField pointName = new TextField();
+			Label clickedLocationsList = new Label();
+
+			chooseMapButton.setOnAction(e -> {
+				FileChooser fileChooser = new FileChooser();
+				File selectedFile = fileChooser.showOpenDialog(primaryStage);
+				fileChosenLabel.setText("Current File: " + selectedFile.getName());
+				try {
+					FileInputStream inputFile = new FileInputStream(selectedFile.getAbsolutePath());
+					mapImage = new Image(inputFile);
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			});
+
+			saveMapButton.setOnAction(e-> {
+
+
+				mapScreenLayout.add(pointName, 15, 0);
+				mapScreenLayout.add(clickedLocationsList, 15, 1);
+
+				primaryStage.setScene(mapScreen);
+
+				if (mapImage == null) {
+					//THROW AN ERROR
+				}
+				else {
+					if (!realImageHeight.getText().isEmpty() && !realImageWidth.getText().isEmpty()){
+						realHeight = Double.parseDouble(realImageHeight.getText());
+						realWidth = Double.parseDouble(realImageWidth.getText());
+						imageHeight = mapImage.getHeight();
+						imageWidth = mapImage.getWidth();
+					}
+
+
+					ImageView image = new ImageView(mapImage);
+					image.setX(0);
+					image.setY(0);
+	
+					//setting the fit height and width of the image view 
+					image.setFitHeight(500); 
+					image.setFitWidth(500); 
+					
+					//Setting the preserve ratio of the image view 
+					image.setPreserveRatio(true);  
+
+					Bounds bounds = image.getLayoutBounds();
+					double xScale = bounds.getWidth() / image.getImage().getWidth();
+					double yScale = bounds.getHeight() / image.getImage().getHeight();
+
+					double xToRealScale = realWidth/image.getImage().getWidth();
+					double yToRealScale = realHeight/image.getImage().getHeight();
+
+					image.setOnMouseClicked(click -> {
+
+						if (clickedLocations.isEmpty()) {
+							homeX = click.getX();
+							homeY = click.getY();
+						}
+						currentX = ((click.getX() - homeX)/xScale)*xToRealScale;
+						currentY = (((click.getY() - homeY)*-1)/yScale)*yToRealScale;
+						Location current = new Location(pointName.getText(), (int)currentX, (int)currentY);
+						clickedLocations.add(current);
+						//clickedLocationsList.setText(clickedLocationsList.getText() + ", [" + currentX + ", " + currentY + "]");
+
+						Circle circle = new Circle(click.getX(), click.getY(), 3);
+						circle.setFill(javafx.scene.paint.Color.RED);
+						deliveryPointsGroup.getChildren().add(circle);
+
+					});
+
+					deliveryPointsGroup.getChildren().add(image);
+				}
+
+			});
+
+			uploadMapScreenLayout.add(fileChosenLabel, 0, 4);
+			uploadMapScreenLayout.add(chooseMapButton, 2, 4);
+			uploadMapScreenLayout.add(realImageWidthPrompt, 0, 6);
+			uploadMapScreenLayout.add(realImageWidth, 0, 8);
+			uploadMapScreenLayout.add(realImageHeightPrompt, 4, 6);
+			uploadMapScreenLayout.add(realImageHeight, 4, 8);
+			uploadMapScreenLayout.add(saveMapButton, 2, 10);
+
+
+
+			mapScreenLayout.add(deliveryPointsGroup, 0, 0);
+			//mapScreenLayoutTotal.getChildren().addAll(mapScreenLayout, deliveryPointsGroup);
 			
 			//------------------------------------------------------------------------------------------------
 			
@@ -467,12 +782,18 @@ public class Main extends Application{
 			//TODO: Decide on default
 			simulationScreen = new Scene(simulationScreenLayout,1000,600);
 			//TODO: Are we going to use this ever?
-			//simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+			simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			
 			//TODO: Decide on default 
 			//settingsScreen = new Scene(settingsScreenLayout,1000,500);
 			
 			
+
+
+			mapScreen = new Scene(mapScreenLayout, 1000, 650);
+
+			uploadMapScreen = new Scene(uploadMapScreenLayout, 1000, 650);
+
 			primaryStage.setScene(simulationScreen);
 			//TODO: Decide if we want to be able to resize
 			primaryStage.setResizable(false);
@@ -1068,10 +1389,24 @@ public class Main extends Application{
 		//More Locations Stuff
 		
 		
-		
+		Button viewMapButton = new Button("View Delivery Map");
+
+		ChoiceBox deliveryPointsChoices = new ChoiceBox();
+		deliveryPointsChoices.getItems().add("Default Grove City Points");
+		deliveryPointsChoices.getItems().add("Points from file");
+		deliveryPointsChoices.getItems().add("Points from map");
+
+		ChoiceBox algoChoice = new ChoiceBox();
+		algoChoice.getItems().add("Greedy Algorithm");
+		algoChoice.getItems().add("Genetic Algorithm");
+
+		viewMapButton.setOnAction(e ->{
+			//primaryStage.setScene(mapScreen);
+		});
+
 		
 		//add everything to column one
-		columnOne.getChildren().addAll(dronesL, addAndEditButtonsBox, droneSelectorPane, locationPointsLabel, addAndClearButtonsBox);
+		columnOne.getChildren().addAll(dronesL, addAndEditButtonsBox, droneSelectorPane, locationPointsLabel, algoChoice,  addAndClearButtonsBox,viewMapButton, deliveryPointsChoices);
 		
 		settingsScreenLayout.add(columnOne,0,1);
 		
@@ -1437,6 +1772,8 @@ public class Main extends Application{
 		Button saveSimulationSetngsBtn = new Button("Save Settings");
 		//listener so we can go back to the simulation screen and write to the file
 		saveSimulationSetngsBtn.setOnAction(e  ->  {
+			readLocationsFrom = (String) deliveryPointsChoices.getValue();
+			chosenAlgorithm = (String) algoChoice.getValue();
 			Alert alert = new Alert(AlertType.ERROR);
 			lowerOrdersPerHour = valueFactoryLowerHours.getValue();
 			upperOrdersPerHour = valueFactoryUpperHours.getValue();

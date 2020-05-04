@@ -20,6 +20,9 @@ public class SimulationSettings {
 	private int orderUpper;
 	private int orderLower;
 	
+	public SimulationSettings() {
+		
+	}
 	/**
 	 * Constructor for a simulation setting
 	 * @param name The name of the simulation

@@ -2,7 +2,6 @@ package application;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -19,6 +18,13 @@ public class Simulation {
 	private ArrayList<Order> fifoData;
 	private ArrayList<Order> knapsackData;
 	private int maxLocations;
+
+
+	private String chosenAlgorithm = "Greedy";
+
+	public void setAlgorithm(String algo) {
+		chosenAlgorithm = algo;
+	}
 
 	/**
 	 * Creates a simulation object
@@ -121,9 +127,16 @@ public class Simulation {
 			}
 			
 			
+		if (onDrone.size() > 1 ) {
 			//TODO: Traveling Salesman Problem goes here probably
 			TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
-			onDrone = tsp.GreedyTSP();
+			if (chosenAlgorithm.contains("Genetic")) {
+				onDrone = tsp.GeneticAlgorithmTSP();
+			}
+			else {
+				onDrone = tsp.GreedyTSP();
+			}		
+		}
 
 			
 
@@ -189,9 +202,16 @@ public class Simulation {
 				}
 			}
 			
-			//TODO: Traveling Salesman Problem goes here probably
-			TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
-			onDrone = tsp.GreedyTSP();
+			if (onDrone.size() > 1 ) {
+				//TODO: Traveling Salesman Problem goes here probably
+				TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
+				if (chosenAlgorithm.contains("Genetic")) {
+					onDrone = tsp.GeneticAlgorithmTSP();
+				}
+				else {
+					onDrone = tsp.GreedyTSP();
+				}		
+			}
 			
 			//Run calculations on the time of the simulation
 			Location homeBase = new Location("Sac",0,0);	//Set the drones initial location
