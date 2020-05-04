@@ -1,6 +1,5 @@
 package application;
 
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,6 +8,7 @@ import java.util.Scanner;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -21,6 +21,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
@@ -41,11 +42,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
+import java.io.FileInputStream; 
+import java.io.FileNotFoundException; 
+import javafx.application.Application; 
+import javafx.scene.Group; 
+import javafx.scene.Scene; 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;  
+import javafx.stage.Stage; 
+
+import javafx.scene.shape.Circle; 
+
+import javafx.scene.layout.StackPane;
+
 
 public class Main extends Application{
 	
 	//global variables
-	private Scene simulationScreen, settingsScreen, addLocationScreen; //scenes 
+	private Scene simulationScreen, settingsScreen, addLocationScreen, mapScreen, uploadMapScreen; //scenes 
 	private int weightPerOrder[] = new int[50]; //int ary for the weights we need to display
 	private double sumPercent= 100; //a total 
 	private String realFileContents = ""; //what we want to print to the file
@@ -62,11 +76,21 @@ public class Main extends Application{
 	String fifoText;
 	String knapText;
 	ArrayList<Integer> CSV = new ArrayList<Integer>();
+
+	ArrayList<Location> groveCityLocations = new ArrayList<Location>();
+
+	Image mapImage = null;
+	double realHeight, realWidth, imageHeight, imageWidth;
+	ArrayList<Location> clickedLocations = new ArrayList<Location>();
+	double homeX, homeY, currentX, currentY;
+
+	String readLocationsFrom = "UNCHANGED";
 	
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			
+			SimulationSettings baseToCallFunctions = new SimulationSettings();
+			groveCityLocations = baseToCallFunctions.populateLocations("src/application/gccLocationPoints.csv");
 			//opens the file with the default values
 			Scanner sc = new Scanner(new File("NewSimData.txt")); 
 			StringBuffer buffer = new StringBuffer();
@@ -251,12 +275,22 @@ public class Main extends Application{
 			
 			//Edit Simulation Button on Simulation Screen
 			Button runSimulationBtn = new Button("Run Simulation");
+			runSimulationBtn.setId("allbuttons");
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
 
 				Simulation s = new Simulation();	//TODO: Make sure this is populated with the actual simulation settings from the radio buttons
 				try {
-					s.runSimulation(finalLocations);
+					if (readLocationsFrom.contains("Map")) {
+						s.runSimulation(clickedLocations);
+					}
+					else if (readLocationsFrom.contains("File")) {
+						s.runSimulation(finalLocations);
+					}
+					else {
+						s.runSimulation(groveCityLocations);
+					}
+					
 				} catch (FileNotFoundException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -496,9 +530,21 @@ public class Main extends Application{
 			//Add Locations Buttons
 			Label locationPointsLabel = new Label("Add Delivery Points");
 			Button addDeliveryPointsBtn = new Button("Add Delivery Point(s)");
+
+			Button viewMapButton = new Button("View Delivery Map");
+
+			ChoiceBox deliveryPointsChoices = new ChoiceBox();
+			deliveryPointsChoices.getItems().add("Default Grove City Points");
+			deliveryPointsChoices.getItems().add("Points from file");
+			deliveryPointsChoices.getItems().add("Points from map");
+
 			
 			addDeliveryPointsBtn.setOnAction(e->{
 				 primaryStage.setScene(addLocationScreen);
+			});
+
+			viewMapButton.setOnAction(e ->{
+				primaryStage.setScene(mapScreen);
 			});
 			
 			//TODO: Clear the delivery points
@@ -510,7 +556,7 @@ public class Main extends Application{
 			
 			//add everything to column one
 			//columnOne.getChildren().addAll(schemeL, schemeKCB, schemeFCB, dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn);
-			columnOne.getChildren().addAll( dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn);
+			columnOne.getChildren().addAll( dronesL, defaultDroneCB, locationPointsLabel, addDeliveryPointsBtn, clearDeliveryPointsBtn, viewMapButton, deliveryPointsChoices);
 			settingsScreenLayout.add(columnOne,0,1);
 			
 			//TODO: Add method for add new drone
@@ -846,7 +892,7 @@ public class Main extends Application{
 
 			//listener so we can go back to the simulation screen and write to the file
 			saveSimulationSetngsBtn.setOnAction(e  ->  {
-
+						readLocationsFrom = (String) deliveryPointsChoices.getValue();
 						//try catch to the write to the file
 						try(FileWriter writer = new FileWriter("NewSimData.txt" ,false)) {
 							writer.write(realFileContents);
@@ -872,7 +918,157 @@ public class Main extends Application{
 			
 			settingsScreenLayout.add(saveAndCancelButtonsBox,0,2,3,1);
 			
+			//------------------------------------------------------------------------------------------------
+
 			
+			
+			GridPane mapScreenLayout = new GridPane();
+			Group deliveryPointsGroup = new Group();
+			//StackPane mapScreenLayoutTotal = new StackPane();
+			mapScreenLayout.setAlignment(Pos.CENTER);
+			mapScreenLayout.setHgap(10);
+			mapScreenLayout.setVgap(10);
+
+			Label uploadMapPrompt = new Label("If you are not able to view a map, upload one.");
+			Button uploadMapButton = new Button("Upload Map");
+
+			Button cancelButton = new Button("Cancel");
+
+			cancelButton.setOnAction(e -> {
+				primaryStage.setScene(settingsScreen);
+			});
+
+			uploadMapButton.setOnAction(e -> {
+				primaryStage.setScene(uploadMapScreen);
+			});
+
+			if (mapImage == null) {
+				mapScreenLayout.add(uploadMapPrompt,0,4);
+				mapScreenLayout.add(uploadMapButton,1,4);
+				mapScreenLayout.add(cancelButton, 0, 5);
+
+			}
+			else {
+				ImageView image = new ImageView(mapImage);
+				image.setX(50);
+				image.setY(25);
+
+				//setting the fit height and width of the image view 
+				image.setFitHeight(500); 
+				image.setFitWidth(300); 
+				
+				//Setting the preserve ratio of the image view 
+				image.setPreserveRatio(true);  
+
+				mapScreenLayout.add(image, 0, 0);
+			}
+
+
+
+			GridPane uploadMapScreenLayout = new GridPane();
+			uploadMapScreenLayout.setAlignment(Pos.CENTER);
+			uploadMapScreenLayout.setHgap(10);
+			uploadMapScreenLayout.setVgap(10);
+
+			Label fileChosenLabel = new Label("No File Chosen");
+			Button chooseMapButton = new Button("Choose file");
+
+			Button saveMapButton = new Button("Save Map");
+
+			Label realImageWidthPrompt = new Label("Please enter the real width of the image in feet: ");
+			Label realImageHeightPrompt = new Label("Please enter the real height of the image in feet: ");
+			TextField realImageWidth = new TextField();
+			TextField realImageHeight = new TextField();
+
+			TextField pointName = new TextField();
+			Label clickedLocationsList = new Label();
+
+			chooseMapButton.setOnAction(e -> {
+				FileChooser fileChooser = new FileChooser();
+				File selectedFile = fileChooser.showOpenDialog(primaryStage);
+				fileChosenLabel.setText("Current File: " + selectedFile.getName());
+				try {
+					FileInputStream inputFile = new FileInputStream(selectedFile.getAbsolutePath());
+					mapImage = new Image(inputFile);
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			});
+
+			saveMapButton.setOnAction(e-> {
+
+
+				mapScreenLayout.add(pointName, 15, 0);
+				mapScreenLayout.add(clickedLocationsList, 15, 1);
+
+				primaryStage.setScene(mapScreen);
+
+				if (mapImage == null) {
+					//THROW AN ERROR
+				}
+				else {
+					if (!realImageHeight.getText().isEmpty() && !realImageWidth.getText().isEmpty()){
+						realHeight = Double.parseDouble(realImageHeight.getText());
+						realWidth = Double.parseDouble(realImageWidth.getText());
+						imageHeight = mapImage.getHeight();
+						imageWidth = mapImage.getWidth();
+					}
+
+
+					ImageView image = new ImageView(mapImage);
+					image.setX(0);
+					image.setY(0);
+	
+					//setting the fit height and width of the image view 
+					image.setFitHeight(500); 
+					image.setFitWidth(500); 
+					
+					//Setting the preserve ratio of the image view 
+					image.setPreserveRatio(true);  
+
+					Bounds bounds = image.getLayoutBounds();
+					double xScale = bounds.getWidth() / image.getImage().getWidth();
+					double yScale = bounds.getHeight() / image.getImage().getHeight();
+
+					double xToRealScale = realWidth/image.getImage().getWidth();
+					double yToRealScale = realHeight/image.getImage().getHeight();
+
+					image.setOnMouseClicked(click -> {
+
+						if (clickedLocations.isEmpty()) {
+							homeX = click.getX();
+							homeY = click.getY();
+						}
+						currentX = ((click.getX() - homeX)/xScale)*xToRealScale;
+						currentY = (((click.getY() - homeY)*-1)/yScale)*yToRealScale;
+						Location current = new Location(pointName.getText(), (int)currentX, (int)currentY);
+						clickedLocations.add(current);
+						//clickedLocationsList.setText(clickedLocationsList.getText() + ", [" + currentX + ", " + currentY + "]");
+
+						Circle circle = new Circle(click.getX(), click.getY(), 3);
+						circle.setFill(javafx.scene.paint.Color.RED);
+						deliveryPointsGroup.getChildren().add(circle);
+
+					});
+
+					deliveryPointsGroup.getChildren().add(image);
+				}
+
+			});
+
+			uploadMapScreenLayout.add(fileChosenLabel, 0, 4);
+			uploadMapScreenLayout.add(chooseMapButton, 2, 4);
+			uploadMapScreenLayout.add(realImageWidthPrompt, 0, 6);
+			uploadMapScreenLayout.add(realImageWidth, 0, 8);
+			uploadMapScreenLayout.add(realImageHeightPrompt, 4, 6);
+			uploadMapScreenLayout.add(realImageHeight, 4, 8);
+			uploadMapScreenLayout.add(saveMapButton, 2, 10);
+
+
+
+			mapScreenLayout.add(deliveryPointsGroup, 0, 0);
+			//mapScreenLayoutTotal.getChildren().addAll(mapScreenLayout, deliveryPointsGroup);
 			
 			//------------------------------------------------------------------------------------------------
 
@@ -965,7 +1161,7 @@ public class Main extends Application{
 			//TODO: Decide on default
 			simulationScreen = new Scene(simulationScreenLayout,1000,650);
 			//TODO: Are we going to use this ever?
-			//simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+			simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			
 			//TODO: Decide on default 
 			settingsScreen = new Scene(settingsScreenLayout,1000,650);
@@ -973,7 +1169,11 @@ public class Main extends Application{
 			
 			//TODO: Decide on default
 			addLocationScreen = new Scene(addLocationScreenLayout, 1000, 650);
-			
+
+			mapScreen = new Scene(mapScreenLayout, 1000, 650);
+
+			uploadMapScreen = new Scene(uploadMapScreenLayout, 1000, 650);
+
 			primaryStage.setScene(simulationScreen);
 			//TODO: Decide if we want to be able to resize
 			primaryStage.setResizable(false);
