@@ -396,7 +396,6 @@ public class Main extends Application{
 				}
 				fifoLineChart.getData().add(fifoSeries);
 			});
-			dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
 			
 			//Button for saving a data file
 			Button saveDataFileBtn = new Button("Save Data File");
@@ -453,6 +452,7 @@ public class Main extends Application{
 				}	//TODO: Add the logic here
 			});
 			dataButtonsBox.getChildren().add(saveDataFileBtn);	//Add button to screen
+			dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
 			
 			//Add the box to the grid layout
 			simulationScreenLayout.add(dataButtonsBox, 1, 3);
