@@ -109,7 +109,7 @@ public class Main extends Application{
 	private Map<Integer,Integer> knapsackData;
 	
 	//global variables
-	private Scene  mapScreen, uploadMapScreen; //scenes 
+	private static Scene  mapScreen, uploadMapScreen; //scenes 
 
 	private double sumPercent= 100; //a total 
 	private String realFileContents = ""; //what we want to print to the file
@@ -1401,7 +1401,7 @@ public class Main extends Application{
 		algoChoice.getItems().add("Genetic Algorithm");
 
 		viewMapButton.setOnAction(e ->{
-			//primaryStage.setScene(mapScreen);
+			primaryStage.setScene(mapScreen);
 		});
 
 		
