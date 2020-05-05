@@ -19,6 +19,8 @@ public class SimulationSettings {
 	private String name;
 	private Drone currentDrone;
 	private ArrayList<Location> locations;
+	private String deliveryPointChoice;
+	private String algorithmChoice;
 	private ArrayList<Meal> meals;
 	private int hoursPerShift;
 	private int orderUpper;
@@ -37,11 +39,13 @@ public class SimulationSettings {
 	 * @param orderUpper The upper number of orders in an hour
 	 * @param orderLower The lower number of orders in an hour
 	 */
-	public SimulationSettings(String name, Drone drone, ArrayList<Location> locations, ArrayList<Meal> meals, int hoursPerShift, int orderUpper, int orderLower) {
+	public SimulationSettings(String name, Drone drone, ArrayList<Location> locations,String deliveryPointChoice, String algorithmChoice, ArrayList<Meal> meals, int hoursPerShift, int orderUpper, int orderLower) {
 		this.name = name;
 		this.currentDrone = drone;
 		this.locations = locations;
-		this.meals = meals;	//TODO: Question 1: I feel like we need to pull this in from it being built in the main frontend side Question 2: Do we need a deep copy constructor here?
+		this.deliveryPointChoice = deliveryPointChoice;
+		this.algorithmChoice = algorithmChoice;
+		this.meals = meals;	
 		this.hoursPerShift = hoursPerShift;
 		this.orderUpper = orderUpper;
 		this.orderLower = orderLower;
@@ -189,5 +193,29 @@ public class SimulationSettings {
 		}
 		
 		return deliveryLocations;
+	}
+	/**
+	 * @return Which of the location schemas needs to be present
+	 */
+	public String getDeliveryPointChoice() {
+		return deliveryPointChoice;
+	}
+	/**
+	 * @param locationSchema Which of the location schemas needs to be present
+	 */
+	public void setDeliveryPointChoice(String deliveryPointChoice) {
+		this.deliveryPointChoice = deliveryPointChoice;
+	}
+	/**
+	 * @return The chosen algorithm for TSP
+	 */
+	public String getAlgorithmChoice() {
+		return algorithmChoice;
+	}
+	/**
+	 * @param algorithmChoice The Chosen Algorithm for TSP
+	 */
+	public void setAlgorithmChoice(String algorithmChoice) {
+		this.algorithmChoice = algorithmChoice;
 	}
 }

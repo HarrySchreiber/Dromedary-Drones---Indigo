@@ -979,6 +979,8 @@ public class Main extends Application{
 		String simulationName = "";
 		String droneIDNumber = "";
 		ArrayList<Location> locations = new ArrayList<Location>();
+		String deliveryPointChoice = "";
+		String algorithmChoice = "";
 		ArrayList<Meal> meals = new ArrayList<Meal>();
 		int hoursInShift = 0;
 		int upperOrdersPerHour = 0;
@@ -1093,10 +1095,18 @@ public class Main extends Application{
 				if(field.getTagName().equals("ordersperhourlower")) {
 					lowerOrdersPerHour = Integer.valueOf(field.getTextContent());
 				}
+				//If the element is the algorithm choice
+				if(field.getTagName().equals("algorithmchoice")) {
+					algorithmChoice = field.getTextContent();
+				}
+				//If the element is the delivery choice
+				if(field.getTagName().equals("deliverypointchoice")) {
+					deliveryPointChoice = field.getTextContent();
+				}
 			}
 		}
 		//Build and return the object from the set variables
-		return new SimulationSettings(simulationName, buildDroneFromXML(droneIDNumber), locations, meals, hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
+		return new SimulationSettings(simulationName, buildDroneFromXML(droneIDNumber), locations, deliveryPointChoice, algorithmChoice, meals, hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
 	}
 	
 	/**
@@ -1881,7 +1891,7 @@ deliveryPointsChoices.getValue();
 					finalLocations.add(tempLocations.get(i));
 				tempLocations.clear();
 
-				SimulationSettings newSimulation = new SimulationSettings(simulationName, buildDroneFromXML("1") , finalLocations, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
+				SimulationSettings newSimulation = new SimulationSettings(simulationName, buildDroneFromXML("1") , finalLocations, /*TODO: Populate with deliveryPointChoice*/,  /*TODO: Populate with algorithmChoice*/, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
 				try {
 					if(id == "1") {
 						simulationSettingToXML(findAvailableSimulationSettingID(), newSimulation);
@@ -2204,6 +2214,16 @@ deliveryPointsChoices.getValue();
 		Element lowerOrdersPerHourElement = simulationSettingsXML.createElement("ordersperhourlower");
 		lowerOrdersPerHourElement.setTextContent(String.valueOf(simulationSetting.getOrderLower()));
 		currentSimulationDocument.appendChild(lowerOrdersPerHourElement);
+		
+		//Add delivery point choice element to the current simulationsetting
+		Element deliveryPointChoiceElement = simulationSettingsXML.createElement("deliverypointchoice");
+		deliveryPointChoiceElement.setTextContent(simulationSetting.getDeliveryPointChoice());
+		currentSimulationDocument.appendChild(deliveryPointChoiceElement);
+		
+		//Add delivery point choice element to the current simulationsetting
+		Element algorithmChoiceElement = simulationSettingsXML.createElement("algorithmchoice");
+		algorithmChoiceElement.setTextContent(simulationSetting.getAlgorithmChoice());
+		currentSimulationDocument.appendChild(algorithmChoiceElement);
 		
 		//Run the updater to update and write the actual file
 		updateSimulationSettingsXML();
