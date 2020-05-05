@@ -40,6 +40,8 @@ public class Simulation {
 	 * @throws FileNotFoundException 
 	 */
 	public void runSimulation(SimulationSettings sim, Drone d) {
+		fifoData = new ArrayList<Order>();
+		knapsackData = new ArrayList<Order>();
 		
 		maxLocations = maxNumberOfLocationsToDeliverTo(sim.getCurrentDrone(), sim.getLocations());
 		

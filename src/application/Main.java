@@ -47,6 +47,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -58,7 +59,12 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.io.BufferedReader;
 
 import java.io.FileNotFoundException;
@@ -124,11 +130,11 @@ public class Main extends Application{
 	String knapText;
 	ArrayList<Integer> CSV = new ArrayList<Integer>();
 
-	ArrayList<Location> groveCityLocations = new ArrayList<Location>();
+	static ArrayList<Location> groveCityLocations = new ArrayList<Location>();
 
 	Image mapImage = null;
 	double realHeight, realWidth, imageHeight, imageWidth;
-	ArrayList<Location> clickedLocations = new ArrayList<Location>();
+	static ArrayList<Location> clickedLocations = new ArrayList<Location>();
 	double homeX, homeY, currentX, currentY;
 
 	private static String readLocationsFrom = "UNCHANGED";
@@ -251,7 +257,7 @@ public class Main extends Application{
 					currentSimulationSettingID = idNumber;
 				});
 				//Start the simulation with the default settings
-				if(idNumber.equals("1")) {
+				if(idNumber.equals(currentSimulationSettingID)) {
 					radioButton.setSelected(true);
 				}
 				//Add radio button to toggle group and add it to the screen
@@ -396,6 +402,8 @@ public class Main extends Application{
 				}
 				fifoLineChart.getData().add(fifoSeries);
 				
+				System.out.println(fifoData);
+				System.out.println(knapsackData);
 				//TODO:Remove from testing
 				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(fifoData) + " Worst Time: " + s.findWorst(fifoData));
 				System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(knapsackData) + " Worst Time: " + s.findWorst(knapsackData));
@@ -609,19 +617,6 @@ public class Main extends Application{
 			
 			
 			//-----------------------------------------------------------------------------------
-			
-			
-
-
-
-			
-			//TODO: Clear the delivery points
-
-			
-			//TODO: Add method for add new drone
-			
-			
-		
 
 			
 			//------------------------------------------------------------------------------------------------
@@ -1174,6 +1169,12 @@ public class Main extends Application{
 		return new Drone(droneID,name,maxCargo,avgCruisingSpeed,maxFlightTime,turnAroundTime,unloadTime);
 	}
 	
+	public static ObservableList<Location> getLocationsObservable(ArrayList<Location> list) {
+		ObservableList<Location> data = FXCollections.observableArrayList();
+		data.addAll(list);
+		return data;
+	}
+	
 	/*
 	 * Method for when we need to build a setting screen with the id of the simulation settings object
 	 * builds the screen here
@@ -1231,7 +1232,7 @@ public class Main extends Application{
 				
 			});
 			//Start the simulation with the default settings
-			if(idNumber.equals("1")) {
+			if(idNumber.equals(currentDroneSettingID)) {
 				radioButton.setSelected(true);
 			}
 			//Add radio button to toggle group and add it to the screen
@@ -1409,14 +1410,71 @@ public class Main extends Application{
 		ChoiceBox algoChoice = new ChoiceBox();
 		algoChoice.getItems().add("Greedy Algorithm");
 		algoChoice.getItems().add("Genetic Algorithm");
+		
+		deliveryPointsChoices.setValue("Default Grove City Points");
+		algoChoice.setValue("Greedy Algorithm");
+		
 
 		viewMapButton.setOnAction(e ->{
 			primaryStage.setScene(mapScreen);
 		});
+		
+		Label locationTableView = new Label("Location Table");
+		
+//		FlowPane root = new FlowPane();
+//		root.setAlignment(Pos.CENTER_LEFT);
+		
+//		Scene scene = new Scene(root, 450, 450);
+		
+		ObservableList<Location> locationList = buildSimulationSettingsFromXML(currentSimulationSettingID).getObservable();
+		System.out.println(locationList);
+		
+		TableView<Location> locationTable;
+
+		System.out.println("Test");
+		//locationList = getLocationsObservable(clickedLocations);
+		//locationList = getLocationsObservable(finalLocations);
+		System.out.println("Delivery Choices" + deliveryPointsChoices.getValue().toString());
+		if (deliveryPointsChoices.getValue().toString().contains("Map")) {
+			locationList.clear();
+			locationList = getLocationsObservable(clickedLocations);
+			System.out.println(locationList);
+		//	refresh(locationTable);
+
+		}
+		else if (deliveryPointsChoices.getValue().toString().contains("File")) {
+			locationList.clear();
+			locationList = getLocationsObservable(finalLocations);
+
+		}
+		else {
+			locationList = getLocationsObservable(groveCityLocations);
+
+		}
+		locationTable = new TableView<Location>(locationList);
+		
+		TableColumn<Location, String> title = new TableColumn<>("Location");
+		title.setCellValueFactory(new PropertyValueFactory<>("name"));
+		locationTable.getColumns().add(title);
+		
+		TableColumn<Location, Integer> xVal = new TableColumn<>("X");
+		xVal.setCellValueFactory(new PropertyValueFactory<>("x"));
+		locationTable.getColumns().add(xVal);
+		
+		TableColumn<Location, Integer> yVal = new TableColumn<>("Y");
+		yVal.setCellValueFactory(new PropertyValueFactory<>("y"));
+		locationTable.getColumns().add(yVal);
+		
+deliveryPointsChoices.getValue();
+		
+		//set height and width
+		locationTable.setPrefWidth(200);
+		locationTable.setPrefHeight(200);
 
 		
 		//add everything to column one
-		columnOne.getChildren().addAll(dronesL, addAndEditButtonsBox, droneSelectorPane, locationPointsLabel, algoChoice,  addAndClearButtonsBox,viewMapButton, deliveryPointsChoices);
+		columnOne.getChildren().addAll(   locationPointsLabel, algoChoice, 
+				addAndClearButtonsBox,viewMapButton, deliveryPointsChoices, locationTable);
 		
 		settingsScreenLayout.add(columnOne,0,1);
 		
@@ -1769,7 +1827,7 @@ public class Main extends Application{
     	
 		
 		//TODO: Use this to add things in column three
-		columnThree.getChildren().addAll(gridC3);
+		columnThree.getChildren().addAll(gridC3, dronesL, droneSelectorPane, addAndEditButtonsBox);
 		
 		settingsScreenLayout.add(columnThree,2,1);
 		
@@ -1782,6 +1840,7 @@ public class Main extends Application{
 		Button saveSimulationSetngsBtn = new Button("Save Settings");
 		//listener so we can go back to the simulation screen and write to the file
 		saveSimulationSetngsBtn.setOnAction(e  ->  {
+			
 			readLocationsFrom = (String) deliveryPointsChoices.getValue();
 			chosenAlgorithm = (String) algoChoice.getValue();
 			Alert alert = new Alert(AlertType.ERROR);
@@ -1854,7 +1913,7 @@ public class Main extends Application{
 						currentSimulationSettingID = idNumber;
 					});
 					//Start the simulation with the default settings
-					if(idNumber.equals("1")) {
+					if(idNumber.equals(currentSimulationSettingID)) {
 						radioButton.setSelected(true);
 					}
 					//Add radio button to toggle group and add it to the screen
@@ -1896,7 +1955,7 @@ public class Main extends Application{
 						currentSimulationSettingID = idNumber;
 					});
 					//Start the simulation with the default settings
-					if(idNumber.equals("1")) {
+					if(idNumber.equals(currentSimulationSettingID)) {
 						radioButton.setSelected(true);
 					}
 					//Add radio button to toggle group and add it to the screen
@@ -2331,7 +2390,7 @@ public class Main extends Application{
 						currentDroneSettingID = idNumber;
 					});
 					//Start the simulation with the default settings
-					if(idNumber.equals("1")) {
+					if(idNumber.equals(currentDroneSettingID)) {
 						radioButton.setSelected(true);
 					}
 					//Add radio button to toggle group and add it to the screen
@@ -2364,7 +2423,7 @@ public class Main extends Application{
 					currentDroneSettingID = idNumber;
 				});
 				//Start the simulation with the default settings
-				if(idNumber.equals("1")) {
+				if(idNumber.equals(currentDroneSettingID)) {
 					radioButton.setSelected(true);
 				}
 				//Add radio button to toggle group and add it to the screen

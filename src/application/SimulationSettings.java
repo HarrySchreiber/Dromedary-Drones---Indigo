@@ -2,6 +2,10 @@ package application;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -62,6 +66,14 @@ public class SimulationSettings {
 	 */
 	public void setLocations(ArrayList<Location> locations) {
 		this.locations = locations;
+	}
+	/*
+	 * @return locations as an ObservableList
+	 */
+	public ObservableList<Location> getObservable() {
+		ObservableList<Location> data = FXCollections.observableArrayList();
+		data.addAll(getLocations());
+		return data;
 	}
 
 	/**
