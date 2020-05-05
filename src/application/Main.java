@@ -640,7 +640,14 @@ public class Main extends Application{
 
 			Button cancelButton = new Button("Cancel");
 
+			Button saveButton = new Button("Save");
+
+			saveButton.setOnAction(e -> {
+				primaryStage.setScene(settingsScreen);
+			});
+
 			cancelButton.setOnAction(e -> {
+				clickedLocations.clear();
 				primaryStage.setScene(settingsScreen);
 			});
 
@@ -656,8 +663,8 @@ public class Main extends Application{
 			}
 			else {
 				ImageView image = new ImageView(mapImage);
-				image.setX(50);
-				image.setY(25);
+				image.setX(0);
+				image.setY(0);
 
 				//setting the fit height and width of the image view 
 				image.setFitHeight(500); 
@@ -686,6 +693,7 @@ public class Main extends Application{
 			TextField realImageWidth = new TextField();
 			TextField realImageHeight = new TextField();
 
+			Label promptForName = new Label("Enter name for location before clicking: ");
 			TextField pointName = new TextField();
 			Label clickedLocationsList = new Label();
 
@@ -704,9 +712,11 @@ public class Main extends Application{
 
 			saveMapButton.setOnAction(e-> {
 
-
-				mapScreenLayout.add(pointName, 15, 0);
-				mapScreenLayout.add(clickedLocationsList, 15, 1);
+				mapScreenLayout.add(promptForName, 10, 0);
+				mapScreenLayout.add(pointName, 10, 1);
+				mapScreenLayout.add(clickedLocationsList, 10, 2);
+				uploadMapPrompt.setText("Change Map: ");
+				mapScreenLayout.add(saveButton, 2, 5);
 
 				primaryStage.setScene(mapScreen);
 
@@ -728,7 +738,7 @@ public class Main extends Application{
 	
 					//setting the fit height and width of the image view 
 					image.setFitHeight(500); 
-					image.setFitWidth(500); 
+					image.setFitWidth(300); 
 					
 					//Setting the preserve ratio of the image view 
 					image.setPreserveRatio(true);  

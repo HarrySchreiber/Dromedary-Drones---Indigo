@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<drones>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><drones>
     <drone id="1">
         <name>Default Drone</name>
         <maxcargo>12</maxcargo>
@@ -8,4 +7,4 @@
         <turnaroundtime>2.5</turnaroundtime>
         <unloadtime>0.5</unloadtime>
     </drone>
-</drones>
+<drone id="2"><name>Default Drone</name><maxcargo>12.0</maxcargo><avgcruisingspeed>25.0</avgcruisingspeed><maxflighttime>20.0</maxflighttime><turnaroundtime>2.5</turnaroundtime><unloadtime>0.5</unloadtime></drone><drone id="3"><name>Default Drone</name><maxcargo>12.0</maxcargo><avgcruisingspeed>25.0</avgcruisingspeed><maxflighttime>100.0</maxflighttime><turnaroundtime>2.5</turnaroundtime><unloadtime>0.5</unloadtime></drone><drone id="4"><name>Default Drone</name><maxcargo>12.0</maxcargo><avgcruisingspeed>25.0</avgcruisingspeed><maxflighttime>20.0</maxflighttime><turnaroundtime>2.5</turnaroundtime><unloadtime>0.5</unloadtime></drone></drones>
