@@ -521,10 +521,10 @@ public class Main extends Application{
 					} catch (FileNotFoundException e1) {
 						// TODO Auto-generated catch block
 						System.out.println("File Not Found");
-						e1.printStackTrace();
+						//e1.printStackTrace();
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						//e1.printStackTrace();
 					}
 				}
 				//loadDataFileBtn.setText("CurrentFile: " + selectedFile.getName());
