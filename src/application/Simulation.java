@@ -144,12 +144,11 @@ public class Simulation {
 
 			
 			//Run calculations on the time of the simulation
-			Location homeBase = new Location("Sac",0,0);	//TODO: Refactor to work with true home base of file Set the drones initial location
 			for(int i = 0; i < onDrone.size(); i++) {
 				double distance;
 				//First destination needs to leave from the initial location
 				if(i == 0) {
-					distance = (Math.sqrt(Math.pow((onDrone.get(i).getDeliveryPoint().getX()-homeBase.getX()), 2)+Math.pow((onDrone.get(i).getDeliveryPoint().getY()-homeBase.getY()),2))) / FEET_IN_A_MILE;
+					distance = (Math.sqrt(Math.pow((onDrone.get(i).getDeliveryPoint().getX()-0), 2)+Math.pow((onDrone.get(i).getDeliveryPoint().getY()-0),2))) / FEET_IN_A_MILE;
 				//Every other destination is based on the previous destination
 				}else {
 					distance = (Math.sqrt(Math.pow(onDrone.get(i).getDeliveryPoint().getX()-onDrone.get(i-1).getDeliveryPoint().getX(), 2)+Math.pow(onDrone.get(i).getDeliveryPoint().getY()-onDrone.get(i-1).getDeliveryPoint().getY(), 2))) / FEET_IN_A_MILE;
@@ -165,7 +164,7 @@ public class Simulation {
 			//Finish out the simulation timings for returning to home base
 			if(!onDrone.isEmpty()) {
 				//Calculate the distance back to home base
-				double finalDistance = Math.sqrt(Math.pow((onDrone.get(onDrone.size()-1).getDeliveryPoint().getX()-homeBase.getX()), 2)+Math.pow((onDrone.get(onDrone.size()-1).getDeliveryPoint().getY()-homeBase.getY()),2)) / FEET_IN_A_MILE;
+				double finalDistance = Math.sqrt(Math.pow((onDrone.get(onDrone.size()-1).getDeliveryPoint().getX()-0), 2)+Math.pow((onDrone.get(onDrone.size()-1).getDeliveryPoint().getY()-0),2)) / FEET_IN_A_MILE;
 				//Calculate the time its going to take to get back to base
 				double finalTime = finalDistance/d.getAvgCruisingSpeed() * MINUTES_IN_AN_HOUR;
 				//Add the time it takes to get to base and the turn around time
