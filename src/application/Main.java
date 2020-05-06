@@ -296,6 +296,7 @@ public class Main extends Application{
 			//Add the box to the results grid and span 2 columns
 			resultsBox.add(resultsTextBox, 0, 0, 2, 1);
 			
+			
 			//FIFO results section
 			VBox fifoResultsBox = new VBox();
 			fifoResultsBox.setAlignment(Pos.TOP_LEFT);	//Left Align
@@ -305,9 +306,7 @@ public class Main extends Application{
 			Label fifoAvgLabel = new Label("Average Delivery Time: ");	//TODO: Add variable Here
 			Label fifoWrstLabel = new Label("Worst Deivery Time: ");	//TODO: Add variable Here
 			
-			//TODO: Add FIFO results graph here
-			
-		     final NumberAxis xAxisFifo = new NumberAxis(); // we are gonna plot against time
+		     final NumberAxis xAxisFifo = new NumberAxis(); // we are going to plot against time
 		     final NumberAxis yAxisFifo = new NumberAxis();
 		     xAxisFifo.setLabel("Time Between Order and Delivery (min)");
 		     xAxisFifo.setAnimated(false); // axis animations are removed
@@ -353,7 +352,7 @@ public class Main extends Application{
 			
 
 			//Add box to the main grid in the second column stretching three rows if need be			
-			simulationScreenLayout.add(resultsBox, 1, 0, 1, 3);
+			simulationScreenLayout.add(resultsBox, 1, 0, 2, 3);
 			
 			Simulation s = new Simulation();
 			//Edit Simulation Button on Simulation Screen
@@ -831,7 +830,9 @@ public class Main extends Application{
 		ColumnConstraints c1 = new ColumnConstraints();
 		c1.setPercentWidth(25);	//25% of the screen is used up for the side selection bar
 		ColumnConstraints c2 = new ColumnConstraints();
-		c2.setPercentWidth(75);	//75% of the screen is used for the results and data saving section
+		c2.setPercentWidth(70);	//75% of the screen is used for the results and data saving section
+		ColumnConstraints c3 = new ColumnConstraints();
+		c3.setPercentWidth(5);
 		simulationScreenLayout.getColumnConstraints().addAll(c1,c2);
 		//Row Constraints for Simulation Screen
 		RowConstraints r1 = new RowConstraints();
@@ -2377,9 +2378,9 @@ public class Main extends Application{
 		Label unloadTime = new Label("Unload Time: ");
 		TextField unloadTimeTextField = new TextField(String.valueOf(drone.getUnloadTime()));
 		Button saveDrone = new Button("Save Drone");
-		saveDrone.setMaxWidth(100);
+		saveDrone.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		Button cancelButton = new Button ("Cancel");
-		cancelButton.setMaxWidth(100);
+		cancelButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		
 		addDroneLayout.setAlignment(Pos.CENTER);
 		addDroneLayout.add(droneName, 0, 0);
@@ -2415,17 +2416,66 @@ public class Main extends Application{
 				droneID = findAvailableDroneSettingID();
 				System.out.println(findAvailableDroneSettingID());
 			}
+			Drone returnDrone;
 			
-			double maxCargoVal = Double.valueOf(maxCargoTextField.getText());
-			double avgCruise = Double.valueOf(avgCruisingSpeedTextField.getText());
-			double maxFlight = Double.valueOf(maxFlightTimeTextField.getText());
-			double turnAround = Double.valueOf(turnAroundTimeTextField.getText());
-			double unload =  Double.valueOf(unloadTimeTextField.getText());
-			
+			double maxCargoVal = 0, avgCruise = 0, maxFlight = 0, turnAround = 0, unload = 0;
+			   boolean canSaveDrone = true;
+			   Alert alert = new Alert(AlertType.ERROR);
+			   
+			     
+			   //max cargo error field
+			   if(!isNumeric(maxCargoTextField.getText())
+			     || maxCargoTextField.getText().isEmpty()){
+			    alert.setContentText("Please make sure Max Cargo only contains numbers! Thanks!");
+			    canSaveDrone = false;
+			   }
+			   
+			   //avg cruising speed erro field
+			   if(!isNumeric(avgCruisingSpeedTextField.getText())
+			     || avgCruisingSpeedTextField.getText().isEmpty()) {
+			    
+			    alert.setContentText("Please make sure Average Cruising Speed only contains numbers! Thanks!");
+			    canSaveDrone = false;
+			   }
+			   
+			   //max flight time error field
+			   if(!isNumeric(maxFlightTimeTextField.getText())
+			     ||  maxFlightTimeTextField.getText().isEmpty()){
+			    alert.setContentText("Please make sure Max Flight Time only contains numbers! Thanks!");
+			    canSaveDrone = false;
+			   }
+			   
+			   
+			   //turn around flight time error field
+			   if(!isNumeric(turnAroundTimeTextField.getText())
+			     ||  turnAroundTimeTextField.getText().isEmpty()){
+			    alert.setContentText("Please make sure Turn-Around Time only contains numbers! Thanks!");
+			    canSaveDrone = false;
+			   }
 
-				//builds the data here
-				Drone returnDrone = new Drone(droneID, name, maxCargoVal, avgCruise, maxFlight, turnAround, unload);    
-						
+			   //unload flight time error field
+			   if(!isNumeric(unloadTimeTextField.getText())
+			     ||  unloadTimeTextField.getText().isEmpty()) {
+			    System.out.println(unloadTimeTextField.getText());
+			    alert.setContentText("Please make sure Unload Time only contains numbers! Thanks!");
+			    canSaveDrone = false;
+			   }
+			   
+			   if(canSaveDrone == false) {
+			    alert.setTitle("Error Dialog");
+			    alert.setHeaderText("Look, an Error Dialog");
+			    alert.showAndWait();
+			   }
+			    
+			   else {
+			    maxCargoVal = Double.valueOf(maxCargoTextField.getText());
+			    avgCruise = Double.valueOf(avgCruisingSpeedTextField.getText());
+			    maxFlight = Double.valueOf(maxFlightTimeTextField.getText());
+			    turnAround = Double.valueOf(turnAroundTimeTextField.getText());
+			    unload =  Double.valueOf(unloadTimeTextField.getText());
+			    returnDrone = new Drone(droneID, name, maxCargoVal,avgCruise, maxFlight,turnAround, unload);
+			   
+			   
 				//try catch to write to the xml
 				try {
 					droneSettingToXML(droneID, returnDrone);
@@ -2463,7 +2513,7 @@ public class Main extends Application{
 				
 	
 				primaryStage.setScene(settingsScreen);
-			
+			}
 		});
 		
 		cancelButton.setOnAction(e -> {
@@ -2504,6 +2554,23 @@ public class Main extends Application{
 		
 		
 	}
+	
+	/*
+	  * Method to check if a string can be counted to double Double
+	  */
+	 public static boolean isNumeric(String str) { 
+	  
+	  for(int i = 0; i < str.length(); i++)
+	   if(Character.isLetter(str.charAt(i)))
+	    return false;
+	  try {  
+	      Double.parseDouble(str);  
+	      return true;
+	    } catch(NumberFormatException e){  
+	      return false;  
+	    }  
+	        
+	 }
 	
 	public static void main(String[] args) throws FileNotFoundException {
 		DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
