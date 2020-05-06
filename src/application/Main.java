@@ -356,13 +356,15 @@ public class Main extends Application{
 			runSimulationBtn.setId("allbuttons");
 			runSimulationBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); //Fit button to fill grid box
 			runSimulationBtn.setOnAction(e -> {
-				s.setAlgorithm(chosenAlgorithm);
+				
 				SimulationSettings newSimulation = buildSimulationSettingsFromXML(currentSimulationSettingID);
-				if (readLocationsFrom.contains("Map")) {
+				s.setAlgorithm(newSimulation.getAlgorithmChoice());
+				readLocationsFrom = newSimulation.getDeliveryPointChoice();
+				if (readLocationsFrom.contains("map")) {
 					newSimulation.setLocations(clickedLocations);
 					//s.runSimulation(clickedLocations);
 				}
-				else if (readLocationsFrom.contains("File")) {
+				else if (readLocationsFrom.contains("file")) {
 					newSimulation.setLocations(finalLocations);
 					//s.runSimulation(finalLocations);
 				}
@@ -1421,8 +1423,8 @@ public class Main extends Application{
 		algoChoice.getItems().add("Greedy Algorithm");
 		algoChoice.getItems().add("Genetic Algorithm");
 		
-		deliveryPointsChoices.setValue("Default Grove City Points");
-		algoChoice.setValue("Greedy Algorithm");
+		deliveryPointsChoices.setValue(sim.getDeliveryPointChoice());
+		algoChoice.setValue(sim.getAlgorithmChoice());
 		
 
 		viewMapButton.setOnAction(e ->{
@@ -1436,7 +1438,7 @@ public class Main extends Application{
 		
 //		Scene scene = new Scene(root, 450, 450);
 		
-		ObservableList<Location> locationList = buildSimulationSettingsFromXML(currentSimulationSettingID).getObservable();
+		ObservableList<Location> locationList = sim.getObservable();
 		System.out.println(locationList);
 		
 		TableView<Location> locationTable;
@@ -1445,14 +1447,14 @@ public class Main extends Application{
 		//locationList = getLocationsObservable(clickedLocations);
 		//locationList = getLocationsObservable(finalLocations);
 		System.out.println("Delivery Choices" + deliveryPointsChoices.getValue().toString());
-		if (deliveryPointsChoices.getValue().toString().contains("Map")) {
+		if (sim.getDeliveryPointChoice().contains("map")) {
 			locationList.clear();
 			locationList = getLocationsObservable(clickedLocations);
 			System.out.println(locationList);
 		//	refresh(locationTable);
 
 		}
-		else if (deliveryPointsChoices.getValue().toString().contains("File")) {
+		else if (sim.getDeliveryPointChoice().contains("file")) {
 			locationList.clear();
 			locationList = getLocationsObservable(finalLocations);
 
@@ -1462,6 +1464,7 @@ public class Main extends Application{
 
 		}
 		locationTable = new TableView<Location>(locationList);
+
 		
 		TableColumn<Location, String> title = new TableColumn<>("Location");
 		title.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -1475,13 +1478,41 @@ public class Main extends Application{
 		yVal.setCellValueFactory(new PropertyValueFactory<>("y"));
 		locationTable.getColumns().add(yVal);
 		
-deliveryPointsChoices.getValue();
-		
 		//set height and width
 		locationTable.setPrefWidth(200);
 		locationTable.setPrefHeight(200);
 
 		
+		deliveryPointsChoices.setOnAction(e -> {
+			ObservableList<Location> locationlist = sim.getObservable();
+			System.out.println(locationlist);
+			//locationTable.getColumns().clear();
+			
+			if (deliveryPointsChoices.getValue().toString().contains("map")) {
+				System.out.print("MAP");
+				locationlist.clear();
+				locationlist = getLocationsObservable(clickedLocations);
+	
+			}
+			else if (deliveryPointsChoices.getValue().toString().contains("file")) {
+				System.out.print("FILE");
+				locationlist.clear();
+				locationlist = getLocationsObservable(finalLocations);
+	
+			}
+			else {
+				locationlist = getLocationsObservable(groveCityLocations);
+	
+			}
+
+			System.out.println(locationlist);
+
+			locationTable.getItems().clear();
+			locationTable.setItems(locationlist);
+			locationTable.refresh();
+
+		});
+
 		//add everything to column one
 		columnOne.getChildren().addAll(   locationPointsLabel, algoChoice, 
 				addAndClearButtonsBox,viewMapButton, deliveryPointsChoices, locationTable);
@@ -1850,9 +1881,10 @@ deliveryPointsChoices.getValue();
 		Button saveSimulationSetngsBtn = new Button("Save Settings");
 		//listener so we can go back to the simulation screen and write to the file
 		saveSimulationSetngsBtn.setOnAction(e  ->  {
-			
-			readLocationsFrom = (String) deliveryPointsChoices.getValue();
-			chosenAlgorithm = (String) algoChoice.getValue();
+			sim.setAlgorithmChoice(algoChoice.getValue().toString());
+			sim.setDeliveryPointChoice(deliveryPointsChoices.getValue().toString());
+			chosenAlgorithm = algoChoice.getValue().toString();
+			readLocationsFrom = deliveryPointsChoices.getValue().toString();
 			Alert alert = new Alert(AlertType.ERROR);
 			lowerOrdersPerHour = valueFactoryLowerHours.getValue();
 			upperOrdersPerHour = valueFactoryUpperHours.getValue();
@@ -1891,7 +1923,8 @@ deliveryPointsChoices.getValue();
 					finalLocations.add(tempLocations.get(i));
 				tempLocations.clear();
 
-				SimulationSettings newSimulation = new SimulationSettings(simulationName, buildDroneFromXML("1") , finalLocations, /*TODO: Populate with deliveryPointChoice*/,  /*TODO: Populate with algorithmChoice*/, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
+				SimulationSettings newSimulation = new SimulationSettings(simulationName, buildDroneFromXML("1") , 
+				finalLocations, readLocationsFrom,  chosenAlgorithm, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
 				try {
 					if(id == "1") {
 						simulationSettingToXML(findAvailableSimulationSettingID(), newSimulation);
