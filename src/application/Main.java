@@ -703,7 +703,7 @@ public class Main extends Application{
 					mapImage = new Image(inputFile);
 				} catch (FileNotFoundException e1) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					//e1.printStackTrace();
 				}
 			});
 
@@ -807,7 +807,7 @@ public class Main extends Application{
 			primaryStage.setTitle("Dromedary Drones Simulation");
 			primaryStage.show();
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 	
@@ -1338,7 +1338,7 @@ public class Main extends Application{
 				
 			} catch (FileNotFoundException e1) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				//e1.printStackTrace();
 			}
 		});
 		
@@ -1935,7 +1935,7 @@ public class Main extends Application{
 
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					//e1.printStackTrace();
 				}
 
 
@@ -2124,10 +2124,10 @@ public class Main extends Application{
 			transformer.transform(domSource, streamResult);
 		} catch (TransformerConfigurationException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (TransformerException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		
 	}
@@ -2147,10 +2147,10 @@ public class Main extends Application{
 			transformer.transform(domSource, streamResult);
 		} catch (TransformerConfigurationException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (TransformerException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		
 	}
@@ -2424,7 +2424,7 @@ public class Main extends Application{
 					droneSettingToXML(droneID, returnDrone);
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					//e1.printStackTrace();
 				}
 				
 				droneSettingsIDs = getDroneSettingsIDs();
