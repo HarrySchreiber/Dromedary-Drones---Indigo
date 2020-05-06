@@ -7,4 +7,4 @@
         <turnaroundtime>2.5</turnaroundtime>
         <unloadtime>0.5</unloadtime>
     </drone>
-<drone id="2"><name>Default Drone</name><maxcargo>12.0</maxcargo><avgcruisingspeed>25.0</avgcruisingspeed><maxflighttime>20.0</maxflighttime><turnaroundtime>2.5</turnaroundtime><unloadtime>0.5</unloadtime></drone><drone id="3"><name>Default Drone</name><maxcargo>12.0</maxcargo><avgcruisingspeed>25.0</avgcruisingspeed><maxflighttime>100.0</maxflighttime><turnaroundtime>2.5</turnaroundtime><unloadtime>0.5</unloadtime></drone><drone id="4"><name>Default Drone</name><maxcargo>12.0</maxcargo><avgcruisingspeed>25.0</avgcruisingspeed><maxflighttime>20.0</maxflighttime><turnaroundtime>2.5</turnaroundtime><unloadtime>0.5</unloadtime></drone></drones>
+</drones>

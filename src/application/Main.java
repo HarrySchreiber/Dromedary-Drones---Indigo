@@ -287,9 +287,10 @@ public class Main extends Application{
 			
 			//Box for the results title heading TODO: figure out how we want to place the box and how we want to format the text
 			HBox resultsTextBox = new HBox();
-			resultsTextBox.setAlignment(Pos.CENTER);	//Centers box elements
+			resultsTextBox.setAlignment(Pos.CENTER_LEFT);	//Centers box elements
 			
-			Label resultsText = new Label("Results");
+			Label resultsText = new Label("Results:");
+			resultsText.setStyle("-fx-font-size: 24pt");
 			resultsTextBox.getChildren().add(resultsText);
 			
 			//Add the box to the results grid and span 2 columns
@@ -300,6 +301,7 @@ public class Main extends Application{
 			fifoResultsBox.setAlignment(Pos.TOP_LEFT);	//Left Align
 			
 			Label fifoLabel = new Label("FIFO");
+			fifoLabel.setStyle("-fx-font-size: 16pt");
 			Label fifoAvgLabel = new Label("Average Delivery Time: ");	//TODO: Add variable Here
 			Label fifoWrstLabel = new Label("Worst Deivery Time: ");	//TODO: Add variable Here
 			
@@ -316,6 +318,7 @@ public class Main extends Application{
 		     final LineChart<Number, Number> fifoLineChart = new LineChart<>(xAxisFifo, yAxisFifo);
 		     fifoLineChart.setTitle("FIFO Results");
 		     fifoLineChart.setAnimated(false); // disable animations
+		     fifoLineChart.setLegendVisible(false);
 		     
 		     final NumberAxis xAxisKnapsack = new NumberAxis(); // we are gonna plot against time
 		     final NumberAxis yAxisKnapsack = new NumberAxis();
@@ -332,6 +335,7 @@ public class Main extends Application{
 			knapsackResultsBox.setAlignment(Pos.TOP_LEFT);	//Left Align
 			
 			Label knapsackLabel = new Label("Knapsack");
+			knapsackLabel.setStyle("-fx-font-size: 16pt");
 			Label knapsackAvgLabel = new Label("Average Delivery Time: ");	//TODO: Add variable here
 			Label knapsackWrstLabel = new Label("Worst Delivery Time: ");	//TODO: Add variable here
 			
@@ -339,6 +343,7 @@ public class Main extends Application{
 			final LineChart<Number, Number> knapLineChart = new LineChart<>(xAxisKnapsack, yAxisKnapsack);
 		     knapLineChart.setTitle("Knapsack Results");
 		     knapLineChart.setAnimated(false); // disable animations
+		     knapLineChart.setLegendVisible(false);
 			
 			knapsackResultsBox.getChildren().addAll(knapsackLabel,knapsackAvgLabel,knapsackWrstLabel, knapLineChart);
 			
@@ -798,8 +803,10 @@ public class Main extends Application{
 
 
 			mapScreen = new Scene(mapScreenLayout, 1000, 650);
+			mapScreen.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
 
 			uploadMapScreen = new Scene(uploadMapScreenLayout, 1000, 650);
+			uploadMapScreen.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
 
 			primaryStage.setScene(simulationScreen);
 			//TODO: Decide if we want to be able to resize
@@ -1388,7 +1395,7 @@ public class Main extends Application{
 		addLocationScreenLayout.add(saveLocationFileBtn, 0, 5);
 		addLocationScreenLayout.add(cancelLocationFileBtn, 1, 5);
 		addLocationScreen = new Scene(addLocationScreenLayout, 1000, 650);
-		
+		addLocationScreen.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
 		
 		//-----------------------------------------------------------------------------------
 		
@@ -2021,7 +2028,7 @@ public class Main extends Application{
 			settingsScreenLayout.add(saveAndCancelButtonsBox,0,2,3,1);
 
 			settingsScreen = new Scene(settingsScreenLayout,1000,600);
-			
+			settingsScreen.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
 
 			primaryStage.setScene(simulationScreen);
 			//TODO: Decide if we want to be able to resize
@@ -2490,7 +2497,8 @@ public class Main extends Application{
 			primaryStage.setScene(settingsScreen);
 			
 		});
-		addDroneScreen = new Scene (addDroneLayout, 400, 400);
+		addDroneScreen = new Scene (addDroneLayout,1000,600);
+		addDroneScreen.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
 		return droneSelectorPane;
 		
 		
