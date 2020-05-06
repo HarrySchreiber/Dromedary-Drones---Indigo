@@ -1916,12 +1916,18 @@ public class Main extends Application{
 				alert.setContentText("Please make sure the Lower Bound of Orders Per Hour is not higher than the Higher Bound. Thanks!");
 			}
 			
+			if(finalLocations.isEmpty()) {
+				canSaveSettings = false;
+				alert.setContentText("Please make sure you have at least one locations. Thanks!");
+			}
+			
 			if(canSaveSettings == false) {
 				
 				alert.setTitle("Error Dialog");
 				alert.setHeaderText("Look, an Error Dialog");
 				alert.showAndWait();
 			}
+			
 			else {
 				//getting the most current variables 
 				simulationName = simNameField.getText();
