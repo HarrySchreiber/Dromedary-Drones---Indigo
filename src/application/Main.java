@@ -29,6 +29,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -267,7 +268,22 @@ public class Main extends Application{
 			//Add the content to the screen
 			simulationSelectorPane.setContent(simulationSelectorVBox);
 			simulationScreenLayout.add(simulationSelectorPane, 0, 0);
+
+
+			ImageView camelImage = new ImageView(new Image(new FileInputStream("src/application/Arabian-dromedary-camel.png")));
+			camelImage.setX(125);
+			camelImage.setY(125);
+
+			//setting the fit height and width of the image view 
+			camelImage.setFitHeight(250); 
+			camelImage.setFitWidth(250); 
 			
+			camelImage.setScaleX(-1.0);
+			//Setting the preserve ratio of the image view 
+			camelImage.setPreserveRatio(true);  
+
+			simulationScreenLayout.add(camelImage, 0, 2);
+
 			
 			
 			//Section that holds results
@@ -631,12 +647,28 @@ public class Main extends Application{
 			
 			GridPane mapScreenLayout = new GridPane();
 			Group deliveryPointsGroup = new Group();
+					//Column Constraints for Simulation Screen
+			ColumnConstraints mapC1 = new ColumnConstraints();
+			mapC1.setPercentWidth(50);	
+			mapC1.setHalignment(HPos.CENTER);
+			RowConstraints c1R1 = new RowConstraints();
+			c1R1.setValignment(VPos.CENTER);
+			ColumnConstraints mapC2 = new ColumnConstraints();
+			mapC2.setPercentWidth(20);	
+			ColumnConstraints mapC3 = new ColumnConstraints();
+			mapC3.setPercentWidth(20);
+			ColumnConstraints mapC4 = new ColumnConstraints();
+			mapC4.setPercentWidth(10);
+
+			mapScreenLayout.getColumnConstraints().addAll(mapC1, mapC2, mapC3);
+			mapScreenLayout.getRowConstraints().addAll(c1R1);
+			
 			//StackPane mapScreenLayoutTotal = new StackPane();
 			mapScreenLayout.setAlignment(Pos.CENTER);
 			mapScreenLayout.setHgap(10);
 			mapScreenLayout.setVgap(10);
 
-			Label uploadMapPrompt = new Label("If you are not able to view a map, upload one.");
+			Label uploadMapPrompt = new Label("		If you are not able to view a map, upload one.");
 			Button uploadMapButton = new Button("Upload Map");
 
 			Button cancelButton = new Button("Cancel");
@@ -659,17 +691,17 @@ public class Main extends Application{
 			if (mapImage == null) {
 				mapScreenLayout.add(uploadMapPrompt,0,4);
 				mapScreenLayout.add(uploadMapButton,1,4);
-				mapScreenLayout.add(cancelButton, 0, 5);
+				mapScreenLayout.add(cancelButton, 1, 5);
 
 			}
 			else {
 				ImageView image = new ImageView(mapImage);
-				image.setX(0);
-				image.setY(0);
+				image.setX(250);
+				image.setY(250);
 
 				//setting the fit height and width of the image view 
 				image.setFitHeight(500); 
-				image.setFitWidth(300); 
+				image.setFitWidth(500); 
 				
 				//Setting the preserve ratio of the image view 
 				image.setPreserveRatio(true);  
@@ -684,6 +716,8 @@ public class Main extends Application{
 			uploadMapScreenLayout.setHgap(10);
 			uploadMapScreenLayout.setVgap(10);
 
+			Alert errorAlert = new Alert(AlertType.ERROR);
+
 			Label fileChosenLabel = new Label("No File Chosen");
 			Button chooseMapButton = new Button("Choose file");
 
@@ -694,7 +728,7 @@ public class Main extends Application{
 			TextField realImageWidth = new TextField();
 			TextField realImageHeight = new TextField();
 
-			Label promptForName = new Label("Enter name for location before clicking: ");
+			Label promptForName = new Label("Name:");
 			TextField pointName = new TextField();
 			Label clickedLocationsList = new Label();
 
@@ -712,17 +746,16 @@ public class Main extends Application{
 			});
 
 			saveMapButton.setOnAction(e-> {
+				
+				
 
-				mapScreenLayout.add(promptForName, 10, 0);
-				mapScreenLayout.add(pointName, 10, 1);
-				mapScreenLayout.add(clickedLocationsList, 10, 2);
-				uploadMapPrompt.setText("Change Map: ");
-				mapScreenLayout.add(saveButton, 2, 5);
-
-				primaryStage.setScene(mapScreen);
+				
 
 				if (mapImage == null) {
 					//THROW AN ERROR
+					errorAlert.setHeaderText("No File Uploaded");
+					errorAlert.setContentText("Please choose a file to save map.");
+					errorAlert.showAndWait();
 				}
 				else {
 					if (!realImageHeight.getText().isEmpty() && !realImageWidth.getText().isEmpty()){
@@ -730,46 +763,88 @@ public class Main extends Application{
 						realWidth = Double.parseDouble(realImageWidth.getText());
 						imageHeight = mapImage.getHeight();
 						imageWidth = mapImage.getWidth();
+
+						ImageView image = new ImageView(mapImage);
+						image.setX(250);
+						image.setY(250);
+		
+						//setting the fit height and width of the image view 
+						image.setFitHeight(500); 
+						image.setFitWidth(500); 
+						
+						//Setting the preserve ratio of the image view 
+						image.setPreserveRatio(true);  
+
+						Bounds bounds = image.getLayoutBounds();
+						double xScale = bounds.getWidth() / image.getImage().getWidth();
+						double yScale = bounds.getHeight() / image.getImage().getHeight();
+
+						double xToRealScale = realWidth/image.getImage().getWidth();
+						double yToRealScale = realHeight/image.getImage().getHeight();
+
+						image.setOnMouseClicked(click -> {
+
+
+							if (!pointName.getText().isEmpty() && !containsName(clickedLocations, pointName.getText())) {
+								
+								if (clickedLocations.isEmpty()) {
+									homeX = click.getX();
+									homeY = click.getY();
+								}
+								currentX = ((click.getX() - homeX)/xScale)*xToRealScale;
+								currentY = (((click.getY() - homeY)*-1)/yScale)*yToRealScale;
+								Location current = new Location(pointName.getText(), (int)currentX, (int)currentY);
+								clickedLocations.add(current);
+								//clickedLocationsList.setText(clickedLocationsList.getText() + ", [" + currentX + ", " + currentY + "]");
+
+								Circle circle = new Circle(click.getX(), click.getY(), 3);
+								circle.setFill(javafx.scene.paint.Color.RED);
+								deliveryPointsGroup.getChildren().add(circle);
+
+							}
+							else if (!pointName.getText().isEmpty()) {
+								errorAlert.setHeaderText("Name Already Exists");
+								errorAlert.setContentText("Please enter a name different from previous ones.");
+								errorAlert.showAndWait();
+
+							}
+							else {
+								errorAlert.setHeaderText("No Name Provided");
+								errorAlert.setContentText("Please enter a name before clicking on a location.");
+								errorAlert.showAndWait();
+							}
+
+
+						});
+
+						mapScreenLayout.getChildren().clear();
+						mapScreenLayout.add(deliveryPointsGroup, 0, 0);
+						uploadMapPrompt.setText("Change Map: ");
+						mapScreenLayout.add(uploadMapPrompt, 1, 0);
+						mapScreenLayout.add(uploadMapButton, 2, 0);
+						mapScreenLayout.add(promptForName, 1, 1);
+						mapScreenLayout.add(pointName, 2, 1);
+						mapScreenLayout.add(clickedLocationsList, 1, 2);
+						mapScreenLayout.add(cancelButton, 1, 3);
+						mapScreenLayout.add(saveButton, 2, 3);
+
+						deliveryPointsGroup.getChildren().add(image);
+
+						primaryStage.setScene(mapScreen);
 					}
-
-
-					ImageView image = new ImageView(mapImage);
-					image.setX(0);
-					image.setY(0);
-	
-					//setting the fit height and width of the image view 
-					image.setFitHeight(500); 
-					image.setFitWidth(300); 
-					
-					//Setting the preserve ratio of the image view 
-					image.setPreserveRatio(true);  
-
-					Bounds bounds = image.getLayoutBounds();
-					double xScale = bounds.getWidth() / image.getImage().getWidth();
-					double yScale = bounds.getHeight() / image.getImage().getHeight();
-
-					double xToRealScale = realWidth/image.getImage().getWidth();
-					double yToRealScale = realHeight/image.getImage().getHeight();
-
-					image.setOnMouseClicked(click -> {
-
-						if (clickedLocations.isEmpty()) {
-							homeX = click.getX();
-							homeY = click.getY();
+					else {
+						if (realImageHeight.getText().isEmpty()){
+							errorAlert.setHeaderText("Missing Value");
+							errorAlert.setContentText("Please enter actual height.");
+							errorAlert.showAndWait();
 						}
-						currentX = ((click.getX() - homeX)/xScale)*xToRealScale;
-						currentY = (((click.getY() - homeY)*-1)/yScale)*yToRealScale;
-						Location current = new Location(pointName.getText(), (int)currentX, (int)currentY);
-						clickedLocations.add(current);
-						//clickedLocationsList.setText(clickedLocationsList.getText() + ", [" + currentX + ", " + currentY + "]");
+						else {
+							errorAlert.setHeaderText("Missing Value");
+							errorAlert.setContentText("Please enter actual width.");
+							errorAlert.showAndWait();
+						}
 
-						Circle circle = new Circle(click.getX(), click.getY(), 3);
-						circle.setFill(javafx.scene.paint.Color.RED);
-						deliveryPointsGroup.getChildren().add(circle);
-
-					});
-
-					deliveryPointsGroup.getChildren().add(image);
+					}
 				}
 
 			});
@@ -784,7 +859,7 @@ public class Main extends Application{
 
 
 
-			mapScreenLayout.add(deliveryPointsGroup, 0, 0);
+			
 			//mapScreenLayoutTotal.getChildren().addAll(mapScreenLayout, deliveryPointsGroup);
 			
 			//------------------------------------------------------------------------------------------------
@@ -1286,7 +1361,7 @@ public class Main extends Application{
 		
 		//TODO: Add method for upload new campus map
 		//Add Locations Buttons
-		Label locationPointsLabel = new Label("Add Delivery Points");
+		Label locationPointsLabel = new Label("Add Delivery Points:");
 		
 		HBox addAndClearButtonsBox = new HBox();
 		addAndEditButtonsBox.setAlignment(Pos.CENTER);
@@ -2596,6 +2671,15 @@ public class Main extends Application{
 			e.printStackTrace();
 		}
 		launch(args);
+	}
+
+	private boolean containsName(ArrayList<Location> locs, String name) {
+		for (int i = 0; i < locs.size(); i++) {
+			if (locs.get(i).getName().equals(name)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }
