@@ -28,7 +28,6 @@ public class Simulation {
 
 	/**
 	 * Creates a simulation object
-	 * TODO: Possibly send in a SimulationSettings Object to be used in the simulation
 	 */
 	public Simulation() {
 		fifoData = new ArrayList<Order>();
@@ -48,7 +47,6 @@ public class Simulation {
 		Random rnd = new Random();
 		for(int simulationNum = 0; simulationNum < 50; simulationNum++) {
 			ArrayList<Order> orders = new ArrayList<Order>();
-			//TODO: Set these up to dynamically populate: ie take out 4 and 15 and populate from settings
 			for(int i = 0; i< sim.getHoursPerShift(); i++) {
 				int numberOfOrdersThisHour = rnd.nextInt((sim.getOrderUpper()-sim.getOrderLower())+1)+sim.getOrderLower();
 				for(int j = 0; j< numberOfOrdersThisHour; j++) {
@@ -130,7 +128,6 @@ public class Simulation {
 			
 			
 		if (onDrone.size() > 1 ) {
-			//TODO: Traveling Salesman Problem goes here probably
 			TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
 			if (chosenAlgorithm.contains("Genetic")) {
 				onDrone = tsp.GeneticAlgorithmTSP();
@@ -170,7 +167,7 @@ public class Simulation {
 				//Add the time it takes to get to base and the turn around time
 				time += finalTime + d.getTurnAroundTime();
 			}else {
-				//Idle time: ie no orders have come in yet and we don't want to increment by 3 TODO: Rewrite this comment or put somewhere else if neccisary
+				//Idle time: ie no orders have come in yet and we don't want to increment by the turn over time
 				time++;
 			}
 		}
@@ -204,7 +201,6 @@ public class Simulation {
 			}
 			
 			if (onDrone.size() > 1 ) {
-				//TODO: Traveling Salesman Problem goes here probably
 				TravelingSalesmanProblem tsp = new TravelingSalesmanProblem(onDrone);
 				if (chosenAlgorithm.contains("Genetic")) {
 					onDrone = tsp.GeneticAlgorithmTSP();
@@ -242,7 +238,7 @@ public class Simulation {
 				//Add the time it takes to get to base and the turn around time
 				time += finalTime + d.getTurnAroundTime();
 			}else {
-				//Idle time: ie no orders have come in yet and we don't want to increment by 3 TODO: Rewrite this comment or put somewhere else if neccisary
+				//Idle time: ie no orders have come in yet and we don't want to increment by turn around time
 				time++;
 			}
 		}

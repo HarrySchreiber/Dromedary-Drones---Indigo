@@ -1,7 +1,6 @@
 package application;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
@@ -9,7 +8,6 @@ import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -24,8 +22,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
@@ -34,14 +30,12 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
@@ -52,7 +46,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -65,27 +58,16 @@ import javafx.scene.control.TableView;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
-import java.io.BufferedReader;
-
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import java.io.FileInputStream; 
-import java.io.FileNotFoundException; 
-import javafx.application.Application; 
-import javafx.scene.Group; 
-import javafx.scene.Scene; 
+import javafx.scene.Group;  
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;  
-import javafx.stage.Stage; 
-
 import javafx.scene.shape.Circle; 
 
-import javafx.scene.layout.StackPane;
 
 public class Main extends Application{
 	
@@ -102,8 +84,6 @@ public class Main extends Application{
 	private static ArrayList<String> droneSettingsIDs;
 	private static String currentSimulationSettingID;
 	private static String currentDroneSettingID;
-	private static ArrayList<Location> temporaryLocations;
-	private static ArrayList<Meal> temporaryMeals;
 	private static int hoursInShift;
 	private static int upperOrdersPerHour;
 	private static int lowerOrdersPerHour;
@@ -117,11 +97,6 @@ public class Main extends Application{
 	
 	//global variables
 	private static Scene  mapScreen, uploadMapScreen; //scenes 
-
-	private double sumPercent= 100; //a total 
-	private String realFileContents = ""; //what we want to print to the file
-	private ArrayList<Location> locations = new ArrayList<Location>(); //edit as it goes and clear when finished
-	private SimulationSettings currentSettings = new SimulationSettings();
 	Map<Integer, Integer> knapData;
 	double fifoAverage;
 	double knapAverage;
@@ -141,102 +116,11 @@ public class Main extends Application{
 	private static String readLocationsFrom = "UNCHANGED";
 	private static String chosenAlgorithm = "UNCHANGED";
 	
+	@SuppressWarnings("resource")
 	@Override
 	public void start(Stage primaryStage) {
-		try {
-			SimulationSettings baseToCallFunctions = new SimulationSettings();
-			groveCityLocations = baseToCallFunctions.populateLocations("src/application/gccLocationPoints.csv");
-			//opens the file with the default values
-			Scanner sc = new Scanner(new File("NewSimData.txt")); 
-			StringBuffer buffer = new StringBuffer();
-			
-			//reads all the lines of the file to buffer
-			while (sc.hasNextLine()) {
-		         buffer.append(sc.nextLine()+System.lineSeparator());
-		      }
-		     
-			 //saves all the old file into the global variables
-		     realFileContents = buffer.toString();
-		     String defaultFileContents = buffer.toString();
-		     
-		     //Not quite done yet
-		     String[] defaultFileLines = defaultFileContents.split(System.getProperty("line.separator"));
-		     
-		     boolean knapB = false, fifoB = false, defDroneB = false;
-		     double perUsedB = 0, perLeftB = 0;
-		     int perCountsB [] = new int [50];
-		     int burgerCountsB [] = new int [50];
-		     int fryCountsB [] = new int [50];
-		     int cokeCountsB [] = new int [50];
-		     int hoursPerShiftB = 0, upperOrdersB = 0, lowerOrdersB = 0;
-		     
-		    for(int i = 0; i < defaultFileLines.length; i++) {
-		    	String curLine = defaultFileLines[i];
-		    	String [] splitVal = curLine.split(": ");
-		    	for(int j = 1; j <= 4; j++) {
-		    		
-		    		if(curLine.contains("Order " + String.valueOf(j) + " Percentage:" )){
-		    			perCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(perCountsB[j-1]);
-		    		}
-		    		else if (curLine.contains("Order " + String.valueOf(j) + " Burgers:" )){
-		    			burgerCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(burgerCountsB[j-1]);
-		    			
-		    		}
-		    		else if (curLine.contains("Order " + String.valueOf(j) + " Fries:") ){
-		    			fryCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(fryCountsB[j-1]);
-		    		}
-		    		else if (curLine.contains("Order " + String.valueOf(j) + " Cokes:")){
-		    			cokeCountsB[j-1] = Integer.valueOf(splitVal[1]);
-		    			//System.out.println(cokeCountsB[j-1]);
-		    		}
-		    		
-		    	}
-		    	
-		    	if(curLine.contains("Percentage Used:")) {
-		    		perUsedB = Double.valueOf(splitVal[1]);
-		    		//System.out.println(perUsedB);
-		    	}
-		    	else if (curLine.contains("Percentage Left:")) {
-		    		perLeftB = Double.valueOf(splitVal[1]);
-		    		//System.out.println(perLeftB);
-		    	}
-		    	else if (curLine.contains("Hours Per Shift:")) {
-		    		hoursPerShiftB = Integer.valueOf(splitVal[1]);
-		    		//System.out.println(hoursPerShiftB);
-		    	}
-		    	else if (curLine.contains("Upper Bound")) {
-		    		upperOrdersB = Integer.valueOf(splitVal[1]);
-		    		//System.out.println(upperOrdersB);
-		    	}
-		    	else if (curLine.contains("Lower Bound")) {
-		    		lowerOrdersB = Integer.valueOf(splitVal[1]);
-		    		//System.out.println(lowerOrdersB);
-		    	}
-		    	else if(curLine.contains("Knapsack Packing")){
-		    		knapB = Boolean.valueOf(splitVal[1]);
-		    		//System.out.println(knapB);
-		    	}
-		    	else if(curLine.contains("Fifo")) {
-		    		fifoB = Boolean.valueOf(splitVal[1]);
-		    		//System.out.println(fifoB);
-		    	}
-		    	else if(curLine.contains("Default Grove City Drone")){
-		    		defDroneB = Boolean.valueOf(splitVal[1]);
-		    		//System.out.println(defDroneB);
-		    	}
-		    	
-		    }
-		     
-			//change the 4 later
-		    //But gets the weight so we can use at the beginning...
-		   for(int i  = 0; i < 4; i++) {
-			   weightPerOrder[i] += (burgerCountsB[i] * 6);
-			   weightPerOrder[i] += (fryCountsB[i] * 4);
-			   weightPerOrder[i] += (cokeCountsB[i] * 14);
-		   }
+			SimulationSettings baseToCallFunctions = buildSimulationSettingsFromXML("1");
+			groveCityLocations = baseToCallFunctions.getLocations();
 
 					
 			//Simulation Screen Layout
@@ -270,19 +154,25 @@ public class Main extends Application{
 			simulationScreenLayout.add(simulationSelectorPane, 0, 0);
 
 
-			ImageView camelImage = new ImageView(new Image(new FileInputStream("src/application/Arabian-dromedary-camel.png")));
-			camelImage.setX(125);
-			camelImage.setY(125);
+			ImageView camelImage;
+			try {
+				camelImage = new ImageView(new Image(new FileInputStream("src/application/Arabian-dromedary-camel.png")));
+				camelImage.setX(125);
+				camelImage.setY(125);
 
-			//setting the fit height and width of the image view 
-			camelImage.setFitHeight(250); 
-			camelImage.setFitWidth(250); 
+				//setting the fit height and width of the image view 
+				camelImage.setFitHeight(250); 
+				camelImage.setFitWidth(250); 
+				
+				camelImage.setScaleX(-1.0);
+				//Setting the preserve ratio of the image view 
+				camelImage.setPreserveRatio(true);  
+
+				simulationScreenLayout.add(camelImage, 0, 2);
+			} catch (FileNotFoundException e2) {
+				e2.printStackTrace();
+			}
 			
-			camelImage.setScaleX(-1.0);
-			//Setting the preserve ratio of the image view 
-			camelImage.setPreserveRatio(true);  
-
-			simulationScreenLayout.add(camelImage, 0, 2);
 
 			
 			
@@ -301,7 +191,7 @@ public class Main extends Application{
 			r2.setPercentHeight(90);
 			resultsBox.getRowConstraints().addAll(r1,r2);
 			
-			//Box for the results title heading TODO: figure out how we want to place the box and how we want to format the text
+			//Box for the results title heading 
 			HBox resultsTextBox = new HBox();
 			resultsTextBox.setAlignment(Pos.CENTER_LEFT);	//Centers box elements
 			
@@ -319,8 +209,8 @@ public class Main extends Application{
 			
 			Label fifoLabel = new Label("FIFO");
 			fifoLabel.setStyle("-fx-font-size: 16pt");
-			Label fifoAvgLabel = new Label("Average Delivery Time: ");	//TODO: Add variable Here
-			Label fifoWrstLabel = new Label("Worst Deivery Time: ");	//TODO: Add variable Here
+			Label fifoAvgLabel = new Label("Average Delivery Time: ");	
+			Label fifoWrstLabel = new Label("Worst Deivery Time: ");
 			
 		     final NumberAxis xAxisFifo = new NumberAxis(); // we are going to plot against time
 		     final NumberAxis yAxisFifo = new NumberAxis();
@@ -351,10 +241,10 @@ public class Main extends Application{
 			
 			Label knapsackLabel = new Label("Knapsack");
 			knapsackLabel.setStyle("-fx-font-size: 16pt");
-			Label knapsackAvgLabel = new Label("Average Delivery Time: ");	//TODO: Add variable here
-			Label knapsackWrstLabel = new Label("Worst Delivery Time: ");	//TODO: Add variable here
+			Label knapsackAvgLabel = new Label("Average Delivery Time: ");	
+			Label knapsackWrstLabel = new Label("Worst Delivery Time: ");
 			
-			//TODO: Add Knapsack results graph here
+			//Knapsack results graph here
 			final LineChart<Number, Number> knapLineChart = new LineChart<>(xAxisKnapsack, yAxisKnapsack);
 		     knapLineChart.setTitle("Knapsack Results");
 		     knapLineChart.setAnimated(false); // disable animations
@@ -399,7 +289,6 @@ public class Main extends Application{
 				reduceKnapsackToMapFromArrayListOrders(s.getKnapsackData());
 				reduceFifoToMapFromArrayListOrders(s.getFifoData());
 				
-				//TODO: Do we want to truncate this?
 				knapsackAvgLabel.setText("Average Time: " + s.findAverage(knapsackData));
 				fifoAvgLabel.setText("Average Time: " + s.findAverage(fifoData));
 				
@@ -424,12 +313,7 @@ public class Main extends Application{
 				}
 				fifoLineChart.getData().add(fifoSeries);
 				
-				System.out.println(fifoData);
-				System.out.println(knapsackData);
-				//TODO:Remove from testing
-				System.out.println("FIFO: " + s.getFifoData() + " Average Time: " + s.findAverage(fifoData) + " Worst Time: " + s.findWorst(fifoData));
-				System.out.println("Knapsack: " + s.getKnapsackData()  + " Average Time: " + s.findAverage(knapsackData) + " Worst Time: " + s.findWorst(knapsackData));
-			}); //TODO: Add some logic to run the simulation
+			});
 			simulationScreenLayout.add(runSimulationBtn, 0, 1);	//Add the button to the screen
 			
 			//Edit Simulation Button on Simulation Screen
@@ -443,7 +327,7 @@ public class Main extends Application{
 				simulationScreen.setRoot(simulationScreenLayout);
 				primaryStage.setScene(settingsScreen);
 				
-			});	//Adds function to the button TODO: Expand function to grab which simulation we need to edit from the radio buttons
+			});
 			simulationScreenLayout.add(editSimulationBtn, 0, 2);	//Add the button to the screen
 			
 			//Create Simulation Button on Simulation Screen
@@ -457,7 +341,7 @@ public class Main extends Application{
 				simulationScreen.setRoot(simulationScreenLayout);
 				
 				primaryStage.setScene(settingsScreen);
-			});	//Adds function to the button TODO: Expand function to grab which simulation we need to edit from the radio buttons
+			});	
 			simulationScreenLayout.add(createSimulationBtn, 0, 3);	//Add the button to the screen
 			
 			//A Horizontal Stack Box to put buttons for save data and open data
@@ -477,7 +361,6 @@ public class Main extends Application{
 						new ExtensionFilter("CSV Files", "*.csv"));
 				File selectedFile = fileSelect.showOpenDialog(primaryStage);
 				if(selectedFile != null) {
-					System.out.println("Selected File: " + selectedFile.getAbsolutePath());
 					String csvFile = selectedFile.getAbsolutePath();
 					
 					try {
@@ -485,9 +368,7 @@ public class Main extends Application{
 						//read file line by line
 						int timeDelivered = 0;
 						int timeOrdered = 0;
-						int minutesTaken = 0;
 						String simType = "";
-						String line = "";
 						Scanner scanner = null;
 						int index = 0;
 						if(lineScanner.hasNextLine()) {
@@ -501,19 +382,16 @@ public class Main extends Application{
 								String data = scanner.next();
 								if(index == 0) {
 									simType = data;
-									//System.out.println(simType);
 								}
 								else if(index == 5) {
-									//timeOrdered = Integer.parseInt(data);
 									timeOrdered = Integer.parseInt(data);
 								}
 								else if(index == 7) {
-									//timeDelivered = Integer.parseInt(data);
 									timeDelivered = Integer.parseInt(data);
 								}
-								//System.out.println("Data " + data);
 								index++;
-							}index = 0;
+							}
+							index = 0;
 
 							
 							if(simType.equals("FIFO")){
@@ -530,27 +408,23 @@ public class Main extends Application{
 								}else {
 									knapsackData.put((timeDelivered-timeOrdered), 1);
 								}
-							}
-							else {
-								System.out.println("Simulation Type not valid");
+							}else {
+								throw new Exception("Data file format issue: Value other than FIFO or Knapsack");
 							}
 						}
 						//close reader
 						scanner.close();
 						lineScanner.close();
 					} catch (FileNotFoundException e1) {
-						// TODO Auto-generated catch block
-						System.out.println("File Not Found");
-						//e1.printStackTrace();
+						System.err.println("Data File Not Found Exception");
+						e1.printStackTrace();
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						//e1.printStackTrace();
+						e1.printStackTrace();
+					} catch (Exception e1) {
+						e1.printStackTrace();
 					}
 				}
-				//loadDataFileBtn.setText("CurrentFile: " + selectedFile.getName());
 				
-				//TODO: Do we want to truncate this?
-				//System.out.println(knapsackData);
 				knapsackAvgLabel.setText("Average Time: " + s.findAverage(knapsackData));
 				fifoAvgLabel.setText("Average Time: " + s.findAverage(fifoData));
 				
@@ -620,15 +494,11 @@ public class Main extends Application{
 							
 						}
 						writer.close();
-						//TODO Delete this print statement
-						System.out.println("Successfully wrote to the file");
 
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						//e1.printStackTrace();
-						System.out.println("File could not be accessed");
+						System.err.println("Data File could not be accessed");
 					}
-				}	//TODO: Add the logic here
+				}
 			});
 			dataButtonsBox.getChildren().add(saveDataFileBtn);	//Add button to screen
 			dataButtonsBox.getChildren().add(loadDataFileBtn);	//Add button to screen
@@ -740,8 +610,7 @@ public class Main extends Application{
 					FileInputStream inputFile = new FileInputStream(selectedFile.getAbsolutePath());
 					mapImage = new Image(inputFile);
 				} catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
-					//e1.printStackTrace();
+					e1.printStackTrace();
 				}
 			});
 
@@ -865,16 +734,9 @@ public class Main extends Application{
 			//------------------------------------------------------------------------------------------------
 			
 			
-			//TODO: Decide on default
+			
 			simulationScreen = new Scene(simulationScreenLayout,1000,600);
-			//TODO: Are we going to use this ever?
 			simulationScreen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-			
-			//TODO: Decide on default 
-			//settingsScreen = new Scene(settingsScreenLayout,1000,500);
-			
-			
-
 
 			mapScreen = new Scene(mapScreenLayout, 1000, 650);
 			mapScreen.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
@@ -883,14 +745,11 @@ public class Main extends Application{
 			uploadMapScreen.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
 
 			primaryStage.setScene(simulationScreen);
-			//TODO: Decide if we want to be able to resize
 			primaryStage.setResizable(false);
 			primaryStage.setTitle("Dromedary Drones Simulation");
 			primaryStage.show();
-		} catch (Exception e) {
-			//e.printStackTrace();
-		}
 	}
+	
 	
 	/**
 	 * A method to extract away some of the setup for the simulation screen
@@ -899,7 +758,7 @@ public class Main extends Application{
 	public static GridPane buildSimulationScreen() {
 		//Grid for Simulation Screen
 		GridPane simulationScreenLayout = new GridPane();
-		simulationScreenLayout.gridLinesVisibleProperty(); //TODO: Remove, for testing
+		simulationScreenLayout.gridLinesVisibleProperty(); 
 		
 		//Column Constraints for Simulation Screen
 		ColumnConstraints c1 = new ColumnConstraints();
@@ -930,7 +789,7 @@ public class Main extends Application{
 	public static GridPane buildSettingsScreen() {
 		//Grid for Settings Screen
 		GridPane settingsScreenLayout = new GridPane();
-		settingsScreenLayout.gridLinesVisibleProperty(); //TODO: Remove for testing
+		settingsScreenLayout.gridLinesVisibleProperty(); 
 		
 		//Column Constraints for Settings screen
 		ColumnConstraints c1 = new ColumnConstraints();
@@ -1289,10 +1148,9 @@ public class Main extends Application{
 		simNameBox.setAlignment(Pos.CENTER);	//Center the box
 		simNameBox.setSpacing(5);	//Space between elements is 5
 		
-		//Label and TextField for the simulation TODO: Formatting
+		//Label and TextField for the simulation
 		Label simNameLabel = new Label("Simulation Name: ");
 		TextField simNameField = new TextField(sim.getName());
-		
 		
 		//Add Items to the HBox
 		simNameBox.getChildren().addAll(simNameLabel,simNameField);
@@ -1304,11 +1162,7 @@ public class Main extends Application{
 		//VBox for things in column 1
 		VBox columnOne = new VBox(20);
 		columnOne.setAlignment(Pos.TOP_LEFT);
-		
-		//TODO: Use this to add things in column one
-		//DRONE STUFF
 	
-		
 		Label dronesL = new Label ("Drones: ");
 		
 		ScrollPane droneSelectorPane = new ScrollPane();
@@ -1353,13 +1207,6 @@ public class Main extends Application{
 		settingsScreenLayout.add(droneSelectorPane, 0, 0);
 		//settingsScreenLayout.add(addAndEditButtonsBox, 0, 1);
 		
-		
-		
-		//TODO: Add method for upload new campus map
-		
-		//TODO: Add method for add new drone
-		
-		//TODO: Add method for upload new campus map
 		//Add Locations Buttons
 		Label locationPointsLabel = new Label("Add Delivery Points:");
 		
@@ -1410,7 +1257,7 @@ public class Main extends Application{
 		Button uploadLocationFileBtn = new Button("Browse");
 		GridPane.setHalignment(uploadLocationFileBtn, HPos.RIGHT);
 		
-		//TODO: Add logic for file upload/selection, probably throw exceptions here if something is wrong
+		//Add logic for file upload/selection
 		uploadLocationFileBtn.setOnAction(e->{
 			FileChooser fileChooser = new FileChooser();
 			File selectedFile = fileChooser.showOpenDialog(primaryStage);
@@ -1420,8 +1267,7 @@ public class Main extends Application{
 				tempLocations = sim.populateLocations(selectedFile.getAbsolutePath());
 				
 			} catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
-				//e1.printStackTrace();
+				e1.printStackTrace();
 			}
 		});
 		
@@ -1433,7 +1279,6 @@ public class Main extends Application{
 		saveLocationFileBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		
 		saveLocationFileBtn.setOnAction(e->{
-			//TODO: Add logic for saving points
 			if (!addNameTextField.getText().isEmpty() && !addXTextField.getText().isEmpty() && !addYTextField.getText().isEmpty()) {
 				Location newLocation = new Location(addNameTextField.getText(), Integer.parseInt(addXTextField.getText()), Integer.parseInt(addYTextField.getText()));
 				tempLocations.add(newLocation);
@@ -1451,9 +1296,6 @@ public class Main extends Application{
 			for(int i = 0; i > tempLocations.size(); i++)
 				finalLocations.add(tempLocations.get(i));
 			
-			
-			//locations.clear();
-			//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
 			primaryStage.setScene(settingsScreen); 	
 		});
 		
@@ -1464,7 +1306,6 @@ public class Main extends Application{
 		cancelLocationFileBtn.setOnAction(e->{
 			//DO NOTHING
 			tempLocations.clear();
-			//TODO: I can foresee this getting dicy with us leaving the edit screen and then losing the data that was in the file so lets be careful
 			primaryStage.setScene(settingsScreen);
 		});
 		
@@ -1485,8 +1326,6 @@ public class Main extends Application{
 			 primaryStage.setScene(addLocationScreen);
 		});
 		
-		//TODO: Clear the delivery points
-		
 		clearDeliveryPointsBtn.setOnAction(e->{
 			tempLocations.clear();
 						
@@ -1497,12 +1336,12 @@ public class Main extends Application{
 		
 		Button viewMapButton = new Button("View Delivery Map");
 
-		ChoiceBox deliveryPointsChoices = new ChoiceBox();
+		ChoiceBox<String> deliveryPointsChoices = new ChoiceBox<String>();
 		deliveryPointsChoices.getItems().add("Default Grove City Points");
 		deliveryPointsChoices.getItems().add("Points from file");
 		deliveryPointsChoices.getItems().add("Points from map");
 
-		ChoiceBox algoChoice = new ChoiceBox();
+		ChoiceBox<String> algoChoice = new ChoiceBox<String>();
 		algoChoice.getItems().add("Greedy Algorithm");
 		algoChoice.getItems().add("Genetic Algorithm");
 		
@@ -1514,28 +1353,13 @@ public class Main extends Application{
 			primaryStage.setScene(mapScreen);
 		});
 		
-		Label locationTableView = new Label("Location Table");
-		
-//		FlowPane root = new FlowPane();
-//		root.setAlignment(Pos.CENTER_LEFT);
-		
-//		Scene scene = new Scene(root, 450, 450);
-		
 		ObservableList<Location> locationList = sim.getObservable();
-		System.out.println(locationList);
 		
 		TableView<Location> locationTable;
 
-		System.out.println("Test");
-		//locationList = getLocationsObservable(clickedLocations);
-		//locationList = getLocationsObservable(finalLocations);
-		System.out.println("Delivery Choices" + deliveryPointsChoices.getValue().toString());
 		if (sim.getDeliveryPointChoice().contains("map")) {
 			locationList.clear();
 			locationList = getLocationsObservable(clickedLocations);
-			System.out.println(locationList);
-		//	refresh(locationTable);
-
 		}
 		else if (sim.getDeliveryPointChoice().contains("file")) {
 			locationList.clear();
@@ -1568,27 +1392,20 @@ public class Main extends Application{
 		
 		deliveryPointsChoices.setOnAction(e -> {
 			ObservableList<Location> locationlist = sim.getObservable();
-			System.out.println(locationlist);
-			//locationTable.getColumns().clear();
 			
 			if (deliveryPointsChoices.getValue().toString().contains("map")) {
-				System.out.print("MAP");
 				locationlist.clear();
 				locationlist = getLocationsObservable(clickedLocations);
 	
 			}
 			else if (deliveryPointsChoices.getValue().toString().contains("file")) {
-				System.out.print("FILE");
 				locationlist.clear();
 				locationlist = getLocationsObservable(finalLocations);
 	
 			}
 			else {
 				locationlist = getLocationsObservable(groveCityLocations);
-	
 			}
-
-			System.out.println(locationlist);
 
 			locationTable.getItems().clear();
 			locationTable.setItems(locationlist);
@@ -1656,12 +1473,10 @@ public class Main extends Application{
 		hoursInShift = sim.getHoursPerShift();
 		upperOrdersPerHour = sim.getOrderUpper();
 		lowerOrdersPerHour = sim.getOrderLower();
-		ArrayList<Location> locations = sim.getLocations();
 		ArrayList<Meal> meals = sim.getMeals();
 		//resets total weight
 		weightPerOrder = new int [amountOfOrders];
 		finalLocations = sim.getLocations();
-		//System.out.println("Read Meals: " + meals.get(2).toString());
 		
 		
 		
@@ -1863,7 +1678,7 @@ public class Main extends Application{
         	
 	}
         	        	        
-		//TODO: Use this to add things in column two
+		//Use this to add things in column two
 		columnTwo.getChildren().addAll(grid);
 		scrollPaneOrders.setContent(grid);
 		columnTwo.getChildren().addAll(scrollPaneOrders);
@@ -1950,7 +1765,7 @@ public class Main extends Application{
     
     	
 		
-		//TODO: Use this to add things in column three
+		//Use this to add things in column three
 		columnThree.getChildren().addAll(gridC3, dronesL, droneSelectorPane, addAndEditButtonsBox);
 		
 		settingsScreenLayout.add(columnThree,2,1);
@@ -2017,8 +1832,7 @@ public class Main extends Application{
 					}
 
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					//e1.printStackTrace();
+					e1.printStackTrace();
 				}
 
 
@@ -2055,7 +1869,7 @@ public class Main extends Application{
 
 				primaryStage.setScene(simulationScreen); //saves the stage
 			}
-			});	//Adds function to the button TODO: Expand function to not save if the user has not inputed correct values, possibly able to be done with throwing exceptions in a constructor
+			});
 		
 			saveSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			saveAndCancelButtonsBox.getChildren().add(saveSimulationSetngsBtn);
@@ -2096,7 +1910,7 @@ public class Main extends Application{
 				simulationScreen.setRoot(simulationScreenLayout);
 
 				primaryStage.setScene(simulationScreen);
-			});	//Adds function to the button TODO: Idk if there's anything else were gonna have to do here cause as long as we dont save anything we should be good
+			});	
 			cancelSimulationSetngsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 			saveAndCancelButtonsBox.getChildren().add(cancelSimulationSetngsBtn);
 
@@ -2107,31 +1921,10 @@ public class Main extends Application{
 			settingsScreen.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
 
 			primaryStage.setScene(simulationScreen);
-			//TODO: Decide if we want to be able to resize
 			primaryStage.setResizable(false);
 			primaryStage.setTitle("Dromedary Drones Simulation");
 			primaryStage.show();
 		}
-		
-		
-		
-
-	
-	/**
-	 * Helper method that populates the temporaryMeals ArrayList with the simulation that is given to it
-	 * @param id The id String of the simulation setting that is desired
-	 */
-	public static void populateDynamicMealArray(String id){
-		temporaryMeals = buildSimulationSettingsFromXML(id).getMeals();
-	}
-	
-	/**
-	 * Helper method that populates the temporaryLocations ArrayList with the simulation that is given to it
-	 * @param id The id String of the simulation setting that is desired
-	 */
-	public static void populateDynamicLocationArray(String id){
-		temporaryLocations = buildSimulationSettingsFromXML(id).getLocations();
-	}
 	
 	/**
 	 * Method to remove a simulation from the simulationsettings XML file
@@ -2206,11 +1999,9 @@ public class Main extends Application{
 			//transformer.setOutputProperty(OutputKeys.INDENT, "yes");	//Uncomment for tabs, Indents the XML file instead of just listing the nodes out
 			transformer.transform(domSource, streamResult);
 		} catch (TransformerConfigurationException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
+			e.printStackTrace();
 		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 		
 	}
@@ -2229,11 +2020,9 @@ public class Main extends Application{
 			//transformer.setOutputProperty(OutputKeys.INDENT, "yes");	//Uncomment for tabs, Indents the XML file instead of just listing the nodes out
 			transformer.transform(domSource, streamResult);
 		} catch (TransformerConfigurationException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
+			e.printStackTrace();
 		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 		
 	}
@@ -2489,7 +2278,6 @@ public class Main extends Application{
 			String droneID = drone.getDroneID();		
 			if(droneID.equals("1")) {
 				droneID = findAvailableDroneSettingID();
-				System.out.println(findAvailableDroneSettingID());
 			}
 			Drone returnDrone;
 			
@@ -2531,7 +2319,6 @@ public class Main extends Application{
 			   //unload flight time error field
 			   if(!isNumeric(unloadTimeTextField.getText())
 			     ||  unloadTimeTextField.getText().isEmpty()) {
-			    System.out.println(unloadTimeTextField.getText());
 			    alert.setContentText("Please make sure Unload Time only contains numbers! Thanks!");
 			    canSaveDrone = false;
 			   }
@@ -2555,8 +2342,7 @@ public class Main extends Application{
 				try {
 					droneSettingToXML(droneID, returnDrone);
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					//e1.printStackTrace();
+					e1.printStackTrace();
 				}
 				
 				droneSettingsIDs = getDroneSettingsIDs();
@@ -2657,22 +2443,24 @@ public class Main extends Application{
 			droneSettingsXML = documentBuilder.parse("droneSettings.xml");
 			droneSettingsIDs = getDroneSettingsIDs();
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		launch(args);
 	}
-
+	
+	/**
+	 * Check if a location name is already present
+	 * @param locs The locations
+	 * @param name The name of the locations
+	 * @return True if 
+	 */
 	private boolean containsName(ArrayList<Location> locs, String name) {
 		for (int i = 0; i < locs.size(); i++) {
 			if (locs.get(i).getName().equals(name)) {
