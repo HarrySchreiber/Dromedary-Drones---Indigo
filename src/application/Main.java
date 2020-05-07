@@ -269,19 +269,7 @@ public class Main extends Application{
 				
 				SimulationSettings newSimulation = buildSimulationSettingsFromXML(currentSimulationSettingID);
 				s.setAlgorithm(newSimulation.getAlgorithmChoice());
-				readLocationsFrom = newSimulation.getDeliveryPointChoice();
-				if (readLocationsFrom.contains("map")) {
-					newSimulation.setLocations(clickedLocations);
-					//s.runSimulation(clickedLocations);
-				}
-				else if (readLocationsFrom.contains("file")) {
-					newSimulation.setLocations(finalLocations);
-					//s.runSimulation(finalLocations);
-				}
-				else {
-					newSimulation.setLocations(groveCityLocations);
-					//s.runSimulation(groveCityLocations);
-				}
+
 
 				s.runSimulation(newSimulation , buildDroneFromXML(currentDroneSettingID));
 				
@@ -1138,6 +1126,7 @@ public class Main extends Application{
 		
 		
 		SimulationSettings sim =  buildSimulationSettingsFromXML(id);
+
 		
 		
 		//Settings Screen Layout
@@ -1781,13 +1770,14 @@ public class Main extends Application{
 		saveSimulationSetngsBtn.setOnAction(e  ->  {
 			sim.setAlgorithmChoice(algoChoice.getValue().toString());
 			sim.setDeliveryPointChoice(deliveryPointsChoices.getValue().toString());
-			chosenAlgorithm = algoChoice.getValue().toString();
-			readLocationsFrom = deliveryPointsChoices.getValue().toString();
+			chosenAlgorithm = sim.getAlgorithmChoice();
+			readLocationsFrom = sim.getDeliveryPointChoice();
 			Alert alert = new Alert(AlertType.ERROR);
 			lowerOrdersPerHour = valueFactoryLowerHours.getValue();
 			upperOrdersPerHour = valueFactoryUpperHours.getValue();
 			
 			Boolean canSaveSettings = true;
+			Boolean emptyLocations = false;
 			for(int i = 0; i < weightPerOrder.length; i++) {
 				if(weightPerOrder[i] > 192) {
 					canSaveSettings = false;
@@ -1805,21 +1795,57 @@ public class Main extends Application{
 				canSaveSettings = false;
 				alert.setContentText("Please make sure the Lower Bound of Orders Per Hour is not higher than the Higher Bound. Thanks!");
 			}
+
+							
+			if (readLocationsFrom.contains("map")) {
+				if (clickedLocations.isEmpty()) {
+					emptyLocations = true;
+				}
+				//s.runSimulation(clickedLocations);
+			}
+			else if (readLocationsFrom.contains("file")) {
+				if (finalLocations.isEmpty()) {
+					emptyLocations = true;
+				}
+				//DO NOTHING
+				//s.runSimulation(finalLocations);
+			}
+			else {
+				finalLocations = groveCityLocations;
+				//s.runSimulation(groveCityLocations);
+			}
 			
 			if(canSaveSettings == false) {
-				
-				alert.setTitle("Error Dialog");
-				alert.setHeaderText("Look, an Error Dialog");
-				alert.showAndWait();
+				if (emptyLocations) {
+					alert.setTitle("No Locations");
+					alert.setHeaderText("The file/map is empty.");
+					alert.showAndWait();
+				}
+				else {
+					alert.setTitle("Error Dialog");
+					alert.setHeaderText("Unable to save settings");
+					alert.showAndWait();
+
+				}
+
 			}
 			else {
 				//getting the most current variables 
 				simulationName = simNameField.getText();
 				hoursInShift = valueFactoryHours.getValue();
 				
-				for(int i = 0; i < tempLocations.size(); i++)
-					finalLocations.add(tempLocations.get(i));
-				tempLocations.clear();
+				if (readLocationsFrom.contains("map")) {
+					finalLocations = clickedLocations;
+					//s.runSimulation(clickedLocations);
+				}
+				else if (readLocationsFrom.contains("file")) {
+					//DO NOTHING
+					//s.runSimulation(finalLocations);
+				}
+				else {
+					finalLocations = groveCityLocations;
+					//s.runSimulation(groveCityLocations);
+				}
 
 				SimulationSettings newSimulation = new SimulationSettings(simulationName, buildDroneFromXML("1") , 
 				finalLocations, readLocationsFrom,  chosenAlgorithm, meals , hoursInShift, upperOrdersPerHour, lowerOrdersPerHour);
