@@ -1420,11 +1420,12 @@ public class Main extends Application{
 		
 		//Add new drone button action
 		editDroneButton.setOnAction(e -> {
-				
-			settingsScreenLayout.getChildren().remove(columnOne);
-			columnOne.getChildren().remove(2 );
-			columnOne.getChildren().add(buildAddDroneScreen(currentDroneSettingID, primaryStage));
-			settingsScreenLayout.add(columnOne,0,1);
+//				
+//			settingsScreenLayout.getChildren().remove(columnOne);
+//			columnOne.getChildren().remove(2 );
+			//columnOne.getChildren().add(buildAddDroneScreen(currentDroneSettingID, primaryStage));
+//			settingsScreenLayout.add(columnOne,0,1);
+			buildAddDroneScreen(currentDroneSettingID, primaryStage);
 			primaryStage.setScene(addDroneScreen);
 
 		});
